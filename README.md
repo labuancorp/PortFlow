@@ -46,6 +46,12 @@ PortFlow is a state-of-the-art enterprise solution designed to modernize maritim
 *   **Live Traffic**: Visualizes vessel positions based on their operational status.
 *   **Berth Geofencing**: Virtual perimeters around Main Wharf and Jetties.
 
+### 8. 🛂 Crew Terminal Kiosk
+*   **Security & Immigration**: Specialized interface (`/terminal`) for verifying crew transfers.
+*   **Passport Scanning**: Simulates MRZ scanning to instantly retrieve crew profiles.
+*   **Risk Flagging**: One-click flagging of high-risk individuals during "Sign On" / "Sign Off".
+
+
 
 ---
 
@@ -109,6 +115,7 @@ PortFlow is a state-of-the-art enterprise solution designed to modernize maritim
 | **Vessels** | `/vessels` | Vessel database & registry. |
 | **Agents** | `/agents` | Shipping Agent CRUD management. |
 | **GIS Map** | `/map` | Asset tracking via Satellite Digital Twin. |
+| **Crew Terminal** | `/terminal` | Security & Immigration Checkpoint. |
 | **Wharfs** | `/wharfs` | Port Infrastructure management. |
 
 ---
