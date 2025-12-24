@@ -21,7 +21,10 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'role',
+        'organization_id'
     ];
+
 
     /**
      * The attributes that should be hidden for serialization.
@@ -44,5 +47,9 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
         ];
+    }
+    public function organization()
+    {
+        return $this->belongsTo(Organization::class);
     }
 }

@@ -257,6 +257,43 @@
                             </div>
                         </div>
 
+                        <!-- Smart Berth Suggestion -->
+                        <div class="bg-indigo-50/50 p-4 rounded-xl border border-indigo-100">
+                             <div class="flex justify-between items-center mb-3">
+                                 <label class="block text-[10px] font-bold uppercase tracking-widest text-indigo-500">Optimization Engine</label>
+                                 <button type="button" wire:click="generateRecommendations" class="text-xs bg-indigo-600 hover:bg-indigo-700 text-white px-3 py-1.5 rounded-lg font-bold transition-colors flex items-center gap-1">
+                                     <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                                     Find Best Slot
+                                 </button>
+                             </div>
+                             
+                             @if($searchStatus)
+                                <p class="text-xs text-slate-500 mb-2">{{ $searchStatus }}</p>
+                             @endif
+
+                             @if(count($recommendedBerths) > 0)
+                                <div class="grid grid-cols-2 gap-2 mb-3">
+                                    @foreach($recommendedBerths as $rec)
+                                        <div wire:click="$set('newBerthId', {{ $rec['berth']['id'] }})" 
+                                             class="cursor-pointer p-2 rounded-lg border transition-all relative overflow-hidden group
+                                             {{ $newBerthId == $rec['berth']['id'] ? 'bg-indigo-600 border-indigo-600 text-white' : 'bg-white border-slate-200 hover:border-indigo-300 text-slate-600' }}">
+                                            
+                                            <!-- Fit Score Badge -->
+                                            <div class="absolute top-0 right-0 bg-indigo-500 text-white text-[8px] font-bold px-1.5 py-0.5 rounded-bl-lg opacity-0 group-hover:opacity-100 transition-opacity">
+                                                Fit Score: {{ $rec['score'] }}
+                                            </div>
+
+                                            <div class="font-bold text-sm">{{ $rec['berth']['name'] }}</div>
+                                            <div class="text-[10px] opacity-80 mt-0.5 flex gap-2">
+                                                <span>LOA: +{{ number_format($rec['loa_diff'], 1) }}m</span>
+                                                <span>Draft: +{{ number_format($rec['draft_diff'], 1) }}m</span>
+                                            </div>
+                                        </div>
+                                    @endforeach
+                                </div>
+                             @endif
+                        </div>
+
                         <div>
                             <label class="block text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-1">Pre-Assign Berth (Optional)</label>
                             <select wire:model="newBerthId" class="w-full bg-slate-50 border-slate-200 rounded-xl font-bold text-slate-700 focus:ring-teal-500 focus:border-teal-500">

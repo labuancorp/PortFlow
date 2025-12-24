@@ -5,6 +5,8 @@ namespace App\Livewire;
 use Livewire\Component;
 use App\Models\Berth;
 use App\Models\PortCall;
+use App\Services\BerthOptimizationService;
+use App\Services\ComplianceService;
 
 class BerthPlanner extends Component
 {
@@ -35,6 +37,8 @@ class BerthPlanner extends Component
     public $newBerthId = '';
     public $newEta = '';
     public $newEtd = '';
+    public $recommendedBerths = [];
+    public $searchStatus = '';
 
     protected $rules = [
         'newVesselId' => 'required|exists:vessels,id',
@@ -49,12 +53,53 @@ class BerthPlanner extends Component
         $this->reset(['newVesselId', 'newAgentId', 'newBerthId', 'newEta', 'newEtd']);
         $this->newEta = now()->format('Y-m-d\TH:i');
         $this->newEtd = now()->addHours(24)->format('Y-m-d\TH:i');
+        $this->recommendedBerths = [];
+        $this->searchStatus = '';
         $this->showCreateModal = true;
     }
 
-    public function saveBooking()
+    public function generateRecommendations(BerthOptimizationService $optimizer)
+    {
+        $this->validate([
+            'newVesselId' => 'required|exists:vessels,id',
+            'newEta' => 'required|date',
+            'newEtd' => 'required|date|after:newEta',
+        ]);
+
+        $vessel = \App\Models\Vessel::find($this->newVesselId);
+        
+        $results = $optimizer->findOptimalBerths($vessel, $this->newEta, $this->newEtd);
+        
+        $this->recommendedBerths = $results;
+
+        if (empty($results)) {
+            $this->searchStatus = 'No available berths found for this vessel and time window.';
+        } else {
+            $this->searchStatus = 'Found ' . count($results) . ' available berths.';
+            // Auto-select the best one?
+            // $this->newBerthId = $results[0]['berth']->id;
+        }
+    }
+
+    public function saveBooking(ComplianceService $compliance)
     {
         $this->validate();
+
+        // If a berth is selected, run Full Compliance Check
+        if ($this->newBerthId) {
+            $vessel = \App\Models\Vessel::find($this->newVesselId);
+            $berth = Berth::find($this->newBerthId);
+            
+            $check = $compliance->validateOperation($vessel, $berth, $this->newEta, $this->newEtd);
+
+            if (!$check['safe']) {
+                // formatted error message
+                $errorMsg = implode(" | ", $check['messages']);
+                $this->addError('newBerthId', $errorMsg);
+                $this->dispatch('schedule-error', message: 'Safety Constraint Violation: ' . $check['messages'][0]);
+                return;
+            }
+        }
 
         PortCall::create([
             'vessel_id' => $this->newVesselId,

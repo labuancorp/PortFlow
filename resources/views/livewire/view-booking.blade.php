@@ -47,6 +47,98 @@
                     <p class="text-sm font-medium text-slate-900">{{ $booking->berth->name }}</p>
                 </div>
             </div>
+            
+            <!-- Operational Controls (Ground Ops) -->
+            <div class="mb-6 p-4 bg-slate-100 rounded-xl border border-slate-200">
+                <h5 class="text-xs font-bold text-slate-500 uppercase tracking-widest mb-3">Ground Operations</h5>
+                <div class="flex gap-2">
+                    @if($booking->status === 'requested' || $booking->status === 'approved')
+                        <button wire:click="updateStatus('anchored')" class="flex-1 py-3 bg-white border border-slate-300 rounded-lg text-xs font-bold text-slate-700 hover:bg-amber-50 hover:border-amber-300 shadow-sm transition-all flex flex-col items-center gap-1">
+                            <span class="text-lg">⚓</span>
+                            Confirm Arrival (ATA)
+                        </button>
+                    @endif
+                    
+                    @if($booking->status === 'anchored' || $booking->status === 'requested' || $booking->status === 'approved')
+                        <button wire:click="updateStatus('alongside')" class="flex-1 py-3 bg-green-600 text-white rounded-lg text-xs font-bold shadow-lg shadow-green-900/20 hover:bg-green-500 transition-all flex flex-col items-center gap-1">
+                            <span class="text-lg">✅</span>
+                            Line Secured (Start Billing)
+                        </button>
+                    @endif
+
+                    @if($booking->status === 'alongside')
+                        <button wire:click="updateStatus('completed')" class="flex-1 py-3 bg-slate-800 text-white rounded-lg text-xs font-bold shadow-lg shadow-slate-900/20 hover:bg-slate-700 transition-all flex flex-col items-center gap-1">
+                            <span class="text-lg">🏁</span>
+                            Line Released (End Billing)
+                        </button>
+                    @endif
+
+                    @if($booking->status === 'completed')
+                         <div class="flex-1 py-3 bg-slate-200 text-slate-500 rounded-lg text-xs font-bold text-center cursor-not-allowed flex flex-col items-center gap-1">
+                            <span class="text-lg">🔒</span>
+                            Voyage Closed
+                        </div>
+                    @endif
+                </div>
+            </div>
+
+            <!-- Live Invoice Section -->
+            <div class="mb-6 border border-slate-200 rounded-xl overflow-hidden">
+                <div class="bg-slate-50 px-4 py-3 border-b border-slate-200 flex justify-between items-center">
+                    <h5 class="text-xs font-bold text-slate-500 uppercase tracking-widest flex items-center gap-2">
+                        <svg class="w-4 h-4 text-teal-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path></svg>
+                        Live Billing Engine
+                    </h5>
+                    <button wire:click="refreshInvoice" class="text-[10px] text-teal-600 font-bold hover:underline">Refresh</button>
+                </div>
+                <div class="p-4 bg-white">
+                    @if($invoice && $invoice->invoiceItems->count() > 0)
+                        <table class="w-full text-sm">
+                            <thead class="text-xs text-slate-400 font-bold uppercase border-b border-slate-100">
+                                <tr>
+                                    <th class="text-left py-2 font-bold pl-2">Item</th>
+                                    <th class="text-right py-2 font-bold pr-2">Total</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-50">
+                                @foreach($invoice->invoiceItems as $item)
+                                <tr>
+                                    <td class="py-2 text-slate-600 pl-2 text-xs">
+                                        <div class="font-bold text-slate-700">{{ $item->description }}</div>
+                                        <div class="text-[10px] opacity-70">{{ $item->quantity }} units @ ${{ number_format($item->unit_price / $item->quantity, 2) }}</div>
+                                    </td>
+                                    <td class="py-2 text-right font-mono font-bold text-slate-800 pr-2">${{ number_format($item->total_price, 2) }}</td>
+                                </tr>
+                                @endforeach
+                            </tbody>
+                            <tfoot class="border-t-2 border-slate-100 bg-slate-50/50">
+                                <tr>
+                                    <td class="py-3 pl-2 text-right font-black text-slate-900 uppercase text-xs tracking-widest">Total Due</td>
+                                    <td class="py-3 pr-2 text-right font-black text-xl text-teal-600 font-mono">${{ number_format($invoice->total_amount, 2) }}</td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                        <div class="mt-3 flex gap-2 justify-end">
+                             <div class="text-[10px] bg-yellow-100 text-yellow-800 px-2 py-1 rounded font-bold uppercase tracking-wider">
+                                Status: {{ $invoice->status }}
+                             </div>
+                             @if($booking->atb)
+                                <div class="text-[10px] bg-indigo-100 text-indigo-700 px-2 py-1 rounded font-mono font-bold">
+                                    ⏱ {{ $booking->atb->diffInHours($booking->atd ?? now()) }} hrs
+                                </div>
+                             @endif
+                        </div>
+                    @else
+                        <div class="text-center py-6">
+                            <div class="inline-flex justify-center items-center w-12 h-12 rounded-full bg-slate-100 text-slate-300 mb-2">
+                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                            </div>
+                            <p class="text-slate-400 text-xs font-bold uppercase tracking-wider">Waiting for operations...</p>
+                            <p class="text-[10px] text-slate-400">Billing starts when line is secured.</p>
+                        </div>
+                    @endif
+                </div>
+            </div>
 
             <div class="border-t border-slate-100 pt-4 flex justify-end space-x-3">
                 <button wire:click="close" class="px-4 py-2 text-slate-600 hover:bg-slate-100 rounded text-sm font-medium">Close</button>
