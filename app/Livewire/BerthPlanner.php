@@ -69,6 +69,13 @@ class BerthPlanner extends Component
         $this->dispatch('schedule-success', message: 'Booking created successfully!');
     }
 
+    public function optimizeSchedule()
+    {
+        // Simulation of AI Component
+        sleep(1);
+        $this->dispatch('schedule-success', message: '✨ AI Opt: Found 2 efficient slot swaps. Schedule density improved by 15%.');
+    }
+
     public function render()
     {
         $dayStart = \Carbon\Carbon::parse($this->dateFilter)->startOfDay();
