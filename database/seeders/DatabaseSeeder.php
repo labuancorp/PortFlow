@@ -130,5 +130,13 @@ class DatabaseSeeder extends Seeder
             'organization_id' => $auth->id,
             'password' => bcrypt('password'), // password
         ]);
+
+        \App\Models\User::factory()->create([
+            'name' => 'Agent Baram',
+            'email' => 'agent@baram.com',
+            'role' => 'agent',
+            'organization_id' => $agent1->id,
+            'password' => bcrypt('password'),
+        ]);
     }
 }

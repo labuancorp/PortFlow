@@ -16,6 +16,10 @@
                         {{ substr($agent->name, 0, 2) }}
                     </div>
                 @endif
+                <div class="h-8 w-px bg-slate-200 mx-2"></div>
+                <a href="{{ route('logout') }}" class="text-xs font-bold text-slate-500 hover:text-indigo-600 uppercase tracking-widest transition-colors flex items-center gap-1">
+                    Sign Out <span aria-hidden="true">&rarr;</span>
+                </a>
             </div>
         </div>
     </div>
@@ -48,12 +52,20 @@
                 </div>
             </div>
 
-            <div class="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm relative overflow-hidden flex flex-col justify-center items-center gap-3 cursor-pointer hover:border-teal-400 hover:shadow-md transition-all group">
+            <button wire:click="openRequestModal" class="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm relative overflow-hidden flex flex-col justify-center items-center gap-3 cursor-pointer hover:border-teal-400 hover:shadow-md transition-all group">
                 <div class="w-12 h-12 bg-teal-50 rounded-full flex items-center justify-center text-teal-600 group-hover:scale-110 transition-transform">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
                 </div>
                 <span class="font-bold text-teal-600">Request New Berth</span>
-            </div>
+            </button>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="flex justify-end mb-4">
+             <button wire:click="openVesselModal" class="text-sm font-bold text-indigo-600 hover:text-indigo-500 flex items-center gap-2">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path></svg>
+                Register New Vessel to Fleet
+            </button>
         </div>
 
         <!-- Tabs -->
@@ -155,4 +167,130 @@
             @endforelse
         </div>
     </div>
-</div>
+
+    <!-- New Berth Request Modal -->
+    @if($showModal)
+    <div class="fixed inset-0 z-50 flex items-center justify-center p-4">
+        <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm transition-opacity" wire:click="$set('showModal', false)"></div>
+        <div class="relative bg-white w-full max-w-lg rounded-3xl shadow-2xl border border-slate-200 overflow-hidden transform transition-all">
+            <div class="p-8">
+                <div class="flex justify-between items-center mb-6">
+                    <h3 class="text-2xl font-black text-slate-900 tracking-tight">Request New Berth</h3>
+                    <button wire:click="$set('showModal', false)" class="text-slate-400 hover:text-slate-600 transition-colors">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                    </button>
+                </div>
+
+                <form wire:submit.prevent="saveRequest" class="space-y-6">
+                    <div>
+                        <label class="block text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-1">Select Vessel</label>
+                        <select wire:model="vessel_id" class="w-full bg-slate-50 border-slate-200 rounded-xl font-bold text-slate-700 focus:ring-teal-500 focus:border-teal-500 p-3">
+                            <option value="">-- Choose Vessel --</option>
+                            @foreach($myVessels as $vessel)
+                                <option value="{{ $vessel->id }}">{{ $vessel->name }} ({{ $vessel->vessel_type }})</option>
+                            @endforeach
+                        </select>
+                        @error('vessel_id') <span class="text-red-500 text-xs font-bold mt-1 block">{{ $message }}</span> @enderror
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-1">ETA (Local)</label>
+                            <input type="datetime-local" wire:model="eta" class="w-full bg-slate-50 border-slate-200 rounded-xl font-bold text-slate-700 focus:ring-teal-500 focus:border-teal-500 p-3">
+                            @error('eta') <span class="text-red-500 text-xs font-bold mt-1 block">{{ $message }}</span> @enderror
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-1">ETD (Local)</label>
+                            <input type="datetime-local" wire:model="etd" class="w-full bg-slate-50 border-slate-200 rounded-xl font-bold text-slate-700 focus:ring-teal-500 focus:border-teal-500 p-3">
+                            @error('etd') <span class="text-red-500 text-xs font-bold mt-1 block">{{ $message }}</span> @enderror
+                        </div>
+                    </div>
+
+                    <div class="bg-blue-50 p-4 rounded-xl flex gap-3 items-start">
+                        <svg class="w-5 h-5 text-blue-500 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                        <p class="text-xs text-blue-700 font-medium">Your request will be optimized by our AI scheduler. You will receive a berth assignment confirmation shortly.</p>
+                    </div>
+
+                    <div class="pt-4 border-t border-slate-100 flex gap-3">
+                         <button type="button" wire:click="$set('showModal', false)" class="px-6 py-3 rounded-xl border border-slate-200 font-bold text-slate-500 hover:bg-slate-50 transition-colors">Cancel</button>
+                         <button type="submit" class="flex-1 px-6 py-3 bg-teal-600 hover:bg-teal-500 text-white rounded-xl font-bold uppercase tracking-widest shadow-lg shadow-teal-900/20 transition-all">
+                            Submit Request
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    @endif
+
+    <!-- Register Vessel Modal -->
+    @if($showVesselModal)
+    <div class="fixed inset-0 z-50 flex items-center justify-center p-4">
+        <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm transition-opacity" wire:click="$set('showVesselModal', false)"></div>
+        <div class="relative bg-white w-full max-w-lg rounded-3xl shadow-2xl border border-slate-200 overflow-hidden transform transition-all">
+            <div class="p-8">
+                <div class="flex justify-between items-center mb-6">
+                    <h3 class="text-2xl font-black text-slate-900 tracking-tight">Register New Vessel</h3>
+                    <button wire:click="$set('showVesselModal', false)" class="text-slate-400 hover:text-slate-600 transition-colors">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                    </button>
+                </div>
+
+                <form wire:submit.prevent="saveVessel" class="space-y-6">
+                    <div>
+                        <label class="block text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-1">Vessel Name</label>
+                        <input type="text" wire:model="new_vessel_name" class="w-full bg-slate-50 border-slate-200 rounded-xl font-bold text-slate-700 focus:ring-teal-500 focus:border-teal-500 p-3" placeholder="e.g. MV SEALINK 178" required>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-1">IMO Number</label>
+                            <input type="text" wire:model="new_vessel_imo" class="w-full bg-slate-50 border-slate-200 rounded-xl font-mono font-bold text-slate-700 focus:ring-teal-500 focus:border-teal-500 p-3" placeholder="9123456" required>
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-1">Type</label>
+                            <select wire:model="new_vessel_type" class="w-full bg-slate-50 border-slate-200 rounded-xl font-bold text-slate-700 focus:ring-teal-500 focus:border-teal-500 p-3">
+                                <option>Offshore Support Vessel</option>
+                                <option>Tug</option>
+                                <option>Barge</option>
+                                <option>Landing Craft</option>
+                                <option>Tanker</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-4">
+                         <div>
+                            <label class="block text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-1">LOA (Meters)</label>
+                            <input type="number" step="0.1" wire:model="new_vessel_loa" class="w-full bg-slate-50 border-slate-200 rounded-xl font-bold text-slate-700 focus:ring-teal-500 focus:border-teal-500 p-3" placeholder="0.0 m" required>
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-1">Max Draft (Meters)</label>
+                            <input type="number" step="0.1" wire:model="new_vessel_draft" class="w-full bg-slate-50 border-slate-200 rounded-xl font-bold text-slate-700 focus:ring-teal-500 focus:border-teal-500 p-3" placeholder="0.0 m" required>
+                        </div>
+                    </div>
+
+                    <div class="pt-4 border-t border-slate-100 flex gap-3">
+                         <button type="button" wire:click="$set('showVesselModal', false)" class="px-6 py-3 rounded-xl border border-slate-200 font-bold text-slate-500 hover:bg-slate-50 transition-colors">Cancel</button>
+                         <button type="submit" class="flex-1 px-6 py-3 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl font-bold uppercase tracking-widest shadow-lg shadow-indigo-900/20 transition-all">
+                            Add Vessel
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    @endif
+    
+    <!-- Toast Component -->
+    <div x-data="{ toast: { show: false, message: '' }, showToast(msg) { this.toast = { show: true, message: msg }; setTimeout(() => this.toast.show = false, 3000); } }"
+         @notify.window="showToast($event.detail.message)"
+         class="fixed bottom-4 right-4 z-[70]"
+         style="display: none;"
+         x-show="toast.show"
+         x-transition.duration.300ms>
+        <div class="bg-indigo-600 text-white px-6 py-4 rounded-xl shadow-2xl flex items-center justify-center gap-3 font-bold">
+            <span class="text-2xl">📨</span>
+            <span x-text="toast.message"></span>
+        </div>
+    </div>
