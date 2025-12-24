@@ -6,6 +6,7 @@
     <title>{{ $title ?? 'PortFlow' }}</title>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     @livewireStyles
+    @stack('styles')
 </head>
 <body class="bg-slate-50 font-sans antialiased">
     <div class="flex h-screen overflow-hidden">
@@ -19,6 +20,17 @@
                     <li>
                         <a href="{{ route('dashboard') }}" class="flex items-center px-3 py-2 rounded-lg group {{ request()->routeIs('dashboard') ? 'bg-slate-800 text-white' : 'text-slate-300 hover:bg-slate-800 hover:text-white' }}">
                             <span class="ml-3">Command Center</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{{ route('map.index') }}" class="flex items-center px-3 py-2 rounded-lg group {{ request()->routeIs('map.*') ? 'bg-slate-800 text-white' : 'text-slate-300 hover:bg-slate-800 hover:text-white' }}">
+                            <span class="ml-3 text-teal-400 font-bold">GIS Map View</span>
+                        </a>
+                    </li>
+
+                    <li>
+                        <a href="{{ route('crew.terminal') }}" class="flex items-center px-3 py-2 rounded-lg group {{ request()->routeIs('crew.*') ? 'bg-slate-800 text-white' : 'text-slate-300 hover:bg-slate-800 hover:text-white' }}">
+                            <span class="ml-3 text-indigo-400 font-bold">Crew Terminal</span>
                         </a>
                     </li>
                      <li>
@@ -73,5 +85,6 @@
         </main>
     </div>
     @livewireScripts
+    @stack('scripts')
 </body>
 </html>

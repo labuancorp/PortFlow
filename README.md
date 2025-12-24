@@ -41,6 +41,12 @@ PortFlow is a state-of-the-art enterprise solution designed to modernize maritim
 *   **Pilotage Simulator**: A visual interactive tool to simulate pilot dispatch and vessel docking.
 *   **Alerts System**: System-wide notifications for conflicting schedules or safety risks.
 
+### 7. 🌍 GIS Digital Twin (Phase 1)
+*   **Satellite Map Integration**: Fully interactive map of Labuan ASB (`/map`).
+*   **Live Traffic**: Visualizes vessel positions based on their operational status.
+*   **Berth Geofencing**: Virtual perimeters around Main Wharf and Jetties.
+
+
 ---
 
 ## 🛠️ Technology Stack
@@ -102,6 +108,7 @@ PortFlow is a state-of-the-art enterprise solution designed to modernize maritim
 | **Billing** | `/billing` | Finance & Invoice management. |
 | **Vessels** | `/vessels` | Vessel database & registry. |
 | **Agents** | `/agents` | Shipping Agent CRUD management. |
+| **GIS Map** | `/map` | Asset tracking via Satellite Digital Twin. |
 | **Wharfs** | `/wharfs` | Port Infrastructure management. |
 
 ---
