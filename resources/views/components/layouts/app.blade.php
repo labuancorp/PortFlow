@@ -73,6 +73,12 @@
                              <span class="ml-3 text-amber-400 font-bold">Yard / Warehouse Map</span>
                          </a>
                     </li>
+
+                    <li>
+                         <a href="{{ route('hse.permits.dashboard') }}" class="flex items-center px-3 py-2 rounded-lg group {{ request()->routeIs('hse.*') ? 'bg-slate-800 text-white' : 'text-slate-300 hover:bg-slate-800 hover:text-white' }}">
+                             <span class="ml-3 text-red-400 font-bold">HSE Safety Console</span>
+                         </a>
+                    </li>
                     
                     <li>
                         <a href="{{ route('billing.index') }}" class="flex items-center px-3 py-2 rounded-lg group {{ request()->routeIs('billing.*') ? 'bg-slate-800 text-white' : 'text-slate-300 hover:bg-slate-800 hover:text-white' }}">

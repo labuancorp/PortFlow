@@ -77,7 +77,8 @@
 3. **Advanced Scheduling**: Quarter View & Conflict Detection ✅
 4. **Logistics & Cargo**: Manifests, Items, QR Codes ✅
 5. **Warehouse WMS**: Yard Density Map & Aging Reports ✅
-6. **Security**: 2FA Toggle & User Profile ✅
+6. **HSE Safety**: Digital Permit-to-Work & Clash Detection ✅
+7. **Security**: 2FA Toggle & User Profile ✅
 
 ---
 

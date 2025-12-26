@@ -10,7 +10,29 @@ use App\Services\AuditService;
 
 class Index extends Component
 {
-// ... (lines 12-90 remain unchanged, handled by partial match logic of the tool or I should include enough context)
+    use WithPagination;
+
+    public $search = '';
+    public $filterType = 'all';
+    public $showModal = false;
+    public $isEditing = false;
+    public $editingVesselId = null;
+
+    public $vessel_form = [
+        'name' => '',
+        'imo_number' => '',
+        'flag_country' => '',
+        'loa_meters' => '',
+        'draft_meters' => '',
+        'vessel_type' => 'OSV',
+        'organization_id' => '',
+    ];
+
+    public function mount()
+    {
+        $this->resetForm();
+    }
+
     public function save()
     {
         $this->validate([
@@ -36,6 +58,25 @@ class Index extends Component
 
         $this->showModal = false;
         $this->resetForm();
+    }
+
+    public function render()
+    {
+        $vessels = Vessel::with('organization')
+            ->when($this->search, function($query) {
+                $query->where('name', 'like', '%'.$this->search.'%')
+                      ->orWhere('imo_number', 'like', '%'.$this->search.'%');
+            })
+            ->when($this->filterType !== 'all', function($query) {
+                $query->where('vessel_type', $this->filterType);
+            })
+            ->latest()
+            ->paginate(10);
+
+        return view('livewire.vessels.index', [
+            'vessels' => $vessels,
+            'organizations' => Organization::all()
+        ]);
     }
 
     public function delete($id)
