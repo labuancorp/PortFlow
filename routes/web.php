@@ -4,22 +4,29 @@ use Illuminate\Support\Facades\Route;
 use App\Livewire\BerthPlanner;
 
 Route::middleware(['auth', '2fa'])->group(function () {
-    Route::get('/', BerthPlanner::class)->name('home');
-    Route::get('/dashboard', App\Livewire\Dashboard::class)->name('dashboard');
-    Route::get('/vessels', App\Livewire\Vessels\Index::class)->name('vessels.index');
-    Route::get('/billing', App\Livewire\Billing\Index::class)->name('billing.index');
-    Route::get('/wharfs', App\Livewire\Wharfs\Index::class)->name('wharfs.index');
+    // Accessible by All Roles (Client, Agent, Admin)
+    Route::get('/settings', App\Livewire\Settings\Profile::class)->name('settings');
     Route::get('/portal', App\Livewire\AgentPortal::class)->name('agent.portal');
-    Route::get('/ops', App\Livewire\MobileOps::class)->name('ops.mobile');
-    Route::get('/agents', App\Livewire\Agents\Index::class)->name('agents.index');
-    Route::get('/map', App\Livewire\Map\PortMap::class)->name('map.index');
-    Route::get('/terminal', App\Livewire\Crew\Terminal::class)->name('crew.terminal');
-    Route::get('/analytics', App\Livewire\Analytics\Dashboard::class)->name('analytics');
-});
 
-// Admin Routes (RBAC Protected)
-Route::middleware(['auth', 'role:admin'])->group(function () {
-    Route::get('/admin/health', App\Livewire\Admin\SystemHealth::class)->name('admin.health');
+    // Admin & Agent Only
+    Route::middleware(['role:admin,agent'])->group(function () {
+        Route::get('/', BerthPlanner::class)->name('home');
+        Route::get('/dashboard', App\Livewire\Dashboard::class)->name('dashboard');
+        Route::get('/vessels', App\Livewire\Vessels\Index::class)->name('vessels.index');
+        Route::get('/billing', App\Livewire\Billing\Index::class)->name('billing.index');
+        Route::get('/ops', App\Livewire\MobileOps::class)->name('ops.mobile');
+        Route::get('/map', App\Livewire\Map\PortMap::class)->name('map.index');
+        Route::get('/terminal', App\Livewire\Crew\Terminal::class)->name('crew.terminal');
+        Route::get('/analytics', App\Livewire\Analytics\Dashboard::class)->name('analytics');
+    });
+
+    // Admin Only
+    Route::middleware(['role:admin'])->group(function () {
+        Route::get('/agents', App\Livewire\Agents\Index::class)->name('agents.index');
+        Route::get('/wharfs', App\Livewire\Wharfs\Index::class)->name('wharfs.index');
+        Route::get('/admin/health', App\Livewire\Admin\SystemHealth::class)->name('admin.health');
+        Route::get('/admin/audit', App\Livewire\Admin\AuditTrail::class)->name('admin.audit');
+    });
 });
 
 // Auth Routes

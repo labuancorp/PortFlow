@@ -4,6 +4,7 @@ namespace App\Livewire\Auth;
 
 use Livewire\Component;
 use Illuminate\Support\Facades\Auth;
+use App\Services\AuditService;
 
 class Login extends Component
 {
@@ -21,6 +22,7 @@ class Login extends Component
             session()->regenerate();
             
             $user = Auth::user();
+            AuditService::log('Login', 'Auth', $user->id, "User {$user->email} logged in");
 
             if ($user->role === 'agent') {
                 return redirect()->route('agent.portal');

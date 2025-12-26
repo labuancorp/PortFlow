@@ -154,6 +154,9 @@ class BerthPlanner extends Component
             case 'month':
                 $end = $start->copy()->addDays(30)->endOfDay();
                 break;
+            case 'quarter':
+                $end = $start->copy()->addDays(90)->endOfDay();
+                break;
             default: // day
                 $end = $start->copy()->endOfDay();
                 break;
@@ -193,6 +196,7 @@ class BerthPlanner extends Component
         switch ($this->viewMode) {
             case 'week': return $start->copy()->addDays(7)->endOfDay();
             case 'month': return $start->copy()->addDays(30)->endOfDay();
+            case 'quarter': return $start->copy()->addDays(90)->endOfDay();
             default: return $start->copy()->endOfDay();
         }
     }

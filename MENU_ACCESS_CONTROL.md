@@ -211,12 +211,12 @@ This is the field operations interface for ground crew. Clients don't need this.
 
 ## ✅ Implementation Checklist
 
-- [ ] Update `app.blade.php` to hide sidebar for clients
-- [ ] Add `@if` conditions for admin-only menu items
-- [ ] Add `@if` conditions for agent-restricted items
-- [ ] Create role middleware (`app/Http/Middleware/CheckRole.php`)
-- [ ] Update routes with middleware groups
-- [ ] Add automatic redirect for clients to portal
+- [x] Update `app.blade.php` to hide sidebar for clients
+- [x] Add `@if` conditions for admin-only menu items
+- [x] Add `@if` conditions for agent-restricted items
+- [x] Create role middleware (`app/Http/Middleware/CheckRole.php`)
+- [x] Update routes with middleware groups
+- [x] Add automatic redirect for clients to portal
 - [ ] Test each role's access
 - [ ] Update documentation
 

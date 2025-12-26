@@ -63,17 +63,21 @@ class Index extends Component
                 'code' => strtoupper($this->code),
                 'billing_address' => $this->billing_address,
             ]);
+            
+            AuditService::log('Update', 'Agents', $agent->id, "Updated agent profile for {$agent->name}");
 
             $this->dispatch('notify', message: 'Agent updated successfully!');
         } else {
             $this->validate();
 
-            Organization::create([
+            $agent = Organization::create([
                 'type' => 'agent',
                 'name' => $this->name,
                 'code' => strtoupper($this->code),
                 'billing_address' => $this->billing_address,
             ]);
+            
+            AuditService::log('Create', 'Agents', $agent->id, "Registered new agent {$agent->name}");
 
             $this->dispatch('notify', message: 'New Agent registered successfully!');
         }
@@ -92,7 +96,9 @@ class Index extends Component
             return;
         }
 
+        $name = $agent->name;
         $agent->delete();
+        AuditService::log('Delete', 'Agents', $id, "Deleted agent {$name}");
         $this->dispatch('notify', message: 'Agent profile deleted.');
     }
 

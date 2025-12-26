@@ -70,7 +70,9 @@ class Index extends Component
             // Optional: Check for active port calls before deletion?
             // For now, we assume cascade or restriction at DB level, 
             // but let's just delete.
+            $name = $wharf->name;
             $wharf->delete();
+            AuditService::log('Delete', 'Infrastructure', $id, "Decommissioned wharf {$name}");
             session()->flash('success', 'Wharf decommissioned successfully.');
         } catch (\Exception $e) {
             session()->flash('error', 'Cannot remove active infrastructure.');
@@ -90,9 +92,11 @@ class Index extends Component
         if ($this->isEditing) {
             $wharf = Berth::find($this->editingBerthId);
             $wharf->update($this->wharf_form);
+            AuditService::log('Update', 'Infrastructure', $wharf->id, "Updated specs for wharf {$wharf->name}");
             session()->flash('success', 'Wharf specifications updated.');
         } else {
-            Berth::create($this->wharf_form);
+            $wharf = Berth::create($this->wharf_form);
+            AuditService::log('Create', 'Infrastructure', $wharf->id, "Commissioned new wharf {$wharf->name}");
             session()->flash('success', 'New wharf commissioned successfully.');
         }
 

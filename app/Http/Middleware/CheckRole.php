@@ -23,6 +23,10 @@ class CheckRole
             return $next($request);
         }
 
+        if ($request->user()->role === 'client') {
+            return redirect()->route('agent.portal');
+        }
+
         abort(403, 'Unauthorized action.');
     }
 }

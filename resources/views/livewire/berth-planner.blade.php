@@ -48,6 +48,7 @@
                  <button wire:click="setViewMode('day')" class="px-4 py-2 rounded-lg text-xs font-bold transition-all {{ $viewMode === 'day' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-700' }}">Day</button>
                  <button wire:click="setViewMode('week')" class="px-4 py-2 rounded-lg text-xs font-bold transition-all {{ $viewMode === 'week' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-700' }}">Week</button>
                  <button wire:click="setViewMode('month')" class="px-4 py-2 rounded-lg text-xs font-bold transition-all {{ $viewMode === 'month' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-700' }}">Month</button>
+                 <button wire:click="setViewMode('quarter')" class="px-4 py-2 rounded-lg text-xs font-bold transition-all {{ $viewMode === 'quarter' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-700' }}">Quarter</button>
             </div>
             
             <div class="flex bg-white rounded-xl shadow-sm border border-slate-200 p-1">
@@ -101,6 +102,12 @@
                                 @if($i % 5 == 0)
                                 <span class="text-[9px] font-bold text-slate-400">{{ $windowStart->copy()->addDays($i)->format('d') }}</span>
                                 @endif
+                            </div>
+                        @endfor
+                    @elseif($viewMode === 'quarter')
+                         @for($i = 0; $i < 13; $i++)
+                             <div class="flex-1 border-r border-slate-100 flex items-end justify-center pb-2">
+                                <span class="text-[9px] font-bold text-slate-400">W{{ $windowStart->copy()->addWeeks($i)->format('W') }}</span>
                             </div>
                         @endfor
                     @endif
