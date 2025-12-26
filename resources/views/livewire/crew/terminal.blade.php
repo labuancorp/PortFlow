@@ -50,7 +50,7 @@
                 </form>
 
                 <div class="mt-4 flex gap-2 justify-center">
-                    <button wire:click="$set('passportInput', 'A' . rand(100000,999999))" class="text-[10px] bg-slate-700 hover:bg-slate-600 px-3 py-1 rounded-lg uppercase font-bold tracking-wider transition-colors">Test Scan</button>
+                    <button wire:click="$set('passportInput', 'A{{ rand(100000,999999) }}')" class="text-[10px] bg-slate-700 hover:bg-slate-600 px-3 py-1 rounded-lg uppercase font-bold tracking-wider transition-colors">Test Scan</button>
                 </div>
             </div>
         </div>
