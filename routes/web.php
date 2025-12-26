@@ -13,6 +13,7 @@ Route::get('/ops', App\Livewire\MobileOps::class)->name('ops.mobile');
 Route::get('/agents', App\Livewire\Agents\Index::class)->name('agents.index');
 Route::get('/map', App\Livewire\Map\PortMap::class)->name('map.index');
 Route::get('/terminal', App\Livewire\Crew\Terminal::class)->name('crew.terminal');
+Route::get('/analytics', App\Livewire\Analytics\Dashboard::class)->name('analytics');
 
 // Auth Routes
 Route::get('/login', App\Livewire\Auth\Login::class)->name('login');

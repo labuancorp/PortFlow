@@ -16,7 +16,11 @@ class Invoice extends Model
         'total_amount',
         'status',
         'issued_date',
-        'due_date'
+        'due_date',
+        'erp_status',
+        'erp_synced_at',
+        'erp_reference_id',
+        'erp_logs'
     ];
 
     protected $casts = [

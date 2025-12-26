@@ -79,6 +79,11 @@ class Dashboard extends Component
             ->with(['vessel', 'agent'])
             ->get();
 
+        // IoT Sensor Data
+        $iotService = new \App\Services\IotService();
+        $iotService->syncReadings(); // Simulate live update
+        $iotReadings = \App\Models\IotSensor::where('status', 'active')->get();
+
         return view('livewire.dashboard', [
             'alongsideCount' => $alongsideCount,
             'expectedArrivals' => $expectedArrivals,
@@ -87,7 +92,8 @@ class Dashboard extends Component
             'recentActivity' => $recentActivity,
             'pendingRequests' => $pendingRequests,
             'now' => $now,
-            'berths' => $activeBerths
+            'berths' => $activeBerths,
+            'iotReadings' => $iotReadings
         ]);
     }
 

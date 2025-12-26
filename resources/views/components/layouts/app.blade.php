@@ -33,6 +33,11 @@
                             <span class="ml-3 text-indigo-400 font-bold">Crew Terminal</span>
                         </a>
                     </li>
+                    <li>
+                        <a href="{{ route('analytics') }}" class="flex items-center px-3 py-2 rounded-lg group {{ request()->routeIs('analytics') ? 'bg-slate-800 text-white' : 'text-slate-300 hover:bg-slate-800 hover:text-white' }}">
+                            <span class="ml-3 text-purple-400 font-bold">Analytics</span>
+                        </a>
+                    </li>
                      <li>
                         <a href="{{ route('home') }}" class="flex items-center px-3 py-2 rounded-lg group {{ request()->routeIs('home') ? 'bg-slate-800 text-white' : 'text-slate-300 hover:bg-slate-800 hover:text-white' }}">
                             <span class="ml-3">Berth Planner</span>

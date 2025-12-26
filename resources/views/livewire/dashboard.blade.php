@@ -173,7 +173,7 @@
             </div>
 
             <!-- Alerts Grid -->
-            <div class="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden">
+            <div class="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden mb-8">
                 <div class="px-8 py-6 border-b border-slate-50 flex justify-between items-center bg-slate-50/30">
                     <h3 class="text-lg font-bold text-slate-900">Operational Notices</h3>
                     <button type="button" wire:click="toggleAlertsModal" class="text-xs font-bold text-blue-600 hover:text-blue-800 uppercase tracking-widest">Archive History →</button>
@@ -196,6 +196,52 @@
                     @empty
                     <div class="col-span-2 py-8 text-center text-slate-400 italic text-sm">No new notices.</div>
                     @endforelse
+                </div>
+            </div>
+
+            <!-- IoT Environmental Monitoring -->
+            <div class="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden">
+                <div class="px-8 py-6 border-b border-slate-50 flex justify-between items-center bg-slate-50/30">
+                     <div>
+                        <h3 class="text-lg font-bold text-slate-900">Environmental Conditions</h3>
+                        <p class="text-xs text-slate-500 mt-1 uppercase tracking-wider font-semibold">Live IoT Sensor Data</p>
+                    </div>
+                    <div class="flex items-center gap-2">
+                         <span class="flex h-2 w-2 rounded-full bg-green-500 animate-pulse"></span>
+                         <span class="text-[10px] font-bold text-green-600 uppercase tracking-widest">LIVE FEED</span>
+                    </div>
+                </div>
+                <div class="p-6 grid grid-cols-2 md:grid-cols-4 gap-4">
+                    @foreach($iotReadings as $reading)
+                    <div class="p-4 bg-slate-50 rounded-2xl border border-slate-100 relative overflow-hidden group">
+                        <div class="relative z-10">
+                            <p class="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-2">{{ $reading['name'] }}</p>
+                            <div class="flex items-baseline gap-1">
+                                <span class="text-2xl font-black {{ $reading['risk'] === 'critical' ? 'text-red-600' : ($reading['risk'] === 'warning' ? 'text-amber-500' : 'text-slate-800') }}">
+                                    {{ $reading['value'] }}
+                                </span>
+                                <span class="text-xs font-bold text-slate-500">{{ $reading['unit'] }}</span>
+                            </div>
+                             @if($reading['risk'] !== 'normal')
+                            <div class="mt-2 text-[10px] font-bold uppercase px-2 py-1 rounded bg-white inline-block shadow-sm {{ $reading['risk'] === 'critical' ? 'text-red-600 border border-red-100' : 'text-amber-600 border border-amber-100' }}">
+                                {{ $reading['risk'] }}
+                            </div>
+                            @endif
+                        </div>
+                        <!-- Icon Background -->
+                        <div class="absolute -right-2 -bottom-2 text-slate-200 opacity-20 group-hover:opacity-40 transition-opacity">
+                            @if($reading['type'] == 'wind')
+                                <svg class="w-16 h-16" fill="currentColor" viewBox="0 0 24 24"><path d="M14.5 12.5L14.5 12.5C14.5 11.67 13.83 11 13 11C12.17 11 11.5 11.67 11.5 12.5C11.5 13.33 12.17 14 13 14H18V16H13C11.07 16 9.5 14.43 9.5 12.5C9.5 10.57 11.07 9 13 9H17V7H13C9.97 7 7.5 9.47 7.5 12.5C7.5 15.53 9.97 18 13 18H20V12.5H14.5Z"></path></svg>
+                            @elseif($reading['type'] == 'tide')
+                                <svg class="w-16 h-16" fill="currentColor" viewBox="0 0 24 24"><path d="M21.5 9.87L20.1 8.45C19.8 8.16 19.33 8.16 19.04 8.45L16.5 11L14 8.45C13.7 8.16 13.23 8.16 12.94 8.45L10.5 11L8 8.45C7.71 8.16 7.23 8.16 6.94 8.45L4.41 11L3 9.58V14C3 15.1 3.9 16 5 16H19C20.1 16 21 15.1 21 14V9.87Z"></path></svg>
+                            @elseif($reading['type'] == 'swell')
+                                <svg class="w-16 h-16" fill="currentColor" viewBox="0 0 24 24"><path d="M2 12C2 17.52 6.48 22 12 22C17.52 22 22 17.52 22 12C22 6.48 17.52 2 12 2C6.48 2 2 6.48 2 12ZM12 4C14.21 4 16.21 4.9 17.66 6.34L12 12L6.34 6.34C7.79 4.9 9.79 4 12 4Z"></path></svg>
+                            @else
+                                <svg class="w-16 h-16" fill="currentColor" viewBox="0 0 24 24"><path d="M12 4.5C7 4.5 2.73 7.61 1 12C2.73 16.39 7 19.5 12 19.5C17 19.5 21.27 16.39 23 12C21.27 7.61 17 4.5 12 4.5ZM12 17C9.24 17 7 14.76 7 12C7 9.24 9.24 7 12 7C14.76 7 17 9.24 17 12C17 14.76 14.76 17 12 17ZM12 9C10.34 9 9 10.34 9 12C9 13.66 10.34 15 12 15C13.66 15 15 13.66 15 12C15 10.34 13.66 9 12 9Z"></path></svg>
+                            @endif
+                        </div>
+                    </div>
+                    @endforeach
                 </div>
             </div>
         </div>

@@ -110,4 +110,29 @@ class Index extends Component
         $invoice->update(['status' => 'paid']);
         session()->flash('success', 'Invoice marked as PAID.');
     }
+
+    public function syncToErp($invoiceId)
+    {
+        $invoice = Invoice::findOrFail($invoiceId);
+        $syncer = new \App\Services\ErpSyncService();
+        
+        $result = $syncer->syncInvoice($invoice);
+
+        if ($result['success']) {
+            session()->flash('success', $result['message']);
+        } else {
+            session()->flash('error', $result['message']);
+        }
+    }
+
+    public function downloadErpPayload($invoiceId)
+    {
+        $invoice = Invoice::findOrFail($invoiceId);
+        $syncer = new \App\Services\ErpSyncService();
+        $xml = $syncer->generateXmlPayload($invoice);
+
+        return response()->streamDownload(function () use ($xml) {
+            echo $xml;
+        }, "erp_payload_{$invoice->invoice_no}.xml");
+    }
 }

@@ -107,7 +107,7 @@
                             <th class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Vessel</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Amount</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Status</th>
-                            <th class="px-6 py-3 text-right text-xs font-medium text-slate-500 uppercase tracking-wider">Date</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">ERP Sync</th>
                             <th class="px-6 py-3 text-right text-xs font-medium text-slate-500 uppercase tracking-wider">Action</th>
                         </tr>
                     </thead>
@@ -135,12 +135,36 @@
                                     <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-amber-100 text-amber-800">{{ ucfirst($inv->status) }}</span>
                                 @endif
                             </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-right text-sm text-slate-500">
-                                {{ $inv->created_at->format('d M Y') }}
+                            <!-- ERP Status Column -->
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                @if($inv->erp_status === 'synced')
+                                    <div class="flex items-center">
+                                        <div class="flex-shrink-0 h-2.5 w-2.5 rounded-full bg-green-400 mr-2"></div>
+                                        <div>
+                                            <div class="text-xs font-bold text-slate-700">SAP Synced</div>
+                                            <div class="text-[10px] text-slate-500">{{ $inv->erp_reference_id }}</div>
+                                        </div>
+                                    </div>
+                                @elseif($inv->erp_status === 'failed')
+                                    <div class="flex items-center">
+                                        <div class="flex-shrink-0 h-2.5 w-2.5 rounded-full bg-red-400 mr-2"></div>
+                                        <div class="text-xs font-bold text-red-600">Failed</div>
+                                    </div>
+                                @else
+                                    <span class="text-xs text-slate-400 italic">Pending</span>
+                                @endif
                             </td>
                              <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-2">
+                                @if($inv->erp_status === 'synced')
+                                    <button wire:click="downloadErpPayload({{ $inv->id }})" class="text-slate-400 hover:text-slate-600 text-[10px] uppercase font-bold" title="Download Payload XML">XML</button>
+                                    <span class="text-slate-300">|</span>
+                                @else
+                                    <button wire:click="syncToErp({{ $inv->id }})" class="text-blue-600 hover:text-blue-900 text-[10px] uppercase font-bold">Sync SAP</button>
+                                    <span class="text-slate-300">|</span>
+                                @endif
+
                                 @if($inv->status !== 'paid')
-                                <button wire:click="markAsPaid({{ $inv->id }})" class="text-green-600 hover:text-green-900 text-xs uppercase tracking-wide font-bold">Mark Paid</button>
+                                <button wire:click="markAsPaid({{ $inv->id }})" class="text-green-600 hover:text-green-900 text-[10px] uppercase tracking-wide font-bold">Mark Paid</button>
                                 <span class="text-slate-300">|</span>
                                 @endif
                                 <button class="text-teal-600 hover:text-teal-900 font-semibold">View</button>
