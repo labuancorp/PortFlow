@@ -10,7 +10,8 @@
 </head>
 <body class="bg-slate-50 font-sans antialiased">
     <div class="flex h-screen overflow-hidden">
-        <!-- Sidebar -->
+        @if(auth()->user()->role !== 'client')
+        <!-- Sidebar (Hidden for Clients) -->
         <aside class="w-64 bg-slate-900 text-white flex flex-col transition-all duration-300">
             <div class="p-6 border-b border-slate-800">
                 <span class="text-xl font-bold tracking-tight text-teal-400">PortFlow</span>
@@ -48,6 +49,8 @@
                             <span class="ml-3">Vessels</span>
                         </a>
                     </li>
+                    
+                    @if(auth()->user()->role === 'admin')
                     <li>
                         <a href="{{ route('agents.index') }}" class="flex items-center px-3 py-2 rounded-lg group {{ request()->routeIs('agents.*') ? 'bg-slate-800 text-white' : 'text-slate-300 hover:bg-slate-800 hover:text-white' }}">
                             <span class="ml-3">Agents</span>
@@ -58,6 +61,8 @@
                             <span class="ml-3">Wharf Registry</span>
                         </a>
                     </li>
+                    @endif
+                    
                     <li>
                         <a href="{{ route('billing.index') }}" class="flex items-center px-3 py-2 rounded-lg group {{ request()->routeIs('billing.*') ? 'bg-slate-800 text-white' : 'text-slate-300 hover:bg-slate-800 hover:text-white' }}">
                             <span class="ml-3">Billing</span>
@@ -99,6 +104,7 @@
                 </div>
             </div>
         </aside>
+        @endif
 
         <!-- Main Content -->
         <main class="flex-1 overflow-y-auto bg-slate-50 relative">
