@@ -121,3 +121,6 @@ CREATE TABLE service_requests (
 - **Feature**: Tablet view for 'Line Secured'.
 - **Success Metric**: Billing timestamps match physical logs within 5 minutes.
 
+
+## Currency
+All financial transactions, billing, and pricing in PortFlow are denominated in **Malaysian Ringgit (RM/MYR)**.

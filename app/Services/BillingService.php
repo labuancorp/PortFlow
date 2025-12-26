@@ -12,11 +12,11 @@ class BillingService
 {
     // Simplified Tariff Rates (In reality this would be in the database)
     const RATES = [
-        'dockage_per_meter_hour' => 1.50, // $1.50 per meter of LOA per hour
+        'dockage_per_meter_hour' => 1.50, // RM 1.50 per meter of LOA per hour
         'wharfage_fixed' => 500.00,       // Fixed fee for docking
         'line_handling' => 250.00,        // Mooring gang fee (one-time)
-        'fuel_per_liter' => 1.20,         // $1.20 per liter
-        'water_per_mt' => 5.00,           // $5.00 per MT
+        'fuel_per_liter' => 1.20,         // RM 1.20 per liter
+        'water_per_mt' => 5.00,           // RM 5.00 per MT
     ];
 
 
@@ -58,7 +58,7 @@ class BillingService
 
             InvoiceItem::create([
                 'invoice_id' => $invoice->id,
-                'description' => "Dockage Fees ({$loa}m x {$hours} hrs @ \${$rate}/m/hr)",
+                'description' => "Dockage Fees ({$loa}m x {$hours} hrs @ RM {$rate}/m/hr)",
                 'quantity' => $hours,
                 'unit_price' => $rate * $loa,
                 'total_price' => $dockageCost

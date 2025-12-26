@@ -22,6 +22,7 @@ PortFlow is a state-of-the-art enterprise solution designed to modernize maritim
 *   **Live Billing Engine**: Invoices are generated in real-time as operations happen.
 *   **Dynamic Rating**: `BillingService` calculates fees based on LOA, Duration (Hour-based), and Fixed Charges (Wharfage).
 *   **Order-to-Cash**: Service requests (Fuel, Water) from the ground crew are instantly added to the active invoice.
+*   **Currency**: All transactions are in **Malaysian Ringgit (RM/MYR)**.
 *   **Status Triggers**:
     *   `Alongisde` -> Starts the Billing Clock.
     *   `Departed` -> Finalizes and Issues the Invoice.

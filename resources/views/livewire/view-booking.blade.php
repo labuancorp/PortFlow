@@ -105,16 +105,16 @@
                                 <tr>
                                     <td class="py-2 text-slate-600 pl-2 text-xs">
                                         <div class="font-bold text-slate-700">{{ $item->description }}</div>
-                                        <div class="text-[10px] opacity-70">{{ $item->quantity }} units @ ${{ number_format($item->unit_price / $item->quantity, 2) }}</div>
+                                        <div class="text-[10px] opacity-70">{{ $item->quantity }} units @ RM {{ number_format($item->unit_price / $item->quantity, 2) }}</div>
                                     </td>
-                                    <td class="py-2 text-right font-mono font-bold text-slate-800 pr-2">${{ number_format($item->total_price, 2) }}</td>
+                                    <td class="py-2 text-right font-mono font-bold text-slate-800 pr-2">RM {{ number_format($item->total_price, 2) }}</td>
                                 </tr>
                                 @endforeach
                             </tbody>
                             <tfoot class="border-t-2 border-slate-100 bg-slate-50/50">
                                 <tr>
                                     <td class="py-3 pl-2 text-right font-black text-slate-900 uppercase text-xs tracking-widest">Total Due</td>
-                                    <td class="py-3 pr-2 text-right font-black text-xl text-teal-600 font-mono">${{ number_format($invoice->total_amount, 2) }}</td>
+                                    <td class="py-3 pr-2 text-right font-black text-xl text-teal-600 font-mono">RM {{ number_format($invoice->total_amount, 2) }}</td>
                                 </tr>
                             </tfoot>
                         </table>
