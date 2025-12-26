@@ -185,6 +185,7 @@ class Dashboard extends Component
     // 4. Incident & Export
     public function logIncident()
     {
+        \App\Services\AuditService::log('create', 'incident', null, 'Manual incident log triggered from dashboard.');
         session()->flash('success', "Security Incident Logged. PFSO notified and CCTV tagged.");
     }
 

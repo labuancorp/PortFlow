@@ -63,7 +63,18 @@
                             <span class="ml-3">Billing</span>
                         </a>
                     </li>
+                    
+                    @if(auth()->user()->role === 'admin')
                     <li class="mt-8 border-t border-slate-800 pt-4">
+                        <p class="px-3 text-xs font-bold text-slate-500 uppercase tracking-widest mb-2">Administration</p>
+                        <a href="{{ route('admin.health') }}" class="flex items-center px-3 py-2 rounded-lg group {{ request()->routeIs('admin.*') ? 'bg-red-900/20 text-red-400' : 'text-slate-400 hover:bg-slate-800 hover:text-red-400' }}">
+                            <svg class="w-5 h-5 group-hover:animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
+                            <span class="ml-3 font-bold">System Health</span>
+                        </a>
+                    </li>
+                    @endif
+
+                    <li class="mt-4 border-t border-slate-800 pt-4">
                         <a href="{{ route('agent.portal') }}" target="_blank" class="flex items-center px-3 py-2 rounded-lg text-emerald-400 hover:bg-slate-800 hover:text-emerald-300">
                              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
                             <span class="ml-3 font-bold">Client Portal View</span>
