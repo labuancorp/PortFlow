@@ -111,7 +111,21 @@ class BerthPlanner extends Component
         ]);
 
         $this->showCreateModal = false;
+        
+        // Clear Cache logic
+        $this->clearScheduleCache();
+
         $this->dispatch('schedule-success', message: 'Booking created successfully!');
+    }
+
+    public function clearScheduleCache()
+    {
+        // Naive clearing: Clear current view's cache. 
+        // Ideally we use Cache Tags, but for File driver we might just rely on short TTL or clear specific keys.
+        $start = $this->getWindowStart();
+        $end = $this->getWindowEnd();
+        $cacheKey = "berth_schedule_{$this->viewMode}_{$start->format('Y-m-d')}_{$end->format('Y-m-d')}";
+        \Illuminate\Support\Facades\Cache::forget($cacheKey);
     }
 
     public function optimizeSchedule()
@@ -121,42 +135,82 @@ class BerthPlanner extends Component
         $this->dispatch('schedule-success', message: '✨ AI Opt: Found 2 efficient slot swaps. Schedule density improved by 15%.');
     }
 
+    public $viewMode = 'day'; // day, week, month
+
+    public function setViewMode($mode)
+    {
+        $this->viewMode = $mode;
+    }
+
     public function render()
     {
-        $dayStart = \Carbon\Carbon::parse($this->dateFilter)->startOfDay();
-        $dayEnd = \Carbon\Carbon::parse($this->dateFilter)->endOfDay();
+        // Calculate Time Window
+        $start = \Carbon\Carbon::parse($this->dateFilter)->startOfDay();
         
-        // Fetch all berths with port calls that overlap with the current day
-        $berths = Berth::with(['portCalls' => function($query) use ($dayStart, $dayEnd) {
-            $query->where(function($q) use ($dayStart, $dayEnd) {
-                // Show bookings that overlap with the viewing day
-                $q->where('eta', '<=', $dayEnd)
-                  ->where('etd', '>=', $dayStart);
-            })
-            ->with(['vessel', 'agent'])
-            ->orderBy('eta');
-        }])->get();
+        switch ($this->viewMode) {
+            case 'week':
+                $end = $start->copy()->addDays(7)->endOfDay();
+                break;
+            case 'month':
+                $end = $start->copy()->addDays(30)->endOfDay();
+                break;
+            default: // day
+                $end = $start->copy()->endOfDay();
+                break;
+        }
+        
+        // Fetch all berths with port calls that overlap with the window (Cached)
+        $cacheKey = "berth_schedule_{$this->viewMode}_{$start->format('Y-m-d')}_{$end->format('Y-m-d')}";
+        
+        $berths = \Illuminate\Support\Facades\Cache::remember($cacheKey, 60, function() use ($start, $end) {
+            return Berth::with(['portCalls' => function($query) use ($start, $end) {
+                $query->where(function($q) use ($start, $end) {
+                    $q->where('eta', '<', $end)
+                      ->where('etd', '>', $start);
+                })
+                ->with(['vessel', 'agent'])
+                ->orderBy('eta');
+            }])->get();
+        });
 
         return view('livewire.berth-planner', [
             'berths' => $berths,
             'vessels' => \App\Models\Vessel::orderBy('name')->get(),
             'agents' => \App\Models\Organization::where('type', 'agent')->orderBy('name')->get(),
+            'windowStart' => $start,
+            'windowEnd' => $end
         ]);
+    }
+
+    public function getWindowStart()
+    {
+        return \Carbon\Carbon::parse($this->dateFilter)->startOfDay();
+    }
+
+    public function getWindowEnd()
+    {
+        $start = $this->getWindowStart();
+        switch ($this->viewMode) {
+            case 'week': return $start->copy()->addDays(7)->endOfDay();
+            case 'month': return $start->copy()->addDays(30)->endOfDay();
+            default: return $start->copy()->endOfDay();
+        }
     }
 
     public function calculateStyle($portCall)
     {
-        $dayStart = \Carbon\Carbon::parse($this->dateFilter)->startOfDay();
-        $dayEnd = \Carbon\Carbon::parse($this->dateFilter)->endOfDay();
+        $windowStart = $this->getWindowStart();
+        $windowEnd = $this->getWindowEnd();
         
         // Clamp the start and end times to the viewing window
-        $start = $portCall->eta < $dayStart ? $dayStart : $portCall->eta;
-        $end = $portCall->etd > $dayEnd ? $dayEnd : $portCall->etd;
+        $start = $portCall->eta < $windowStart ? $windowStart : $portCall->eta;
+        $end = $portCall->etd > $windowEnd ? $windowEnd : $portCall->etd;
 
-        $totalMinutes = 24 * 60; // 1440 minutes in a day
+        $totalMinutes = $windowStart->diffInMinutes($windowEnd, false);
+        if ($totalMinutes <= 0) $totalMinutes = 1440; // Fallback
         
-        // Calculate offset from start of day (in minutes)
-        $offsetMinutes = $dayStart->diffInMinutes($start, false);
+        // Calculate offset from start of window (in minutes)
+        $offsetMinutes = $windowStart->diffInMinutes($start, false);
         if ($offsetMinutes < 0) $offsetMinutes = 0;
         
         // Calculate duration (in minutes)
@@ -169,7 +223,7 @@ class BerthPlanner extends Component
         return "left: {$leftPercent}%; width: {$widthPercent}%;";
     }
 
-    public function updateSchedule($portCallId, $newBerthId, $newTimeMinutes)
+    public function updateSchedule($portCallId, $newBerthId, $newTimePercentage)
     {
         $portCall = PortCall::find($portCallId);
         if (!$portCall) {
@@ -178,9 +232,19 @@ class BerthPlanner extends Component
         }
 
         // Calculate new times
-        $dayStart = \Carbon\Carbon::parse($this->dateFilter)->startOfDay();
-        $newEta = $dayStart->copy()->addMinutes($newTimeMinutes);
+        $windowStart = $this->getWindowStart();
+        $windowEnd = $this->getWindowEnd();
+        $totalMinutes = $windowStart->diffInMinutes($windowEnd);
         
+        // Percentage comes in 0-1 range from JS, or we accept minutes? 
+        // JS sent minutes previously based on 24h. Let's assume JS now sends percentage (0-1).
+        // Wait, previous JS code: const newTimeMinutes = Math.round(percentage * totalMinutes);
+        // I should stick to minutes passed from JS, but JS needs to know the total Minutes.
+        // EASIER: Pass percentage 0-1 from JS, handle minute calc here.
+        
+        $minutesFromStart = $newTimePercentage * $totalMinutes;
+        
+        $newEta = $windowStart->copy()->addMinutes($minutesFromStart);
         $duration = $portCall->eta->diffInMinutes($portCall->etd);
         $newEtd = $newEta->copy()->addMinutes($duration);
 
@@ -226,6 +290,8 @@ class BerthPlanner extends Component
             'eta' => $newEta,
             'etd' => $newEtd
         ]);
+
+        $this->clearScheduleCache();
 
         $this->dispatch('schedule-success', message: 'Booking updated successfully!');
     }

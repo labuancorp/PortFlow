@@ -30,9 +30,8 @@
             const x = event.clientX - rect.left;
             const width = rect.width;
             const percentage = Math.max(0, Math.min(1, x / width));
-            const totalMinutes = 24 * 60;
-            const newTimeMinutes = Math.round(percentage * totalMinutes);
-            $wire.updateSchedule(bookingId, berthId, newTimeMinutes);
+            // Send percentage (0-1) to backend instead of minutes
+            $wire.updateSchedule(bookingId, berthId, percentage);
         }
      }"
      @schedule-error.window="showToast($event.detail.message, 'error')"
@@ -45,6 +44,12 @@
             <p class="text-slate-500 mt-1">Operational Schedule for <span class="font-bold text-slate-800">{{ \Carbon\Carbon::parse($dateFilter)->format('l, d M Y') }}</span></p>
         </div>
         <div class="flex items-center gap-3">
+            <div class="flex bg-slate-200/50 p-1 rounded-xl">
+                 <button wire:click="setViewMode('day')" class="px-4 py-2 rounded-lg text-xs font-bold transition-all {{ $viewMode === 'day' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-700' }}">Day</button>
+                 <button wire:click="setViewMode('week')" class="px-4 py-2 rounded-lg text-xs font-bold transition-all {{ $viewMode === 'week' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-700' }}">Week</button>
+                 <button wire:click="setViewMode('month')" class="px-4 py-2 rounded-lg text-xs font-bold transition-all {{ $viewMode === 'month' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-700' }}">Month</button>
+            </div>
+            
             <div class="flex bg-white rounded-xl shadow-sm border border-slate-200 p-1">
                 <button type="button" wire:click="$set('dateFilter', '{{ \Carbon\Carbon::parse($dateFilter)->subDay()->format('Y-m-d') }}')" class="p-2 hover:bg-slate-50 rounded-lg text-slate-400 hover:text-slate-600 transition-colors">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
@@ -76,13 +81,29 @@
             </div>
             <div class="flex-1 relative h-12">
                 <div class="absolute inset-0 flex">
-                    @for($hour = 0; $hour < 24; $hour++)
-                        <div class="flex-1 border-r border-slate-100 {{ $hour % 3 === 0 ? 'border-slate-200 bg-slate-50/20' : '' }} flex items-end justify-center pb-2 group relative">
-                             @if($hour % 3 === 0)
-                            <span class="text-[10px] font-bold text-slate-400 group-hover:text-slate-600">{{ sprintf('%02d:00', $hour) }}</span>
-                            @endif
-                        </div>
-                    @endfor
+                    @if($viewMode === 'day')
+                        @for($hour = 0; $hour < 24; $hour++)
+                            <div class="flex-1 border-r border-slate-100 {{ $hour % 3 === 0 ? 'border-slate-200 bg-slate-50/20' : '' }} flex items-end justify-center pb-2 group relative">
+                                 @if($hour % 3 === 0)
+                                <span class="text-[10px] font-bold text-slate-400 group-hover:text-slate-600">{{ sprintf('%02d:00', $hour) }}</span>
+                                @endif
+                            </div>
+                        @endfor
+                    @elseif($viewMode === 'week')
+                        @for($i = 0; $i < 7; $i++)
+                             <div class="flex-1 border-r border-slate-100 flex items-end justify-center pb-2">
+                                <span class="text-[10px] font-bold text-slate-500 uppercase">{{ $windowStart->copy()->addDays($i)->format('D d') }}</span>
+                            </div>
+                        @endfor
+                    @elseif($viewMode === 'month')
+                         @for($i = 0; $i < 30; $i++)
+                             <div class="flex-1 border-r border-slate-100 flex items-end justify-center pb-2">
+                                @if($i % 5 == 0)
+                                <span class="text-[9px] font-bold text-slate-400">{{ $windowStart->copy()->addDays($i)->format('d') }}</span>
+                                @endif
+                            </div>
+                        @endfor
+                    @endif
                 </div>
                 <!-- Precision Indicator -->
                 <div class="absolute bottom-0 left-0 w-full h-[1px] bg-indigo-500/20"></div>

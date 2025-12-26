@@ -22,7 +22,10 @@ class User extends Authenticatable
         'email',
         'password',
         'role',
-        'organization_id'
+        'organization_id',
+        'is_2fa_enabled',
+        'two_factor_code',
+        'two_factor_expires_at'
     ];
 
 

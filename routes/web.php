@@ -3,7 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use App\Livewire\BerthPlanner;
 
-Route::middleware(['auth'])->group(function () {
+Route::middleware(['auth', '2fa'])->group(function () {
     Route::get('/', BerthPlanner::class)->name('home');
     Route::get('/dashboard', App\Livewire\Dashboard::class)->name('dashboard');
     Route::get('/vessels', App\Livewire\Vessels\Index::class)->name('vessels.index');
@@ -25,6 +25,7 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
 // Auth Routes
 Route::get('/login', App\Livewire\Auth\Login::class)->name('login');
 Route::get('/register', App\Livewire\Auth\Register::class)->name('register');
+Route::get('/2fa/verify', App\Livewire\Auth\TwoFactorChallenge::class)->name('2fa.verify')->middleware('auth');
 Route::get('/logout', function () {
     Illuminate\Support\Facades\Auth::logout();
     session()->invalidate();
