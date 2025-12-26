@@ -32,6 +32,11 @@ class AgentPortal extends Component
     public $new_vessel_loa = '';
     public $new_vessel_draft = '';
 
+    // AI Berth Suggestions
+    public $showSuggestions = false;
+    public $berthSuggestions = [];
+    public $selectedSuggestedBerth = null;
+
     protected $rules = [
         'vessel_id' => 'required',
         'eta' => 'required|date|after:now',
@@ -75,6 +80,39 @@ class AgentPortal extends Component
         $this->dispatch('notify', message: 'Vessel registered to fleet!');
     }
 
+    public function getSmartSuggestions()
+    {
+        // Validate that we have the required fields
+        if (!$this->vessel_id || !$this->eta || !$this->etd) {
+            $this->dispatch('notify', message: 'Please select vessel and dates first!');
+            return;
+        }
+
+        $vessel = Vessel::find($this->vessel_id);
+        
+        if (!$vessel) {
+            return;
+        }
+
+        // Use AI optimization service
+        $optimizer = new \App\Services\BerthOptimizationService();
+        $suggestions = $optimizer->findOptimalBerths($vessel, $this->eta, $this->etd);
+
+        // Take top 3 suggestions
+        $this->berthSuggestions = array_slice($suggestions, 0, 3);
+        $this->showSuggestions = true;
+
+        // Auto-select the best suggestion if available
+        if (!empty($this->berthSuggestions) && $this->berthSuggestions[0]['available']) {
+            $this->selectedSuggestedBerth = $this->berthSuggestions[0]['berth']->id;
+        }
+    }
+
+    public function selectSuggestedBerth($berthId)
+    {
+        $this->selectedSuggestedBerth = $berthId;
+    }
+
     public function saveRequest()
     {
         $this->validate();
@@ -82,6 +120,7 @@ class AgentPortal extends Component
         PortCall::create([
             'vessel_id' => $this->vessel_id,
             'agent_id' => $this->agentId,
+            'assigned_berth_id' => $this->selectedSuggestedBerth, // Use AI suggestion if selected
             'status' => 'requested',
             'eta' => $this->eta,
             'etd' => $this->etd,

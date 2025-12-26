@@ -206,9 +206,82 @@
                         </div>
                     </div>
 
+                    {{-- AI Smart Suggest Button --}}
+                    <div class="flex justify-center">
+                        <button type="button" wire:click="getSmartSuggestions" class="px-6 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white rounded-xl font-bold uppercase tracking-widest shadow-lg shadow-indigo-900/30 transition-all flex items-center gap-2">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path></svg>
+                            🤖 Get Smart Suggestions
+                        </button>
+                    </div>
+
+                    {{-- AI Berth Suggestions --}}
+                    @if($showSuggestions && !empty($berthSuggestions))
+                    <div class="space-y-3">
+                        <h4 class="text-sm font-bold text-slate-700 uppercase tracking-wider">AI Recommendations</h4>
+                        
+                        @foreach($berthSuggestions as $index => $suggestion)
+                        <div wire:click="selectSuggestedBerth({{ $suggestion['berth']->id }})" 
+                             class="p-4 rounded-xl border-2 cursor-pointer transition-all
+                                {{ $selectedSuggestedBerth == $suggestion['berth']->id ? 'border-indigo-500 bg-indigo-50' : 'border-slate-200 hover:border-indigo-300' }}
+                                {{ !$suggestion['available'] ? 'opacity-60' : '' }}">
+                            
+                            <div class="flex items-start justify-between mb-2">
+                                <div class="flex items-center gap-2">
+                                    @if($index == 0 && $suggestion['available'])
+                                        <span class="text-2xl">🏆</span>
+                                    @elseif($suggestion['available'])
+                                        <span class="text-2xl">✅</span>
+                                    @else
+                                        <span class="text-2xl">❌</span>
+                                    @endif
+                                    <div>
+                                        <h5 class="font-bold text-slate-900">{{ $suggestion['berth']->name }}</h5>
+                                        <p class="text-xs text-slate-500">{{ $suggestion['berth']->code }} • Max LOA: {{ $suggestion['berth']->max_loa }}m • Max Draft: {{ $suggestion['berth']->max_draft }}m</p>
+                                    </div>
+                                </div>
+                                
+                                @if($suggestion['available'])
+                                <div class="text-right">
+                                    <div class="text-2xl font-black 
+                                        {{ $suggestion['score'] >= 90 ? 'text-green-600' : ($suggestion['score'] >= 75 ? 'text-blue-600' : 'text-slate-600') }}">
+                                        {{ $suggestion['score'] }}
+                                    </div>
+                                    <div class="text-[10px] font-bold uppercase tracking-wider
+                                        {{ $suggestion['confidence'] == 'very_high' ? 'text-green-600' : ($suggestion['confidence'] == 'high' ? 'text-blue-600' : 'text-slate-500') }}">
+                                        {{ str_replace('_', ' ', $suggestion['confidence']) }}
+                                    </div>
+                                </div>
+                                @endif
+                            </div>
+                            
+                            <div class="space-y-1">
+                                @foreach($suggestion['reasons'] as $reason)
+                                <p class="text-xs text-slate-600">{{ $reason }}</p>
+                                @endforeach
+                            </div>
+                            
+                            @if(!empty($suggestion['conflicts']))
+                            <div class="mt-2 p-2 bg-red-50 rounded-lg">
+                                <p class="text-xs font-bold text-red-700 mb-1">Conflicts:</p>
+                                @foreach($suggestion['conflicts'] as $conflict)
+                                <p class="text-xs text-red-600">• {{ $conflict['vessel'] }} ({{ $conflict['eta'] }} - {{ $conflict['etd'] }})</p>
+                                @endforeach
+                            </div>
+                            @endif
+                        </div>
+                        @endforeach
+                    </div>
+                    @endif
+
                     <div class="bg-blue-50 p-4 rounded-xl flex gap-3 items-start">
                         <svg class="w-5 h-5 text-blue-500 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                        <p class="text-xs text-blue-700 font-medium">Your request will be optimized by our AI scheduler. You will receive a berth assignment confirmation shortly.</p>
+                        <p class="text-xs text-blue-700 font-medium">
+                            @if($showSuggestions && $selectedSuggestedBerth)
+                                AI has selected the optimal berth for you. Click Submit to confirm.
+                            @else
+                                Click "Get Smart Suggestions" to let AI recommend the best berth for your vessel.
+                            @endif
+                        </p>
                     </div>
 
                     <div class="pt-4 border-t border-slate-100 flex gap-3">
