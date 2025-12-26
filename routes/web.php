@@ -18,6 +18,11 @@ Route::middleware(['auth', '2fa'])->group(function () {
         Route::get('/map', App\Livewire\Map\PortMap::class)->name('map.index');
         Route::get('/terminal', App\Livewire\Crew\Terminal::class)->name('crew.terminal');
         Route::get('/analytics', App\Livewire\Analytics\Dashboard::class)->name('analytics');
+        
+        // Logistics / Cargo
+        Route::get('/cargo/manifests', App\Livewire\Cargo\ManifestIndex::class)->name('cargo.manifests.index');
+        Route::get('/cargo/manifests/create', App\Livewire\Cargo\ManifestCreate::class)->name('cargo.manifests.create');
+        Route::get('/cargo/manifests/{manifest}', App\Livewire\Cargo\ManifestShow::class)->name('cargo.manifests.show');
     });
 
     // Admin Only

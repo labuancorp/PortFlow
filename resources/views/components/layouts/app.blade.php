@@ -64,6 +64,12 @@
                     @endif
                     
                     <li>
+                         <a href="{{ route('cargo.manifests.index') }}" class="flex items-center px-3 py-2 rounded-lg group {{ request()->routeIs('cargo.*') ? 'bg-slate-800 text-white' : 'text-slate-300 hover:bg-slate-800 hover:text-white' }}">
+                             <span class="ml-3 text-amber-400 font-bold">Cargo Logistics</span>
+                         </a>
+                    </li>
+                    
+                    <li>
                         <a href="{{ route('billing.index') }}" class="flex items-center px-3 py-2 rounded-lg group {{ request()->routeIs('billing.*') ? 'bg-slate-800 text-white' : 'text-slate-300 hover:bg-slate-800 hover:text-white' }}">
                             <span class="ml-3">Billing</span>
                         </a>
