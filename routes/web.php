@@ -49,3 +49,5 @@ Route::get('/logout', function () {
     session()->regenerateToken();
     return redirect()->route('login');
 })->name('logout');
+
+Route::get('/track/{tracking_number}', App\Livewire\Cargo\TrackItem::class)->name('cargo.track');
