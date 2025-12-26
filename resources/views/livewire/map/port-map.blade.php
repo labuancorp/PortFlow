@@ -57,21 +57,39 @@
                 });
             });
 
-            // Draw Geofences for Berths
-            const berthZones = [
-                {name: 'Main Wharf', lat: 5.263, lng: 115.243, r: 150},
-                {name: 'Alpha Jetty', lat: 5.261, lng: 115.241, r: 80}
-            ];
-
-            berthZones.forEach(z => {
-                L.circle([z.lat, z.lng], {
-                    color: 'white',
-                    fillColor: '#fff',
-                    fillOpacity: 0.1,
-                    radius: z.r,
-                    weight: 1,
-                    dashArray: '5, 5'
-                }).addTo(map).bindTooltip(z.name, {permanent: true, direction: "center", className: "berth-label"});
+            // Draw Berths with Colors from Database
+            const berths = @json($berths);
+            
+            berths.forEach(b => {
+                if (b.latitude && b.longitude) {
+                    // Map color names to hex codes
+                    const colorMap = {
+                        'green': '#22c55e',
+                        'yellow': '#fbbf24',
+                        'blue': '#3b82f6',
+                        'red': '#ef4444'
+                    };
+                    
+                    const berthColor = colorMap[b.color] || '#22c55e';
+                    
+                    // Create a rectangular marker for the berth
+                    L.rectangle(
+                        [
+                            [b.latitude - 0.0003, b.longitude - 0.0008],
+                            [b.latitude + 0.0003, b.longitude + 0.0008]
+                        ],
+                        {
+                            color: berthColor,
+                            fillColor: berthColor,
+                            fillOpacity: 0.6,
+                            weight: 3
+                        }
+                    ).addTo(map).bindTooltip(b.name, {
+                        permanent: true, 
+                        direction: "center", 
+                        className: "berth-label"
+                    });
+                }
             });
         });
     </script>

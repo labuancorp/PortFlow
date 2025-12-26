@@ -54,9 +54,22 @@ class PortMap extends Component
                 ];
             });
 
+        // Fetch berths with coordinates and colors
+        $berths = Berth::all()->map(function ($berth) {
+            return [
+                'id' => $berth->id,
+                'name' => $berth->name,
+                'code' => $berth->code,
+                'latitude' => $berth->latitude,
+                'longitude' => $berth->longitude,
+                'color' => $berth->color,
+                'status' => $berth->status
+            ];
+        });
+
         return view('livewire.map.port-map', [
             'vessels' => $activeVessels,
-            'berths' => Berth::all()
+            'berths' => $berths
         ]);
     }
 }

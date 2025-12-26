@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Berth extends Model
 {
-    protected $fillable = ['name', 'code', 'max_loa', 'max_draft', 'status'];
+    protected $fillable = ['name', 'code', 'max_loa', 'max_draft', 'status', 'latitude', 'longitude', 'color'];
 
     public function portCalls()
     {

@@ -74,11 +74,50 @@ class DatabaseSeeder extends Seeder
             'vessel_type' => 'OSV'
         ]);
 
-        // 3. Create Berths
-        $b1 = Berth::create(['name' => 'Main Wharf 1', 'code' => 'MW1', 'max_loa' => 100, 'max_draft' => 10, 'status' => 'active']);
-        $b2 = Berth::create(['name' => 'Main Wharf 2', 'code' => 'MW2', 'max_loa' => 100, 'max_draft' => 10, 'status' => 'active']);
-        $b3 = Berth::create(['name' => 'Main Wharf 3', 'code' => 'MW3', 'max_loa' => 120, 'max_draft' => 12, 'status' => 'active']);
-        $b4 = Berth::create(['name' => 'Alpha Jetty', 'code' => 'AJ1', 'max_loa' => 80, 'max_draft' => 8, 'status' => 'active']);
+        // 3. Create Berths (with GPS coordinates and colors for GIS Map)
+        $b1 = Berth::create([
+            'name' => 'Main Wharf 1', 
+            'code' => 'MW1', 
+            'max_loa' => 100, 
+            'max_draft' => 10, 
+            'status' => 'active',
+            'latitude' => 5.2630,
+            'longitude' => 115.2430,
+            'color' => 'green'
+        ]);
+        
+        $b2 = Berth::create([
+            'name' => 'Main Wharf 2', 
+            'code' => 'MW2', 
+            'max_loa' => 100, 
+            'max_draft' => 10, 
+            'status' => 'active',
+            'latitude' => 5.2635,
+            'longitude' => 115.2435,
+            'color' => 'yellow'
+        ]);
+        
+        $b3 = Berth::create([
+            'name' => 'Main Wharf 3', 
+            'code' => 'MW3', 
+            'max_loa' => 120, 
+            'max_draft' => 12, 
+            'status' => 'active',
+            'latitude' => 5.2640,
+            'longitude' => 115.2440,
+            'color' => 'blue'
+        ]);
+        
+        $b4 = Berth::create([
+            'name' => 'Alpha Jetty', 
+            'code' => 'AJ1', 
+            'max_loa' => 80, 
+            'max_draft' => 8, 
+            'status' => 'active',
+            'latitude' => 5.2610,
+            'longitude' => 115.2410,
+            'color' => 'green'
+        ]);
 
         // 4. Create Port Calls (Bookings)
         $now = Carbon::now();
