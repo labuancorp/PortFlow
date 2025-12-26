@@ -50,6 +50,8 @@ class Index extends Component
 
     public function save()
     {
+        $this->code = strtoupper($this->code);
+
         if ($this->isEdit) {
             $this->validate([
                 'name' => 'required|string|max:255',
@@ -60,7 +62,7 @@ class Index extends Component
             $agent = Organization::findOrFail($this->editId);
             $agent->update([
                 'name' => $this->name,
-                'code' => strtoupper($this->code),
+                'code' => $this->code,
                 'billing_address' => $this->billing_address,
             ]);
             
@@ -73,7 +75,7 @@ class Index extends Component
             $agent = Organization::create([
                 'type' => 'agent',
                 'name' => $this->name,
-                'code' => strtoupper($this->code),
+                'code' => $this->code,
                 'billing_address' => $this->billing_address,
             ]);
             
