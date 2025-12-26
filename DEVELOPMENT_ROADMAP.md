@@ -75,8 +75,9 @@
 1. **Role-Based Access Control (RBAC)**: Fine-grained permissions ✅
 2. **Audit & Compliance**: Comprehensive activity logging & Export ✅
 3. **Advanced Scheduling**: Quarter View & Conflict Detection ✅
-4. **Logistics & Cargo**: Manifests, Items, QR Codes (Phase 4 Early Access) ✅
-5. **Security**: 2FA Toggle & User Profile ✅
+4. **Logistics & Cargo**: Manifests, Items, QR Codes ✅
+5. **Warehouse WMS**: Yard Density Map & Aging Reports ✅
+6. **Security**: 2FA Toggle & User Profile ✅
 
 ---
 

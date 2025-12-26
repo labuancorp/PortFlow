@@ -24,4 +24,9 @@ class CargoItem extends Model
     {
         return $this->belongsTo(CargoManifest::class, 'cargo_manifest_id');
     }
+
+    public function zone()
+    {
+        return $this->belongsTo(WarehouseZone::class, 'warehouse_zone_id');
+    }
 }
