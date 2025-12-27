@@ -39,49 +39,119 @@
     </div>
 @else
     <!-- Sidebar -->
-    <div class="w-full md:w-80 bg-white border-r border-slate-200 flex flex-col z-20 shadow-xl overflow-hidden md:h-full">
+    <div class="w-full md:w-80 bg-white border-r border-slate-200 flex flex-col z-20 shadow-xl overflow-hidden md:h-full" x-data="{ sidebarTab: 'zones' }">
         <div class="p-6 border-b border-slate-100">
             <h1 class="text-xl font-black text-slate-900 tracking-tight">Port Yard Map</h1>
             <p class="text-xs text-slate-500 font-bold uppercase tracking-widest mt-1">Real-time Cargo Tracking</p>
         </div>
-
-        <!-- Stats -->
-        <div class="grid grid-cols-2 divide-x divide-slate-100 border-b border-slate-100 bg-slate-50">
-            <div class="p-4 text-center">
-                <div class="text-2xl font-black text-indigo-600">{{ $warehouses->sum(fn($w) => $w->zones->sum('current_utilization_m3')) }}</div>
-                <div class="text-[10px] uppercase font-bold text-slate-400">Total Volume (m³)</div>
-            </div>
-             <div class="p-4 text-center">
-                <div class="text-2xl font-black text-amber-500">{{ $warehouses->sum(fn($w) => $w->zones->sum(fn($z) => $z->items->where('dg_class', '!=', null)->count())) }}</div>
-                <div class="text-[10px] uppercase font-bold text-slate-400">DG Containers</div>
-            </div>
+ 
+        @if(auth()->user()->role === 'agent')
+        <!-- Tabs for Agents -->
+        <div class="flex border-b border-slate-100 bg-slate-50">
+            <button @click="sidebarTab = 'zones'" :class="sidebarTab === 'zones' ? 'border-b-2 border-indigo-600 text-indigo-600 bg-white' : 'text-slate-500 hover:bg-slate-100'" class="flex-1 py-3 text-[10px] font-black uppercase tracking-widest transition-all">Zones</button>
+            <button @click="sidebarTab = 'requests'" :class="sidebarTab === 'requests' ? 'border-b-2 border-indigo-600 text-indigo-600 bg-white' : 'text-slate-500 hover:bg-slate-100'" class="flex-1 py-3 text-[10px] font-black uppercase tracking-widest transition-all">My Requests</button>
+            <button @click="sidebarTab = 'inventory'" :class="sidebarTab === 'inventory' ? 'border-b-2 border-indigo-600 text-indigo-600 bg-white' : 'text-slate-500 hover:bg-slate-100'" class="flex-1 py-3 text-[10px] font-black uppercase tracking-widest transition-all">In Yard</button>
         </div>
-
-        <!-- Zone List -->
-        <div class="flex-1 overflow-y-auto p-4 space-y-4">
-            @foreach($warehouses as $warehouse)
-            <div class="space-y-2">
-                <h3 class="text-xs font-bold text-slate-900 uppercase tracking-wider bg-slate-100 px-2 py-1 rounded">{{ $warehouse->name }}</h3>
-                @foreach($warehouse->zones as $zone)
-                <div class="group p-3 rounded-lg border border-slate-200 hover:border-indigo-400 hover:shadow-md transition-all cursor-pointer bg-white"
-                     onclick="focusZone({{ $zone->id }})"> 
-                    <div class="flex justify-between items-center mb-2">
-                        <span class="font-bold text-sm text-slate-700">{{ $zone->name }}</span>
-                         @if($zone->is_dg_allowed)
-                            <span class="bg-red-100 text-red-700 text-[10px] font-black px-1.5 py-0.5 rounded">DG ZONE</span>
-                         @endif
+        @endif
+ 
+        <!-- Zones Tab -->
+        <div x-show="sidebarTab === 'zones'" class="flex-1 overflow-y-auto flex flex-col">
+            <!-- Stats -->
+            <div class="grid grid-cols-2 divide-x divide-slate-100 border-b border-slate-100 bg-slate-50">
+                <div class="p-4 text-center">
+                    <div class="text-2xl font-black text-indigo-600">{{ $warehouses->sum(fn($w) => $w->zones->sum('current_utilization_m3')) }}</div>
+                    <div class="text-[10px] uppercase font-bold text-slate-400">Total Volume (m³)</div>
+                </div>
+                 <div class="p-4 text-center">
+                    <div class="text-2xl font-black text-amber-500">{{ $warehouses->sum(fn($w) => $w->zones->sum(fn($z) => $z->items->where('dg_class', '!=', null)->count())) }}</div>
+                    <div class="text-[10px] uppercase font-bold text-slate-400">DG Containers</div>
+                </div>
+            </div>
+ 
+            <!-- Zone List -->
+            <div class="p-4 space-y-4">
+                @foreach($warehouses as $warehouse)
+                <div class="space-y-2">
+                    <h3 class="text-xs font-bold text-slate-900 uppercase tracking-wider bg-slate-100 px-2 py-1 rounded">{{ $warehouse->name }}</h3>
+                    @foreach($warehouse->zones as $zone)
+                    <div class="group p-3 rounded-lg border border-slate-200 hover:border-indigo-400 hover:shadow-md transition-all cursor-pointer bg-white"
+                         onclick="focusZone({{ $zone->id }})"> 
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="font-bold text-sm text-slate-700">{{ $zone->name }}</span>
+                             @if($zone->is_dg_allowed)
+                                <span class="bg-red-100 text-red-700 text-[10px] font-black px-1.5 py-0.5 rounded">DG ZONE</span>
+                             @endif
+                        </div>
+                        <div class="w-full bg-slate-100 rounded-full h-2 mb-1 overflow-hidden">
+                            <div class="bg-indigo-500 h-2 rounded-full" style="width: {{ min(100, ($zone->capacity_limit_m3 > 0 ? ($zone->current_utilization_m3 / $zone->capacity_limit_m3) * 100 : 0)) }}%"></div>
+                        </div>
+                        <div class="flex justify-between text-[10px] text-slate-400 font-medium">
+                            <span>{{ $zone->items->count() }} Items</span>
+                            <span>{{ $zone->current_utilization_m3 }} / {{ $zone->capacity_limit_m3 }} m³</span>
+                        </div>
                     </div>
-                    <div class="w-full bg-slate-100 rounded-full h-2 mb-1 overflow-hidden">
-                        <div class="bg-indigo-500 h-2 rounded-full" style="width: {{ min(100, ($zone->current_utilization_m3 / $zone->capacity_limit_m3) * 100) }}%"></div>
-                    </div>
-                    <div class="flex justify-between text-[10px] text-slate-400 font-medium">
-                        <span>{{ $zone->items->count() }} Items</span>
-                        <span>{{ $zone->current_utilization_m3 }} / {{ $zone->capacity_limit_m3 }} m³</span>
-                    </div>
+                    @endforeach
                 </div>
                 @endforeach
             </div>
-            @endforeach
+        </div>
+ 
+        <!-- Requests Tab (Agents Only) -->
+        <div x-show="sidebarTab === 'requests'" class="flex-1 overflow-y-auto p-4 space-y-4 bg-slate-50/50">
+            <h3 class="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-4">Pending Yard Allocation</h3>
+            @forelse($pendingRequests as $manifest)
+                <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm space-y-3">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <p class="text-[10px] font-black text-indigo-600 uppercase tracking-widest leading-none mb-1">{{ $manifest->reference_no }}</p>
+                            <p class="text-sm font-bold text-slate-900">{{ $manifest->vessel->name }}</p>
+                        </div>
+                        <span class="bg-amber-100 text-amber-700 px-2 py-0.5 rounded-[4px] text-[9px] font-black uppercase tracking-wider">Pending</span>
+                    </div>
+                    <div class="pt-3 border-t border-slate-100">
+                        <p class="text-[10px] text-slate-500 mb-2">Preferred: <span class="font-bold text-slate-700 uppercase">{{ str_replace('_', ' ', $manifest->preferred_zone_type) }}</span></p>
+                        <ul class="space-y-1">
+                            @foreach($manifest->items as $item)
+                                <li class="text-[11px] text-slate-600 flex items-center gap-2">
+                                    <span class="w-1.5 h-1.5 rounded-full bg-slate-300"></span>
+                                    {{ $item->description }}
+                                </li>
+                            @endforeach
+                        </ul>
+                    </div>
+                </div>
+            @empty
+                <div class="text-center py-10">
+                    <p class="text-xs text-slate-400 italic">No pending yard requests.</p>
+                </div>
+            @endforelse
+        </div>
+ 
+        <!-- Inventory Tab (Agents Only) -->
+        <div x-show="sidebarTab === 'inventory'" class="flex-1 overflow-y-auto p-4 space-y-4 bg-slate-50/50">
+             <h3 class="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-4">My Yard Inventory</h3>
+             @forelse($myInventory as $item)
+                <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm hover:border-indigo-300 transition-all cursor-pointer" onclick="focusZone({{ $item->warehouse_zone_id }})">
+                    <div class="flex justify-between items-start mb-2">
+                        <p class="font-bold text-slate-900 text-sm leading-tight">{{ $item->description }}</p>
+                        <span class="bg-indigo-50 text-indigo-700 px-2 py-0.5 rounded-[4px] text-[9px] font-black uppercase tracking-wider">Allocated</span>
+                    </div>
+                    <div class="flex flex-col gap-1">
+                        <div class="flex items-center gap-1.5">
+                            <svg class="w-3 h-3 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                            <span class="text-[11px] font-bold text-indigo-600">{{ $item->zone->name }}</span>
+                        </div>
+                        <div class="flex items-center gap-1.5">
+                            <svg class="w-3 h-3 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                            <span class="text-[10px] text-slate-500 font-mono">{{ $item->tracking_number }}</span>
+                        </div>
+                    </div>
+                </div>
+             @empty
+                <div class="text-center py-10">
+                    <p class="text-xs text-slate-400 italic">You have no items in the yard.</p>
+                </div>
+             @endforelse
         </div>
 
         <!-- Aging Alerts -->

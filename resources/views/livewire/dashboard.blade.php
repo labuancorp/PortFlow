@@ -114,6 +114,12 @@
                         </div>
                         <span class="font-bold text-indigo-900 text-sm">Berth Planner</span>
                     </a>
+                    <a href="{{ route('ops.mobile') }}" class="group bg-indigo-50 p-4 rounded-xl border border-indigo-100 hover:bg-indigo-100 transition-all flex items-center gap-3">
+                        <div class="p-2 bg-white rounded-lg text-indigo-600 shadow-sm group-hover:scale-110 transition-transform">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"></path></svg>
+                        </div>
+                        <span class="font-bold text-indigo-900 text-sm">Mobile Ops</span>
+                    </a>
                     <a href="{{ route('warehouse.map') }}" class="group bg-purple-50 p-4 rounded-xl border border-purple-100 hover:bg-purple-100 transition-all flex items-center gap-3">
                         <div class="p-2 bg-white rounded-lg text-purple-600 shadow-sm group-hover:scale-110 transition-transform">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path></svg>

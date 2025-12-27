@@ -5,6 +5,7 @@ namespace App\Livewire\Warehouse;
 use Livewire\Component;
 use App\Models\Warehouse;
 use App\Models\CargoItem;
+use App\Models\CargoManifest;
 
 class YardMap extends Component
 {
@@ -53,10 +54,33 @@ class YardMap extends Component
 
         $agingItems = $agingQuery->latest()->take(10)->get();
 
+        // Pending Requests for Agents
+        $pendingRequests = collect();
+        $myInventory = collect();
+        if ($user->role === 'agent') {
+            $pendingRequests = CargoManifest::where('agent_id', $user->organization_id)
+                ->where('yard_storage_requested', true)
+                ->where('status', '!=', 'completed')
+                ->whereHas('items', function($q) {
+                    $q->whereNull('warehouse_zone_id');
+                })
+                ->with(['items' => function($q) { $q->whereNull('warehouse_zone_id'); }])
+                ->get();
+
+            $myInventory = CargoItem::whereHas('manifest', function($q) use ($user) {
+                    $q->where('agent_id', $user->organization_id);
+                })
+                ->whereNotNull('warehouse_zone_id')
+                ->with(['zone', 'manifest'])
+                ->get();
+        }
+
         return view('livewire.warehouse.yard-map', [
             'subscribed' => true,
             'warehouses' => $warehouses,
             'agingItems' => $agingItems,
+            'pendingRequests' => $pendingRequests,
+            'myInventory' => $myInventory,
             'userOrgId' => $user->role === 'agent' ? $user->organization_id : null
         ]);
     }

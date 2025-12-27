@@ -17,6 +17,15 @@
                     </div>
                 @endif
                 <div class="h-8 w-px bg-slate-200 mx-2"></div>
+                
+                {{-- Dashboard Link (Outstanding) --}}
+                <a href="{{ route('dashboard') }}" class="group relative px-4 py-2 bg-gradient-to-r from-indigo-600 to-violet-600 rounded-xl font-bold text-white text-xs uppercase tracking-widest shadow-lg shadow-indigo-900/20 hover:scale-105 active:scale-95 transition-all flex items-center gap-2 overflow-hidden">
+                    <div class="absolute inset-0 bg-white/20 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700 skew-x-12"></div>
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path></svg>
+                    <span>Management Console</span>
+                </a>
+
+                <div class="h-8 w-px bg-slate-200 mx-2"></div>
                 <a href="{{ route('logout') }}" class="text-xs font-bold text-slate-500 hover:text-indigo-600 uppercase tracking-widest transition-colors flex items-center gap-1">
                     Sign Out <span aria-hidden="true">&rarr;</span>
                 </a>

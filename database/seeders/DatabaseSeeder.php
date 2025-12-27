@@ -51,7 +51,8 @@ class DatabaseSeeder extends Seeder
             [
                 'name' => 'Baram Shipyard Agents',
                 'type' => 'agent',
-                'billing_address' => 'Lot 123, Miri Port, Sarawak'
+                'billing_address' => 'Lot 123, Miri Port, Sarawak',
+                'warehouse_subscribed' => true
             ]
         );
 
@@ -142,11 +143,11 @@ class DatabaseSeeder extends Seeder
         $this->command->info('🚢 Creating Vessels...');
 
         $vessels = [
-            ['imo' => '9123456', 'name' => 'MV Nautica Gamble', 'client' => $client1, 'type' => 'OSV', 'loa' => 60.5, 'draft' => 5.2, 'flag' => 'Malaysia'],
+            ['imo' => '9123456', 'name' => 'MV Nautica Gamble', 'client' => $agent1, 'type' => 'OSV', 'loa' => 60.5, 'draft' => 5.2, 'flag' => 'Malaysia'],
             ['imo' => '9234567', 'name' => 'Barge Alpha One', 'client' => $client2, 'type' => 'Barge', 'loa' => 85.0, 'draft' => 4.5, 'flag' => 'Singapore'],
-            ['imo' => '9345678', 'name' => 'OSV Explorer', 'client' => $client1, 'type' => 'OSV', 'loa' => 55.0, 'draft' => 5.0, 'flag' => 'Malaysia'],
+            ['imo' => '9345678', 'name' => 'OSV Explorer', 'client' => $agent1, 'type' => 'OSV', 'loa' => 55.0, 'draft' => 5.0, 'flag' => 'Malaysia'],
             ['imo' => '9456789', 'name' => 'Pacific Carrier', 'client' => $client3, 'type' => 'Supply Vessel', 'loa' => 70.0, 'draft' => 6.0, 'flag' => 'Panama'],
-            ['imo' => '9567890', 'name' => 'Sea Dragon', 'client' => $client2, 'type' => 'OSV', 'loa' => 65.0, 'draft' => 5.5, 'flag' => 'Malaysia'],
+            ['imo' => '9567890', 'name' => 'Sea Dragon', 'client' => $agent1, 'type' => 'OSV', 'loa' => 65.0, 'draft' => 5.5, 'flag' => 'Malaysia'],
             ['imo' => '9678901', 'name' => 'Ocean Pioneer', 'client' => $client1, 'type' => 'Anchor Handling Tug', 'loa' => 75.0, 'draft' => 6.5, 'flag' => 'Singapore'],
         ];
 
@@ -342,48 +343,67 @@ class DatabaseSeeder extends Seeder
 
         $manifests = [
             [
-                'ref' => 'MF-2025-001',
-                'vessel' => $vesselModels['9123456'],
+                'ref' => 'MF-BARAM-001',
+                'vessel' => $vesselModels['9123456'], // MV Nautica Gamble
                 'agent' => $agent1,
                 'type' => 'inbound',
                 'status' => 'discharged',
                 'eta' => $today->copy()->subHours(2),
+                'yard_req' => true,
+                'zone_pref' => 'open_yard',
                 'items' => [
                     ['desc' => 'Drill Pipes (20x 6m)', 'weight' => 5000, 'volume' => 120, 'dg' => null, 'zone' => 'A2', 'status' => 'gated_in'],
                     ['desc' => 'Hydraulic Pumps (5 units)', 'weight' => 800, 'volume' => 15, 'dg' => null, 'zone' => 'B1', 'status' => 'gated_in'],
-                    ['desc' => 'Safety Equipment Crates', 'weight' => 300, 'volume' => 25, 'dg' => null, 'zone' => 'A1', 'status' => 'gated_in'],
                 ]
             ],
             [
-                'ref' => 'MF-2025-002',
+                'ref' => 'MF-BARAM-REQ',
+                'vessel' => $vesselModels['9345678'], // OSV Explorer
+                'agent' => $agent1,
+                'type' => 'inbound',
+                'status' => 'submitted',
+                'eta' => $today->copy()->addDays(2),
+                'yard_req' => true,
+                'zone_pref' => 'cold_store',
+                'items' => [
+                    ['desc' => 'Sensitive Electronics (Crated)', 'weight' => 1200, 'volume' => 45, 'dg' => null, 'zone' => null, 'status' => 'requested'],
+                ]
+            ],
+            [
+                'ref' => 'MF-OCEAN-001',
                 'vessel' => $vesselModels['9234567'],
-                'agent' => $agent2,
+                'agent' => $agent2, // Oceanic
                 'type' => 'inbound',
                 'status' => 'discharged',
                 'eta' => $today->copy()->subDays(1),
+                'yard_req' => true,
+                'zone_pref' => 'dg_zone',
                 'items' => [
                     ['desc' => 'Diesel Fuel Drums (Class 3 DG)', 'weight' => 2000, 'volume' => 80, 'dg' => '3', 'zone' => 'A3', 'status' => 'gated_in'],
-                    ['desc' => 'Lubricating Oil Barrels', 'weight' => 1200, 'volume' => 50, 'dg' => null, 'zone' => 'A1', 'status' => 'gated_in'],
                 ]
             ],
             [
-                'ref' => 'MF-2025-003',
-                'vessel' => $vesselModels['9345678'],
+                'ref' => 'MF-BARAM-DG',
+                'vessel' => $vesselModels['9567890'], // Sea Dragon
                 'agent' => $agent1,
-                'type' => 'outbound',
-                'status' => 'submitted',
-                'eta' => $today->copy()->addHours(8),
+                'type' => 'inbound',
+                'status' => 'discharged',
+                'eta' => $today->copy()->subDays(5),
+                'yard_req' => true,
+                'zone_pref' => 'dg_zone',
                 'items' => [
-                    ['desc' => 'Used Equipment Return', 'weight' => 1500, 'volume' => 60, 'dg' => null, 'zone' => 'A1', 'status' => 'at_wharf'],
+                    ['desc' => 'Explosive Bolts (Class 1)', 'weight' => 500, 'volume' => 10, 'dg' => '1.4', 'zone' => 'B2', 'status' => 'gated_in'],
                 ]
             ],
             [
                 'ref' => 'MF-2024-050',
-                'vessel' => $vesselModels['9567890'],
+                'vessel' => $vesselModels['9123456'],
                 'agent' => $agent1,
                 'type' => 'inbound',
                 'status' => 'discharged',
                 'eta' => $today->copy()->subDays(95), // OLD CARGO - triggers aging alert
+                'yard_req' => false,
+                'zone_pref' => null,
                 'items' => [
                     ['desc' => 'Abandoned Containers (Aging)', 'weight' => 3000, 'volume' => 150, 'dg' => null, 'zone' => 'A1', 'status' => 'gated_in'],
                 ]
@@ -398,7 +418,9 @@ class DatabaseSeeder extends Seeder
                     'agent_id' => $m['agent']->id,
                     'type' => $m['type'],
                     'status' => $m['status'],
-                    'eta_etd' => $m['eta']
+                    'eta_etd' => $m['eta'],
+                    'yard_storage_requested' => $m['yard_req'] ?? false,
+                    'preferred_zone_type' => $m['zone_pref'] ?? null,
                 ]
             );
 

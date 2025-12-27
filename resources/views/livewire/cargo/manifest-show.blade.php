@@ -133,6 +133,25 @@
                      <span class="text-xs font-bold text-indigo-600 uppercase">{{ $manifest->status }}</span>
                  </div>
             </div>
+ 
+            @if($manifest->yard_storage_requested)
+            <div class="bg-gradient-to-br from-amber-50 to-orange-50 border border-amber-100 rounded-2xl p-6 shadow-sm">
+                <div class="flex items-center gap-2 mb-4">
+                    <svg class="w-5 h-5 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path></svg>
+                    <h3 class="text-xs font-black text-amber-900 uppercase tracking-widest">Yard Storage Request</h3>
+                </div>
+                <div class="space-y-4">
+                    <div class="p-3 bg-white/50 rounded-xl border border-amber-200/50">
+                        <p class="text-[10px] font-black text-amber-600 uppercase tracking-widest mb-1">Preferred Zone</p>
+                        <p class="text-sm font-bold text-amber-900">{{ ucfirst(str_replace('_', ' ', $manifest->preferred_zone_type)) }}</p>
+                    </div>
+                    <div class="flex items-center justify-between px-1">
+                        <span class="text-xs text-amber-700/70 font-bold uppercase tracking-wide">Flow Status</span>
+                        <span class="text-xs font-black text-amber-600">{{ $manifest->status === 'approved' ? 'READY FOR ALLOCATION' : 'PENDING REVIEW' }}</span>
+                    </div>
+                </div>
+            </div>
+            @endif
         </div>
     </div>
 </div>

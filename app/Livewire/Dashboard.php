@@ -14,6 +14,7 @@ use Carbon\Carbon;
 class Dashboard extends Component
 {
     public $mode = 'admin'; // 'admin' or 'agent'
+    public $now;
     
     // Modal States
     public $showUnpaidModal = false;
@@ -29,6 +30,8 @@ class Dashboard extends Component
 
     public function mount()
     {
+        $this->now = Carbon::now();
+        $this->mode = auth()->user()->role === 'agent' ? 'agent' : 'admin';
         $this->initializeAlerts();
     }
 
@@ -103,14 +106,40 @@ class Dashboard extends Component
 
     public function render()
     {
-        $now = Carbon::now();
+        $this->now = Carbon::now();
         $user = auth()->user();
 
-        if ($user->role === 'agent') {
-            return $this->renderAgentDashboard($user, $now);
+        // Safe defaults to prevent "Undefined variable" errors
+        $viewData = [
+            'mode' => $this->mode,
+            'stats' => [
+                'alongside' => 0,
+                'expected_arrivals' => 0,
+                'occupancy_rate' => 0,
+                'completed_month' => 0,
+                'active_vessels' => 0,
+                'pending_requests' => 0,
+                'unpaid_invoices' => 0,
+            ],
+            'pendingBilling' => ['total_pending' => 0, 'count' => 0],
+            'unpaidInvoices' => ['total' => 0, 'count' => 0],
+            'activeServiceRequests' => 0,
+            'warehouseSummary' => ['total_items' => 0, 'total_charges' => 0],
+            'recentActivity' => collect(),
+            'topAgents' => collect(),
+            'pendingRequests' => collect(),
+            'activeBerths' => collect(),
+            'liveBilling' => ['total_charges' => 0, 'berthing_charges' => 0, 'warehouse_charges' => 0, 'berthing_vessels' => 0],
+            'now' => $this->now
+        ];
+
+        if ($this->mode === 'agent') {
+            $data = $this->renderAgentDashboard($user, $this->now);
+        } else {
+            $data = $this->renderAdminDashboard($this->now);
         }
 
-        return $this->renderAdminDashboard($now);
+        return view('livewire.dashboard', array_merge($viewData, $data));
     }
 
     private function renderAdminDashboard($now)
@@ -183,7 +212,7 @@ class Dashboard extends Component
             ->with('organization')
             ->get();
 
-        return view('livewire.dashboard', [
+        return [
             'mode' => 'admin',
             'stats' => [
                 'alongside' => $alongsideCount,
@@ -202,8 +231,7 @@ class Dashboard extends Component
             'topAgents' => $topAgents,
             'pendingRequests' => PortCall::where('status', 'requested')->with(['vessel', 'agent'])->get(),
             'activeBerths' => $activeBerths,
-            'now' => $now
-        ]);
+        ];
     }
 
     private function renderAgentDashboard($user, $now)
@@ -257,7 +285,7 @@ class Dashboard extends Component
             ->take(6)
             ->get();
 
-        return view('livewire.dashboard', [
+        return [
             'mode' => 'agent',
             'stats' => [
                 'active_vessels' => $activeVesselsCount,
@@ -266,7 +294,6 @@ class Dashboard extends Component
             ],
             'liveBilling' => $liveBilling,
             'recentActivity' => $recentActivity,
-            'now' => $now
-        ]);
+        ];
     }
 }

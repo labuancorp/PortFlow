@@ -51,6 +51,7 @@
                     <th class="px-6 py-4">Reference</th>
                     <th class="px-6 py-4">Vessel</th>
                     <th class="px-6 py-4">Type</th>
+                    <th class="px-6 py-4">Yard Storage</th>
                     <th class="px-6 py-4">ETA/ETD</th>
                     <th class="px-6 py-4">Items</th>
                     <th class="px-6 py-4">Status</th>
@@ -63,7 +64,7 @@
                     <td class="px-6 py-4 font-mono text-sm font-bold text-slate-700">{{ $manifest->reference_no }}</td>
                     <td class="px-6 py-4">
                         <div class="font-bold text-slate-900">{{ $manifest->vessel->name }}</div>
-                        <div class="text-xs text-slate-500">{{ $manifest->agent->name }}</div>
+                        <div class="text-xs text-slate-500">{{ optional($manifest->agent)->name }}</div>
                     </td>
                     <td class="px-6 py-4">
                         <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-bold uppercase tracking-wide {{ $manifest->type === 'inbound' ? 'bg-teal-50 text-teal-700 border border-teal-100' : 'bg-blue-50 text-blue-700 border border-blue-100' }}">
@@ -74,6 +75,16 @@
                             @endif
                             {{ $manifest->type }}
                         </span>
+                    </td>
+                    <td class="px-6 py-4">
+                        @if($manifest->yard_storage_requested)
+                            <div class="inline-flex flex-col">
+                                <span class="text-[10px] font-black uppercase text-amber-600 tracking-widest leading-none mb-1">Requested</span>
+                                <span class="bg-amber-50 text-amber-700 px-2 py-0.5 rounded text-[10px] font-bold border border-amber-100 w-max">{{ ucfirst(str_replace('_', ' ', $manifest->preferred_zone_type)) }}</span>
+                            </div>
+                        @else
+                            <span class="text-slate-300 text-xs">-</span>
+                        @endif
                     </td>
                     <td class="px-6 py-4 text-sm text-slate-600 font-medium">
                         {{ $manifest->eta_etd->format('d M Y H:i') }}
