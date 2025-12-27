@@ -25,6 +25,11 @@ class ManifestCreate extends Component
     {
         $this->reference_no = 'MNF-' . strtoupper(Str::random(8));
         $this->eta_etd = now()->format('Y-m-d\TH:i');
+        
+        if (auth()->user()->role === 'agent') {
+            $this->agent_id = auth()->user()->organization_id;
+        }
+
         // Start with one empty item
         $this->addItem();
     }
@@ -64,6 +69,11 @@ class ManifestCreate extends Component
     {
         $this->validate();
 
+        // Enforce Agent ID validation/override
+        if (auth()->user()->role === 'agent') {
+            $this->agent_id = auth()->user()->organization_id;
+        }
+
         $manifest = CargoManifest::create([
             'vessel_id' => $this->vessel_id,
             'agent_id' => $this->agent_id,
@@ -91,9 +101,17 @@ class ManifestCreate extends Component
 
     public function render()
     {
+        if (auth()->user()->role === 'agent') {
+            $vessels = Vessel::where('organization_id', auth()->user()->organization_id)->orderBy('name')->get();
+            $agents = Organization::where('id', auth()->user()->organization_id)->get();
+        } else {
+            $vessels = Vessel::orderBy('name')->get();
+            $agents = Organization::where('type', 'agent')->orderBy('name')->get();
+        }
+
         return view('livewire.cargo.manifest-create', [
-            'vessels' => Vessel::orderBy('name')->get(),
-            'agents' => Organization::where('type', 'agent')->orderBy('name')->get(),
+            'vessels' => $vessels,
+            'agents' => $agents,
         ]);
     }
 }

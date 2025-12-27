@@ -47,7 +47,55 @@ class Dashboard extends Component
     public function render()
     {
         $now = Carbon::now();
+        $user = auth()->user();
 
+        if ($user->role === 'agent') {
+            return $this->renderAgentDashboard($user, $now);
+        }
+
+        return $this->renderAdminDashboard($now);
+    }
+
+    private function renderAgentDashboard($user, $now)
+    {
+        $orgId = $user->organization_id;
+
+        // KPI: My Active Vessels
+        $myActiveVessels = PortCall::where('agent_id', $orgId)
+            ->whereIn('status', ['anchored', 'alongside'])
+            ->count();
+        
+        // KPI: Pending Requests
+        $myPendingRequests = PortCall::where('agent_id', $orgId)
+            ->where('status', 'requested')
+            ->count();
+
+        // KPI: Invoices Due
+        $unpaidInvoices = \App\Models\Invoice::where('organization_id', $orgId)
+            ->where('status', '!=', 'paid')
+            ->count();
+
+        // Recent Activity filter
+        $recentActivity = PortCall::where('agent_id', $orgId)
+            ->with(['vessel', 'berth'])
+            ->orderBy('updated_at', 'desc')
+            ->take(5)
+            ->get();
+
+        return view('livewire.dashboard', [
+            'mode' => 'agent',
+            'stats' => [
+                'active_vessels' => $myActiveVessels,
+                'pending_requests' => $myPendingRequests,
+                'unpaid_invoices' => $unpaidInvoices,
+            ],
+            'recentActivity' => $recentActivity,
+            'now' => $now
+        ]);
+    }
+
+    private function renderAdminDashboard($now)
+    {
         // KPI: Vessels Alongside
         $alongsideCount = PortCall::where('status', 'alongside')->count();
 
@@ -85,6 +133,7 @@ class Dashboard extends Component
         $iotReadings = \App\Models\IotSensor::where('status', 'active')->get();
 
         return view('livewire.dashboard', [
+            'mode' => 'admin',
             'alongsideCount' => $alongsideCount,
             'expectedArrivals' => $expectedArrivals,
             'occupancyRate' => $occupancyRate,

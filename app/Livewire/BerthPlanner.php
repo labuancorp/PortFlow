@@ -178,25 +178,19 @@ class BerthPlanner extends Component
         
         // Fetch all berths with port calls that overlap with the window (Cached)
         // Fetch all berths with port calls that overlap with the window (Cached)
-        // Unique Cache Key per User Role/Org to support private views AND Versioning
+        // Fetch all berths with port calls that overlap with the window (Cached)
+        // Shared Cache Key (Versioning enabled)
         $version = $this->getScheduleVersion();
-        $roleKey = auth()->user()->role === 'agent' ? 'agent_'.auth()->user()->organization_id : 'admin';
-        $cacheKey = "berth_schedule_v{$version}_{$this->viewMode}_{$start->format('Y-m-d')}_{$end->format('Y-m-d')}_{$roleKey}";
+        $cacheKey = "berth_schedule_v{$version}_{$this->viewMode}_{$start->format('Y-m-d')}_{$end->format('Y-m-d')}";
         
         $berths = \Illuminate\Support\Facades\Cache::remember($cacheKey, 60, function() use ($start, $end) {
             return Berth::with(['portCalls' => function($query) use ($start, $end) {
                 $query->where(function($q) use ($start, $end) {
                     $q->where('eta', '<', $end)
                       ->where('etd', '>', $start);
-                });
-
-                // Privacy Filter: If Agent, only show their own bookings
-                if (auth()->user()->role === 'agent') {
-                    $query->where('agent_id', auth()->user()->organization_id);
-                }
-
-                $query->with(['vessel', 'agent'])
-                      ->orderBy('eta');
+                })
+                ->with(['vessel', 'agent'])
+                ->orderBy('eta');
             }])->get();
         });
 

@@ -12,6 +12,11 @@ class ManifestShow extends Component
 
     public function mount(CargoManifest $manifest)
     {
+        // Security Check
+        if (auth()->user()->role === 'agent' && $manifest->agent_id !== auth()->user()->organization_id) {
+            abort(403, 'Unauthorized access.');
+        }
+
         $this->manifest = $manifest->load(['items', 'vessel', 'agent']);
     }
 

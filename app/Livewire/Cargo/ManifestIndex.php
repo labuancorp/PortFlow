@@ -20,7 +20,17 @@ class ManifestIndex extends Component
     public function delete($id)
     {
         $manifest = CargoManifest::find($id);
-        if ($manifest && $manifest->status === 'draft') {
+
+        if (!$manifest) {
+            return;
+        }
+
+        // Security Check for Agents
+        if (auth()->user()->role === 'agent' && $manifest->agent_id !== auth()->user()->organization_id) {
+            abort(403, 'Unauthorized action.');
+        }
+
+        if ($manifest->status === 'draft') {
             $manifest->delete();
             $this->dispatch('notify', message: 'Manifest deleted successfully.');
         } else {
@@ -30,9 +40,15 @@ class ManifestIndex extends Component
 
     public function render()
     {
-        $manifests = CargoManifest::with(['vessel', 'agent'])
-            ->withCount('items')
-            ->when($this->search, function ($q) {
+        $query = CargoManifest::with(['vessel', 'agent'])
+            ->withCount('items');
+
+        // Filter for Agents
+        if (auth()->user()->role === 'agent') {
+            $query->where('agent_id', auth()->user()->organization_id);
+        }
+
+        $manifests = $query->when($this->search, function ($q) {
                 $q->where('reference_no', 'like', '%'.$this->search.'%')
                   ->orWhereHas('vessel', fn($v) => $v->where('name', 'like', '%'.$this->search.'%'));
             })
