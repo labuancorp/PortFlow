@@ -86,7 +86,9 @@ class Terminal extends Component
 
     public function render()
     {
-        $portCalls = PortCall::whereIn('status', ['alongside', 'anchored'])->get();
+        $portCalls = PortCall::whereIn('status', ['alongside', 'anchored'])
+            ->with('vessel')
+            ->get();
         
         $transfers = [];
         if ($this->selectedPortCallId) {

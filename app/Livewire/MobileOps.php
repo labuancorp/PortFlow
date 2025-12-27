@@ -34,7 +34,7 @@ class MobileOps extends Component
     // Actions triggering state changes
     public function updateStatus($id, $status)
     {
-        $booking = PortCall::find($id);
+        $booking = PortCall::with(['vessel', 'berth', 'invoice'])->find($id);
         if (!$booking) return;
 
         $updates = ['status' => $status];

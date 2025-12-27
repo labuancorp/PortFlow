@@ -64,7 +64,7 @@ class YardMap extends Component
                 ->whereHas('items', function($q) {
                     $q->whereNull('warehouse_zone_id');
                 })
-                ->with(['items' => function($q) { $q->whereNull('warehouse_zone_id'); }])
+                ->with(['vessel', 'items' => function($q) { $q->whereNull('warehouse_zone_id'); }])
                 ->get();
 
             $myInventory = CargoItem::whereHas('manifest', function($q) use ($user) {

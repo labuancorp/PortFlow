@@ -172,7 +172,7 @@ class Dashboard extends Component
         ];
 
         // Calculate berthing charges for all active vessels
-        $activePortCalls = PortCall::whereIn('status', ['anchored', 'alongside'])->with('berth')->get();
+        $activePortCalls = PortCall::whereIn('status', ['anchored', 'alongside'])->with(['berth', 'vessel'])->get();
         foreach ($activePortCalls as $portCall) {
             if ($portCall->berth && $portCall->eta) {
                 $daysAlongside = max(1, now()->diffInDays($portCall->eta));
@@ -266,7 +266,7 @@ class Dashboard extends Component
 
         $myActiveVessels = PortCall::where('agent_id', $orgId)
             ->whereIn('status', ['anchored', 'alongside'])
-            ->with('berth')
+            ->with(['berth', 'vessel'])
             ->get();
 
         foreach ($myActiveVessels as $vessel) {

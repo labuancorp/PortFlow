@@ -25,6 +25,7 @@ class BillingService
      */
     public function generateInvoice(PortCall $portCall)
     {
+        $portCall->loadMissing(['vessel', 'invoice', 'serviceRequests.portCall']);
         // 1. Ensure Invoice Exists
         $invoice = $portCall->invoice ?? Invoice::create([
             'port_call_id' => $portCall->id,
