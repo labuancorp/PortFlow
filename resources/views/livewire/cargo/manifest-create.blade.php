@@ -96,13 +96,19 @@
                         </div>
                         <div class="col-span-6 md:col-span-2">
                              <label class="block text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-1">DG Class</label>
-                             <select wire:model="items.{{ $index }}.dg_class" class="w-full p-2 text-sm border-slate-200 rounded-lg focus:ring-indigo-500 focus:border-indigo-500">
+                             <select wire:model.live="items.{{ $index }}.dg_class" class="w-full p-2 text-sm border-slate-200 rounded-lg focus:ring-indigo-500 focus:border-indigo-500">
                                  <option value="">None (General)</option>
                                  <option value="1">Class 1 (Explosives)</option>
                                  <option value="2">Class 2 (Gases)</option>
                                  <option value="3">Class 3 (Flammable Liquids)</option>
                                  <option value="8">Class 8 (Corrosives)</option>
                              </select>
+                             @if($item['dg_class'])
+                                <div class="mt-1 flex items-center gap-1 text-[10px] uppercase font-black text-red-600 animate-pulse">
+                                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+                                    Safety Permit Req.
+                                </div>
+                             @endif
                         </div>
                         <div class="col-span-12 md:col-span-1 flex items-center justify-end h-full pt-4">
                             @if(count($items) > 1)

@@ -1,99 +1,149 @@
-<div class="p-8 h-full flex flex-col">
-    <div class="flex justify-between items-center mb-8">
-        <div>
-            <h1 class="text-3xl font-black text-slate-900 tracking-tight">Yard Density Map</h1>
-            <p class="text-slate-500 mt-1">Real-time warehouse utilization and aging cargo visualization.</p>
-        </div>
-        <div class="flex items-center gap-4 text-sm font-bold text-slate-500">
-            <div class="flex items-center gap-2">
-                <div class="w-3 h-3 rounded-full bg-emerald-400"></div> < 50%
-            </div>
-            <div class="flex items-center gap-2">
-                <div class="w-3 h-3 rounded-full bg-amber-400"></div> 50-80%
-            </div>
-             <div class="flex items-center gap-2">
-                <div class="w-3 h-3 rounded-full bg-red-500"></div> > 80% (Critical)
-            </div>
-        </div>
-    </div>
+<div>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 
-    <div class="flex-1 grid grid-cols-3 gap-8 min-h-0">
-        <!-- Map Visualization -->
-        <div class="col-span-2 space-y-8 overflow-y-auto pr-2 pb-8">
-            @foreach($warehouses as $warehouse)
-            <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6">
-                <div class="flex items-center justify-between mb-6">
-                    <div>
-                        <h2 class="text-lg font-bold text-slate-800">{{ $warehouse->name }}</h2>
-                        <span class="text-xs uppercase tracking-wide text-slate-400 font-bold border border-slate-200 px-2 py-1 rounded-md">{{ $warehouse->type }}</span>
-                    </div>
-                    <div class="text-right">
-                        <div class="text-2xl font-black text-slate-900">{{ number_format($warehouse->total_capacity_m3) }} <span class="text-sm text-slate-400 font-medium">M³</span></div>
-                        <div class="text-xs text-slate-400 uppercase font-bold">Total Capacity</div>
-                    </div>
+    <div class="h-[calc(100vh-64px)] flex flex-col md:flex-row font-sans">
+        
+        <!-- Sidebar -->
+        <div class="w-full md:w-80 bg-white border-r border-slate-200 flex flex-col z-20 shadow-xl overflow-hidden md:h-full">
+            <div class="p-6 border-b border-slate-100">
+                <h1 class="text-xl font-black text-slate-900 tracking-tight">Port Yard Map</h1>
+                <p class="text-xs text-slate-500 font-bold uppercase tracking-widest mt-1">Real-time Cargo Tracking</p>
+            </div>
+
+            <!-- Stats -->
+            <div class="grid grid-cols-2 divide-x divide-slate-100 border-b border-slate-100 bg-slate-50">
+                <div class="p-4 text-center">
+                    <div class="text-2xl font-black text-indigo-600">{{ $warehouses->sum(fn($w) => $w->zones->sum('current_utilization_m3')) }}</div>
+                    <div class="text-[10px] uppercase font-bold text-slate-400">Total Volume (m³)</div>
                 </div>
+                 <div class="p-4 text-center">
+                    <div class="text-2xl font-black text-amber-500">{{ $warehouses->sum(fn($w) => $w->zones->sum(fn($z) => $z->items->where('dg_class', '!=', null)->count())) }}</div>
+                    <div class="text-[10px] uppercase font-bold text-slate-400">DG Containers</div>
+                </div>
+            </div>
 
-                <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <!-- Zone List -->
+            <div class="flex-1 overflow-y-auto p-4 space-y-4">
+                @foreach($warehouses as $warehouse)
+                <div class="space-y-2">
+                    <h3 class="text-xs font-bold text-slate-900 uppercase tracking-wider bg-slate-100 px-2 py-1 rounded">{{ $warehouse->name }}</h3>
                     @foreach($warehouse->zones as $zone)
-                        @php
-                            $util = $zone->utilization_percentage;
-                            $color = $util > 80 ? 'bg-red-500' : ($util > 50 ? 'bg-amber-400' : 'bg-emerald-400');
-                            $textColor = $util > 80 ? 'text-white' : 'text-slate-900';
-                            $subTextColor = $util > 80 ? 'text-red-100' : 'text-slate-600';
-                        @endphp
-                        <div class="relative group cursor-pointer hover:scale-[1.02] transition-transform">
-                            <div class="h-32 rounded-xl {{ $color }} p-4 flex flex-col justify-between shadow-lg shadow-slate-200">
-                                <div class="flex justify-between items-start">
-                                    <span class="font-bold {{ $textColor }} text-sm">{{ $zone->code }}</span>
-                                    @if($zone->is_dg_allowed)
-                                        <span class="bg-red-900/20 text-white px-1.5 py-0.5 rounded text-[10px] font-bold border border-white/20">DG</span>
-                                    @endif
-                                </div>
-                                <div>
-                                    <div class="text-2xl font-black {{ $textColor }}">{{ round($util) }}%</div>
-                                    <div class="text-[10px] font-bold uppercase {{ $subTextColor }}">
-                                        {{ number_format($zone->utilization) }} / {{ number_format($zone->capacity_limit_m3) }} M³
-                                    </div>
-                                </div>
-                            </div>
+                    <div class="group p-3 rounded-lg border border-slate-200 hover:border-indigo-400 hover:shadow-md transition-all cursor-pointer bg-white"
+                         onclick="focusZone({{ $zone->id }})"> 
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="font-bold text-sm text-slate-700">{{ $zone->name }}</span>
+                             @if($zone->is_dg_allowed)
+                                <span class="bg-red-100 text-red-700 text-[10px] font-black px-1.5 py-0.5 rounded">DG ZONE</span>
+                             @endif
                         </div>
+                        <div class="w-full bg-slate-100 rounded-full h-2 mb-1 overflow-hidden">
+                            <div class="bg-indigo-500 h-2 rounded-full" style="width: {{ min(100, ($zone->current_utilization_m3 / $zone->capacity_limit_m3) * 100) }}%"></div>
+                        </div>
+                        <div class="flex justify-between text-[10px] text-slate-400 font-medium">
+                            <span>{{ $zone->items->count() }} Items</span>
+                            <span>{{ $zone->current_utilization_m3 }} / {{ $zone->capacity_limit_m3 }} m³</span>
+                        </div>
+                    </div>
                     @endforeach
                 </div>
+                @endforeach
             </div>
-            @endforeach
+
+            <!-- Aging Alerts -->
+            <div class="bg-red-50 p-4 border-t border-red-100">
+                <h4 class="text-xs font-bold text-red-700 uppercase tracking-widest mb-3 flex items-center">
+                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+                    Aging Cargo (>90 Days)
+                </h4>
+                <div class="space-y-2 max-h-40 overflow-y-auto">
+                    @foreach($agingItems as $item)
+                    <div class="flex justify-between items-center text-xs bg-white p-2 rounded border border-red-100 shadow-sm">
+                        <span class="font-bold text-slate-700">{{ $item->tracking_number }}</span>
+                        <span class="text-red-500 font-mono">{{ $item->created_at->diffInDays() }} days</span>
+                    </div>
+                    @endforeach
+                     @if($agingItems->isEmpty())
+                        <p class="text-xs text-slate-400 italic">No aging cargo.</p>
+                    @endif
+                </div>
+            </div>
         </div>
 
-        <!-- Aging Reports Sidebar -->
-        <div class="bg-slate-50 border-l border-slate-200 -my-8 p-8 overflow-y-auto">
-            <h3 class="font-black text-xl text-slate-800 mb-6 flex items-center gap-2">
-                <svg class="w-6 h-6 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                Aging Cargo (>90 Days)
-            </h3>
-            
-            <div class="space-y-4">
-                @forelse($agingItems as $item)
-                <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200">
-                    <div class="flex justify-between items-start mb-2">
-                        <span class="bg-red-100 text-red-600 text-[10px] font-bold px-2 py-1 rounded uppercase tracking-wide">
-                            {{ $item->created_at->diffInDays() }} Days
-                        </span>
-                        <a href="{{ route('cargo.manifests.show', $item->cargo_manifest_id) }}" class="text-indigo-600 hover:underline text-xs font-bold">View</a>
-                    </div>
-                    <h4 class="font-bold text-slate-800 text-sm leading-tight mb-1">{{ $item->description }}</h4>
-                    <p class="text-xs font-mono text-slate-400 mb-2">{{ $item->tracking_number }}</p>
-                    
-                    <div class="flex items-center gap-2 text-xs text-slate-500 pt-2 border-t border-slate-50">
-                        <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
-                        <span>{{ $item->zone->code ?? 'Unassigned' }}</span>
-                    </div>
-                </div>
-                @empty
-                <div class="text-center py-8 text-slate-400">
-                    <svg class="w-12 h-12 mx-auto mb-2 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                    <p class="text-sm font-medium">No aging cargo found.</p>
-                </div>
-                @endforelse
-            </div>
-        </div>
+        <!-- Map Container -->
+        <div id="yard-map" class="flex-1 bg-slate-200 h-[50vh] md:h-full z-10 w-full"></div>
     </div>
+
+    @script
+    <script>
+        // Use Livewire's script mechanism or just vanilla JS inside
+        Livewire.hook('commit', ({ component, commit, respond, succeed, fail }) => {
+             // Re-init map if needed on updates
+        });
+        
+        document.addEventListener('livewire:initialized', () => {
+             // Initialize Map
+            const map = L.map('yard-map').setView([5.2630, 115.2430], 17);
+
+            L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
+                subdomains: 'abcd',
+                maxZoom: 20
+            }).addTo(map);
+
+            const zones = {
+                'A1': { coords: [[5.2635, 115.2425], [5.2635, 115.2435], [5.2625, 115.2435], [5.2625, 115.2425]], color: '#6366f1' },
+                'A2': { coords: [[5.2635, 115.2436], [5.2635, 115.2446], [5.2625, 115.2446], [5.2625, 115.2436]], color: '#6366f1' },
+                'A3': { coords: [[5.2620, 115.2425], [5.2620, 115.2446], [5.2615, 115.2446], [5.2615, 115.2425]], color: '#ef4444' },
+                'B1': { coords: [[5.2640, 115.2425], [5.2645, 115.2425], [5.2645, 115.2440], [5.2640, 115.2440]], color: '#10b981' },
+                'B2': { coords: [[5.2640, 115.2441], [5.2645, 115.2441], [5.2645, 115.2450], [5.2640, 115.2450]], color: '#ef4444' },
+            };
+
+            @foreach($warehouses as $w)
+                @foreach($w->zones as $z)
+                    if(zones['{{ $z->code }}']) {
+                        const poly = L.polygon(zones['{{ $z->code }}'].coords, {
+                            color: zones['{{ $z->code }}'].color,
+                            fillColor: zones['{{ $z->code }}'].color,
+                            fillOpacity: 0.2,
+                            weight: 2
+                        }).addTo(map);
+
+                        poly.bindTooltip(`<b>{{ $z->name }}</b><br>Util: {{ $z->current_utilization_m3 }}m³`, { permanent: true, direction: "center", className: "bg-white/80 border-0 text-xs font-bold shadow-sm" });
+                        
+                        @foreach($z->items as $item)
+                            const bounds = poly.getBounds();
+                            const center = bounds.getCenter();
+                            const latJitter = (Math.random() - 0.5) * 0.0008;
+                            const lngJitter = (Math.random() - 0.5) * 0.0008;
+                            
+                            const markerColor = '{{ $item->dg_class ? "red" : "blue" }}';
+                            
+                            L.circleMarker([center.lat + latJitter, center.lng + lngJitter], {
+                                radius: 4,
+                                fillColor: markerColor,
+                                color: "#fff",
+                                weight: 1,
+                                opacity: 1,
+                                fillOpacity: 0.8
+                            }).addTo(map).bindPopup(`
+                                <div class="text-xs">
+                                    <strong class="block mb-1">{{ $item->tracking_number }}</strong>
+                                    <span class="text-slate-500">{{ $item->description }}</span>
+                                    <div class="mt-1">
+                                        ${ '{{ $item->dg_class }}' ? '<span class="bg-red-100 text-red-700 px-1 rounded font-bold">Class {{ $item->dg_class }}</span>' : '<span class="bg-slate-100 text-slate-600 px-1 rounded">General</span>' }
+                                    </div>
+                                </div>
+                            `);
+                        @endforeach
+                    }
+                @endforeach
+            @endforeach
+
+            window.focusZone = function(zoneId) {
+                // map.flyTo([5.2630, 115.2430], 18);
+            }
+        });
+    </script>
+    @endscript
 </div>
