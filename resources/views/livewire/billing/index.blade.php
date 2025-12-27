@@ -167,7 +167,7 @@
                                 <button wire:click="markAsPaid({{ $inv->id }})" class="text-green-600 hover:text-green-900 text-[10px] uppercase tracking-wide font-bold">Mark Paid</button>
                                 <span class="text-slate-300">|</span>
                                 @endif
-                                <button class="text-teal-600 hover:text-teal-900 font-semibold">View</button>
+                                <button wire:click="viewInvoice({{ $inv->id }})" class="text-teal-600 hover:text-teal-900 font-semibold cursor-pointer">View</button>
                             </td>
                         </tr>
                         @empty
@@ -187,4 +187,75 @@
             </div>
         @endif
     </div>
+
+    <!-- Invoice Details Modal -->
+    @if($viewingInvoice)
+    <div class="fixed inset-0 z-50 flex items-center justify-center p-4">
+        <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm transition-opacity" wire:click="closeInvoiceModal"></div>
+        <div class="relative bg-white w-full max-w-2xl rounded-2xl shadow-2xl border border-slate-200 overflow-hidden transform transition-all h-[80vh] flex flex-col">
+            <!-- Header -->
+            <div class="p-6 border-b border-slate-100 flex justify-between items-start bg-slate-50">
+                <div>
+                    <h2 class="text-xl font-bold text-slate-900">Invoice {{ $viewingInvoice->invoice_no }}</h2>
+                    <p class="text-sm text-slate-500">Issued: {{ $viewingInvoice->created_at->format('d M Y') }}</p>
+                </div>
+                <button wire:click="closeInvoiceModal" class="text-slate-400 hover:text-slate-600">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            </div>
+
+            <!-- Scrollable Content -->
+            <div class="flex-1 overflow-y-auto p-8">
+                <!-- Info Grid -->
+                <div class="grid grid-cols-2 gap-8 mb-8">
+                    <div>
+                        <h4 class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">Bill To</h4>
+                        <p class="font-bold text-slate-900 text-lg">{{ $viewingInvoice->organization->name ?? 'Unknown Agent' }}</p>
+                        <p class="text-sm text-slate-500">{{ $viewingInvoice->organization->address ?? 'Labuan Port Complex' }}</p>
+                    </div>
+                    <div class="text-right">
+                        <h4 class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">Vessel Ref</h4>
+                        <p class="font-bold text-slate-900 text-lg">{{ $viewingInvoice->portCall->vessel->name ?? 'N/A' }}</p>
+                        <p class="text-sm text-slate-500">{{ $viewingInvoice->portCall->vessel->vessel_type ?? '' }}</p>
+                    </div>
+                </div>
+
+                <!-- Line Items Table -->
+                <table class="w-full mb-8">
+                    <thead>
+                        <tr class="border-b-2 border-slate-100">
+                            <th class="text-left py-3 text-xs font-bold text-slate-500 uppercase tracking-wider">Description</th>
+                            <th class="text-center py-3 text-xs font-bold text-slate-500 uppercase tracking-wider">Qty</th>
+                            <th class="text-right py-3 text-xs font-bold text-slate-500 uppercase tracking-wider">Amount (RM)</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-50">
+                        @foreach($viewingInvoice->invoiceItems as $item)
+                        <tr>
+                            <td class="py-4 text-sm text-slate-700 font-medium">{{ $item->description }}</td>
+                            <td class="py-4 text-center text-sm text-slate-500">{{ $item->quantity }}</td>
+                            <td class="py-4 text-right text-sm font-bold text-slate-900">{{ number_format($item->total_price, 2) }}</td>
+                        </tr>
+                        @endforeach
+                    </tbody>
+                    <tfoot>
+                        <tr class="border-t-2 border-slate-900">
+                            <td colspan="2" class="pt-4 text-right text-sm font-bold text-slate-600 uppercase tracking-wider">Total Payable</td>
+                            <td class="pt-4 text-right text-2xl font-black text-slate-900">RM {{ number_format($viewingInvoice->total_amount, 2) }}</td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+            
+            <!-- Footer -->
+            <div class="p-6 border-t border-slate-100 bg-slate-50 flex justify-end gap-3">
+                 <button wire:click="closeInvoiceModal" class="px-4 py-2 bg-white border border-slate-200 rounded-lg text-slate-600 font-bold text-sm hover:bg-slate-50">Close</button>
+                 <a href="{{ route('invoice.print', $viewingInvoice->id) }}" target="_blank" class="px-4 py-2 bg-indigo-600 text-white rounded-lg font-bold text-sm hover:bg-indigo-500 shadow-lg shadow-indigo-900/20 flex items-center gap-2 decoration-0">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg>
+                    Print / Save PDF
+                 </a>
+            </div>
+        </div>
+    </div>
+    @endif
 </div>

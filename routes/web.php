@@ -38,7 +38,12 @@ Route::middleware(['auth', '2fa'])->group(function () {
         Route::get('/wharfs', App\Livewire\Wharfs\Index::class)->name('wharfs.index');
         Route::get('/admin/health', App\Livewire\Admin\SystemHealth::class)->name('admin.health');
         Route::get('/admin/audit', App\Livewire\Admin\AuditTrail::class)->name('admin.audit');
-    });
+        // Print Route (No Composer dependency for speed)
+    Route::get('/invoice/{invoice}/print', function (App\Models\Invoice $invoice) {
+        $invoice->load(['organization', 'portCall.vessel', 'invoiceItems']);
+        return view('pdf.invoice', ['invoice' => $invoice]);
+    })->name('invoice.print');
+});
 });
 
 // Auth Routes

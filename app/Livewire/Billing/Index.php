@@ -15,10 +15,21 @@ class Index extends Component
     use WithPagination;
 
     public $activeTab = 'unbilled'; // unbilled, invoices
+    public $viewingInvoice = null;
 
     // Pricing Config (Mock)
     private $rate_dockage_per_meter_hour = 2.50; // RM 2.50 per meter per hour
     private $rate_wharfage_fixed = 500.00;
+
+    public function viewInvoice($id)
+    {
+        $this->viewingInvoice = Invoice::with(['invoiceItems', 'organization', 'portCall.vessel'])->find($id);
+    }
+
+    public function closeInvoiceModal()
+    {
+        $this->viewingInvoice = null;
+    }
 
     public function render()
     {
