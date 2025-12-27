@@ -52,6 +52,7 @@ Route::middleware(['auth', '2fa'])->group(function () {
 Route::middleware('throttle:6,1')->group(function () {
     Route::get('/login', App\Livewire\Auth\Login::class)->name('login');
     Route::get('/register', App\Livewire\Auth\Register::class)->name('register');
+    Route::get('/forgot-password', App\Livewire\Auth\ForgotPassword::class)->name('password.request');
 });
 
 Route::get('/2fa/verify', App\Livewire\Auth\TwoFactorChallenge::class)->name('2fa.verify')->middleware(['auth', 'throttle:10,1']);

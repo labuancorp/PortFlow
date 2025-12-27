@@ -40,7 +40,7 @@
                     <div>
                         <div class="flex justify-between items-center mb-2 px-1">
                             <label for="password" class="block text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">Secret Credential</label>
-                            <a href="#" class="text-[10px] font-black text-indigo-400 hover:text-indigo-300 uppercase tracking-widest transition-colors">Forgot Access?</a>
+                            <a href="{{ route('password.request') }}" class="text-[10px] font-black text-indigo-400 hover:text-indigo-300 uppercase tracking-widest transition-colors">Forgot Access?</a>
                         </div>
                         <div class="relative group">
                             <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-500 group-focus-within:text-indigo-400 transition-colors">
