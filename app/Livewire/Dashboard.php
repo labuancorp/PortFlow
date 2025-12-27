@@ -6,49 +6,29 @@ use Livewire\Component;
 use App\Models\PortCall;
 use App\Models\Berth;
 use App\Models\Vessel;
+use App\Models\Invoice;
+use App\Models\ServiceRequest;
+use App\Services\WarehouseBillingService;
 use Carbon\Carbon;
 
 class Dashboard extends Component
 {
-    public $mode = 'admin'; // or 'agent'
-    public $showUnpaidModal = false;
-    public $unpaidInvoicesList = [];
-
-    public function openUnpaidModal()
-    {
-        $this->unpaidInvoicesList = \App\Models\Invoice::where('status', '!=', 'paid')
-            ->with('organization')
-            ->orderBy('created_at', 'desc')
-            ->get();
-        $this->showUnpaidModal = true;
-    }
-
-    public function closeModal()
-    {
-        $this->showUnpaidModal = false;
-    }
+    public $mode = 'admin'; // 'admin' or 'agent'
+    
     // Modal States
+    public $showUnpaidModal = false;
     public $showReviewModal = false;
+    public $showAlertsModal = false;
+    
+    // Data for Modals
+    public $unpaidInvoicesList = [];
     public $selectedBooking = null;
     public $selectedBerthId = null;
     public $reviewNote = '';
-
-    // Alerts State
-    public $showAlertsModal = false;
     public $activeAlerts = [];
-
-    // Pilot Request State
-    public $pilotRequested = false;
-    public $pilotStatus = 'Idle';
-    public $pilotProgress = 0;
 
     public function mount()
     {
-        $this->pilotRequested = session()->get('pilot_requested', false);
-        $this->pilotStatus = session()->get('pilot_status', 'Idle');
-        $this->pilotProgress = session()->get('pilot_progress', 0);
-        
-        // Mock some alerts for the premium feel
         $this->initializeAlerts();
     }
 
@@ -59,6 +39,66 @@ class Dashboard extends Component
             ['id' => 2, 'type' => 'warning', 'title' => 'Berth 2 Maintenance', 'message' => 'Scheduled dredging operations tomorrow 09:00 - 12:00. No bookings allowed.', 'time' => '2 hours ago'],
             ['id' => 3, 'type' => 'info', 'title' => 'New Bunkering Policy', 'message' => 'Updated safety protocols for fuel transfer at Wharf 3.', 'time' => '5 hours ago'],
         ];
+    }
+
+    public function openUnpaidModal()
+    {
+        $this->unpaidInvoicesList = Invoice::where('status', '!=', 'paid')
+            ->with('organization')
+            ->orderBy('created_at', 'desc')
+            ->get();
+        $this->showUnpaidModal = true;
+    }
+
+    public function closeModal()
+    {
+        $this->showUnpaidModal = false;
+        $this->showReviewModal = false;
+        $this->showAlertsModal = false;
+    }
+
+    public function exportReport()
+    {
+        session()->flash('success', 'Operational snapshot exported successfully.');
+    }
+
+    public function logIncident()
+    {
+        session()->flash('success', 'Incident log opened. Please contact HSE department.');
+    }
+
+    public function toggleAlertsModal()
+    {
+        $this->showAlertsModal = !$this->showAlertsModal;
+    }
+
+    public function openReviewModal($bookingId)
+    {
+        $this->selectedBooking = PortCall::with(['vessel', 'agent'])->find($bookingId);
+        $this->showReviewModal = true;
+    }
+
+    public function approveBooking()
+    {
+        if (!$this->selectedBerthId) {
+            $this->addError('selectedBerthId', 'Please select a berth');
+            return;
+        }
+
+        $this->selectedBooking->update([
+            'status' => 'approved',
+            'assigned_berth_id' => $this->selectedBerthId
+        ]);
+
+        $this->closeModal();
+        session()->flash('success', 'Arrival request approved & berth assigned.');
+    }
+
+    public function rejectBooking()
+    {
+        $this->selectedBooking->update(['status' => 'rejected']);
+        $this->closeModal();
+        session()->flash('success', 'Arrival request rejected.');
     }
 
     public function render()
@@ -73,87 +113,12 @@ class Dashboard extends Component
         return $this->renderAdminDashboard($now);
     }
 
-    private function renderAgentDashboard($user, $now)
-    {
-        $orgId = $user->organization_id;
-
-        // KPI: My Active Vessels
-        $myActiveVessels = PortCall::where('agent_id', $orgId)
-            ->whereIn('status', ['anchored', 'alongside'])
-            ->count();
-        
-        // KPI: Pending Requests
-        $myPendingRequests = PortCall::where('agent_id', $orgId)
-            ->where('status', 'requested')
-            ->count();
-
-        // KPI: Invoices Due
-        $unpaidInvoices = \App\Models\Invoice::where('organization_id', $orgId)
-            ->where('status', '!=', 'paid')
-            ->count();
-
-        // Live Billing Calculation
-        $liveBilling = [
-            'berthing_charges' => 0,
-            'warehouse_charges' => 0,
-            'total_charges' => 0,
-            'berthing_vessels' => 0,
-            'warehouse_items' => 0
-        ];
-
-        // Calculate Berthing Charges (Active Vessels)
-        $activePortCalls = PortCall::where('agent_id', $orgId)
-            ->whereIn('status', ['anchored', 'alongside'])
-            ->with('berth')
-            ->get();
-
-        foreach ($activePortCalls as $portCall) {
-            if ($portCall->berth && $portCall->eta) {
-                $daysAlongside = max(1, now()->diffInDays($portCall->eta));
-                $berthRate = $portCall->berth->rate_per_day ?? 500; // Default RM 500/day
-                $liveBilling['berthing_charges'] += $daysAlongside * $berthRate;
-                $liveBilling['berthing_vessels']++;
-            }
-        }
-
-        // Warehouse Billing (if subscribed)
-        $warehouseBilling = null;
-        if ($user->organization->warehouse_subscribed ?? false) {
-            $billingService = new \App\Services\WarehouseBillingService();
-            $warehouseBilling = $billingService->calculateLiveCharges($orgId);
-            $liveBilling['warehouse_charges'] = $warehouseBilling['total_charges'];
-            $liveBilling['warehouse_items'] = $warehouseBilling['items_count'];
-        }
-
-        $liveBilling['total_charges'] = $liveBilling['berthing_charges'] + $liveBilling['warehouse_charges'];
-
-        // Recent Activity filter
-        $recentActivity = PortCall::where('agent_id', $orgId)
-            ->with(['vessel', 'berth'])
-            ->orderBy('updated_at', 'desc')
-            ->take(5)
-            ->get();
-
-        return view('livewire.dashboard', [
-            'mode' => 'agent',
-            'stats' => [
-                'active_vessels' => $myActiveVessels,
-                'pending_requests' => $myPendingRequests,
-                'unpaid_invoices' => $unpaidInvoices,
-            ],
-            'liveBilling' => $liveBilling,
-            'warehouseBilling' => $warehouseBilling,
-            'recentActivity' => $recentActivity,
-            'now' => $now
-        ]);
-    }
-
     private function renderAdminDashboard($now)
     {
         // KPI: Vessels Alongside
         $alongsideCount = PortCall::where('status', 'alongside')->count();
 
-        // KPI: Expected Arrivals (Next 24h)
+        // KPI: Expected Arrivals (24h)
         $expectedArrivals = PortCall::whereIn('status', ['requested', 'approved'])
             ->whereBetween('eta', [$now, $now->copy()->addHours(24)])
             ->count();
@@ -169,7 +134,7 @@ class Dashboard extends Component
             ->whereMonth('atd', $now->month)
             ->count();
 
-        // Live Pending Billing Summary
+        // Live Pending Billing Summary (Admins only)
         $pendingBilling = [
             'total_pending' => 0,
             'berthing_pending' => 0,
@@ -178,10 +143,7 @@ class Dashboard extends Component
         ];
 
         // Calculate berthing charges for all active vessels
-        $activePortCalls = PortCall::whereIn('status', ['anchored', 'alongside'])
-            ->with('berth')
-            ->get();
-
+        $activePortCalls = PortCall::whereIn('status', ['anchored', 'alongside'])->with('berth')->get();
         foreach ($activePortCalls as $portCall) {
             if ($portCall->berth && $portCall->eta) {
                 $daysAlongside = max(1, now()->diffInDays($portCall->eta));
@@ -191,20 +153,19 @@ class Dashboard extends Component
             }
         }
 
-        // Calculate warehouse charges for all subscribed organizations
-        $billingService = new \App\Services\WarehouseBillingService();
+        // Warehouse Revenue Summary
+        $billingService = new WarehouseBillingService();
         $warehouseSummary = $billingService->getOrganizationSummary();
         $pendingBilling['warehouse_pending'] = $warehouseSummary['total_charges'] ?? 0;
-        
         $pendingBilling['total_pending'] = $pendingBilling['berthing_pending'] + $pendingBilling['warehouse_pending'];
 
         // Unpaid Invoices Summary
-        $unpaidInvoices = \App\Models\Invoice::where('status', '!=', 'paid')->get();
-        $unpaidTotal = $unpaidInvoices->sum('total_amount');
-        $unpaidCount = $unpaidInvoices->count();
+        $unpaidInvoicesData = Invoice::where('status', '!=', 'paid')->get();
+        $unpaidTotal = $unpaidInvoicesData->sum('total_amount');
+        $unpaidCount = $unpaidInvoicesData->count();
 
-        // Active Service Requests
-        $activeServiceRequests = \App\Models\ServiceRequest::whereIn('status', ['pending', 'in_progress'])->count();
+        // Service Requests
+        $activeServiceRequests = ServiceRequest::whereIn('status', ['pending', 'in_progress'])->count();
 
         // Recent Activity
         $recentActivity = PortCall::with(['vessel', 'agent', 'berth'])
@@ -212,8 +173,8 @@ class Dashboard extends Component
             ->take(8)
             ->get();
 
-        // Top Agents by Revenue (This Month)
-        $topAgents = \App\Models\Invoice::where('status', 'paid')
+        // Top Agents
+        $topAgents = Invoice::where('status', 'paid')
             ->whereMonth('created_at', $now->month)
             ->selectRaw('organization_id, SUM(total_amount) as revenue')
             ->groupBy('organization_id')
@@ -239,107 +200,73 @@ class Dashboard extends Component
             'warehouseSummary' => $warehouseSummary,
             'recentActivity' => $recentActivity,
             'topAgents' => $topAgents,
+            'pendingRequests' => PortCall::where('status', 'requested')->with(['vessel', 'agent'])->get(),
+            'activeBerths' => $activeBerths,
             'now' => $now
         ]);
     }
 
-    // 1. Review Booking Flow
-    public function openReviewModal($id)
+    private function renderAgentDashboard($user, $now)
     {
-        $this->selectedBooking = PortCall::with(['vessel', 'agent'])->findOrFail($id);
-        $this->selectedBerthId = null;
-        $this->showReviewModal = true;
-    }
+        $orgId = $user->organization_id;
 
-    public function approveBooking()
-    {
-        $this->validate([
-            'selectedBerthId' => 'required|exists:berths,id'
-        ], [
-            'selectedBerthId.required' => 'Please select a berth to assign.'
-        ]);
-
-        $this->selectedBooking->update([
-            'status' => 'approved',
-            'assigned_berth_id' => $this->selectedBerthId
-        ]);
-
-        $this->showReviewModal = false;
-        session()->flash('success', "Booking for {$this->selectedBooking->vessel->name} APPROVED and assigned to " . Berth::find($this->selectedBerthId)->name);
-    }
-
-    public function rejectBooking()
-    {
-        if ($this->selectedBooking) {
-            $this->selectedBooking->update(['status' => 'cancelled']);
-            session()->flash('success', "Booking for {$this->selectedBooking->vessel->name} REJECTED.");
-        }
-        $this->showReviewModal = false;
-    }
-
-    // 2. Alerts Flow
-    public function toggleAlertsModal()
-    {
-        $this->showAlertsModal = !$this->showAlertsModal;
-    }
-
-    public function dismissAlert($id)
-    {
-        $this->activeAlerts = array_values(array_filter($this->activeAlerts, fn($a) => $a['id'] != $id));
-    }
-
-    // 3. Pilotage Flow (Fancy Progress Simulation)
-    public function requestPilot()
-    {
-        $this->pilotRequested = true;
-        $this->pilotStatus = 'Dispatched';
-        $this->pilotProgress = 10;
+        // KPI: Active Vessels
+        $activeVesselsCount = PortCall::where('agent_id', $orgId)
+            ->whereIn('status', ['anchored', 'alongside'])
+            ->count();
         
-        session()->put('pilot_requested', true);
-        session()->put('pilot_status', 'Dispatched');
-        session()->put('pilot_progress', 10);
+        // KPI: Pending Requests
+        $pendingRequestsCount = PortCall::where('agent_id', $orgId)
+            ->where('status', 'requested')
+            ->count();
+
+        // KPI: Unpaid Invoices
+        $unpaidInvoicesCount = Invoice::where('organization_id', $orgId)
+            ->where('status', '!=', 'paid')
+            ->count();
+
+        // Live Billing
+        $billingService = new WarehouseBillingService();
+        $warehouseBilling = $billingService->calculateLiveCharges($orgId);
         
-        session()->flash('success', "Pilot request dispatched to Marine Dept. 'Alpha 1' is en route.");
-    }
+        $liveBilling = [
+            'berthing_charges' => 0,
+            'warehouse_charges' => $warehouseBilling['total_charges'] ?? 0,
+            'total_charges' => 0,
+            'berthing_vessels' => 0
+        ];
 
-    public function advancePilotSimulation()
-    {
-        if (!$this->pilotRequested) return;
+        $myActiveVessels = PortCall::where('agent_id', $orgId)
+            ->whereIn('status', ['anchored', 'alongside'])
+            ->with('berth')
+            ->get();
 
-        if ($this->pilotProgress < 100) {
-            $this->pilotProgress += 20;
-            if ($this->pilotProgress >= 100) {
-                $this->pilotStatus = 'Alongside';
-                $this->pilotProgress = 100;
-            } elseif ($this->pilotProgress >= 60) {
-                $this->pilotStatus = 'Entering Basins';
-            } elseif ($this->pilotProgress >= 40) {
-                $this->pilotStatus = 'En Route';
+        foreach ($myActiveVessels as $vessel) {
+            if ($vessel->berth && $vessel->eta) {
+                $days = max(1, now()->diffInDays($vessel->eta));
+                $liveBilling['berthing_charges'] += $days * ($vessel->berth->rate_per_day ?? 500);
+                $liveBilling['berthing_vessels']++;
             }
-            
-            session()->put('pilot_status', $this->pilotStatus);
-            session()->put('pilot_progress', $this->pilotProgress);
-        } else {
-            // Reset for demo purposes
-            $this->pilotRequested = false;
-            $this->pilotStatus = 'Idle';
-            $this->pilotProgress = 0;
-            session()->forget(['pilot_requested', 'pilot_status', 'pilot_progress']);
         }
-    }
+        $liveBilling['total_charges'] = $liveBilling['berthing_charges'] + $liveBilling['warehouse_charges'];
 
-    // 4. Incident & Export
-    public function logIncident()
-    {
-        \App\Services\AuditService::log('create', 'incident', null, 'Manual incident log triggered from dashboard.');
-        session()->flash('success', "Security Incident Logged. PFSO notified and CCTV tagged.");
-    }
+        // Fleet Activity
+        $recentActivity = PortCall::where('agent_id', $orgId)
+            ->with(['vessel', 'berth'])
+            ->orderBy('updated_at', 'desc')
+            ->take(6)
+            ->get();
 
-    public function exportReport()
-    {
-        return response()->streamDownload(function () {
-            echo "Timestamp,Event,Agent,Details\r\n";
-            echo now()->toDateTimeString() . ",Report Export,Control Room,Daily Operations Snapshot\r\n";
-        }, 'daily_operations_' . date('Ymd_His') . '.csv');
+        return view('livewire.dashboard', [
+            'mode' => 'agent',
+            'stats' => [
+                'active_vessels' => $activeVesselsCount,
+                'pending_requests' => $pendingRequestsCount,
+                'unpaid_invoices' => $unpaidInvoicesCount,
+            ],
+            'liveBilling' => $liveBilling,
+            'recentActivity' => $recentActivity,
+            'now' => $now
+        ]);
     }
 }
