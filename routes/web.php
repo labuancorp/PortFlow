@@ -15,9 +15,11 @@ Route::middleware(['auth', '2fa'])->group(function () {
         Route::get('/vessels', App\Livewire\Vessels\Index::class)->name('vessels.index');
         Route::get('/billing', App\Livewire\Billing\Index::class)->name('billing.index');
         Route::get('/ops', App\Livewire\MobileOps::class)->name('ops.mobile');
+        Route::get('/mobile-ops', App\Livewire\MobileOps::class)->name('ops.mobile.alias');
         Route::get('/map', App\Livewire\Map\PortMap::class)->name('map.index');
         Route::get('/terminal', App\Livewire\Crew\Terminal::class)->name('crew.terminal');
         Route::get('/analytics', App\Livewire\Analytics\Dashboard::class)->name('analytics');
+        Route::get('/gate/scanner', App\Livewire\Gate\Scanner::class)->name('gate.scanner');
         
         // Logistics / Cargo
         Route::get('/cargo/manifests', App\Livewire\Cargo\ManifestIndex::class)->name('cargo.manifests.index');
@@ -51,3 +53,4 @@ Route::get('/logout', function () {
 })->name('logout');
 
 Route::get('/track/{tracking_number}', App\Livewire\Cargo\TrackItem::class)->name('cargo.track');
+Route::get('/gate/request', App\Livewire\Gate\PreRegister::class)->name('gate.request');

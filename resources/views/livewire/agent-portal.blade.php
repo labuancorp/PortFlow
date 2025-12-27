@@ -132,6 +132,11 @@
                             @if($call->status === 'alongside')
                                 <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">Berth</p>
                                 <p class="font-bold text-slate-900">{{ $call->berth->name ?? 'Unassigned' }}</p>
+
+                                <button wire:click="openServiceModal({{ $call->id }})" class="mt-2 text-[10px] bg-teal-50 text-teal-700 px-2 py-1 rounded border border-teal-200 font-bold hover:bg-teal-100 transition-colors uppercase tracking-wide">
+                                    + Request Service
+                                </button>
+                                
                                 @if($call->invoice)
                                      <span class="inline-block mt-1 px-2 py-0.5 rounded text-[10px] bg-green-100 text-green-700 font-bold border border-green-200">
                                         Active Billing
@@ -347,6 +352,62 @@
                          <button type="button" wire:click="$set('showVesselModal', false)" class="px-6 py-3 rounded-xl border border-slate-200 font-bold text-slate-500 hover:bg-slate-50 transition-colors">Cancel</button>
                          <button type="submit" class="flex-1 px-6 py-3 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl font-bold uppercase tracking-widest shadow-lg shadow-indigo-900/20 transition-all">
                             Add Vessel
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    @endif
+
+    <!-- Service Request Modal -->
+    @if($showServiceModal)
+    <div class="fixed inset-0 z-50 flex items-center justify-center p-4">
+        <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm transition-opacity" wire:click="$set('showServiceModal', false)"></div>
+        <div class="relative bg-white w-full max-w-lg rounded-3xl shadow-2xl border border-slate-200 overflow-hidden transform transition-all">
+            <div class="p-8">
+                <div class="flex justify-between items-center mb-6">
+                    <h3 class="text-2xl font-black text-slate-900 tracking-tight">Request Port Services</h3>
+                    <button wire:click="$set('showServiceModal', false)" class="text-slate-400 hover:text-slate-600 transition-colors">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                    </button>
+                </div>
+
+                <div class="bg-slate-50 p-4 rounded-xl mb-6">
+                    <p class="text-xs font-bold text-slate-500 uppercase tracking-widest">Vessel</p>
+                    <p class="font-bold text-slate-900">{{ $selectedPortCall->vessel->name ?? 'Unknown' }}</p>
+                </div>
+
+                <form wire:submit.prevent="saveServiceRequest" class="space-y-6">
+                    <div>
+                        <label class="block text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-1">Service Type</label>
+                        <select wire:model.live="serviceType" class="w-full bg-slate-50 border-slate-200 rounded-xl font-bold text-slate-700 focus:ring-teal-500 focus:border-teal-500 p-3">
+                            <option value="water">Fresh Water Supply</option>
+                            <option value="fuel">Bunker Fuel</option>
+                            <option value="waste">Waste Disposal</option>
+                            <option value="crane">Mobile Crane Hire</option>
+                            <option value="pilot">Pilotage Extension</option>
+                        </select>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-1">Quantity</label>
+                            <div class="relative">
+                                <input type="number" wire:model="serviceQuantity" class="w-full bg-slate-50 border-slate-200 rounded-xl font-bold text-slate-700 focus:ring-teal-500 focus:border-teal-500 p-3 pr-12" required>
+                                <span class="absolute right-4 top-3.5 text-xs font-bold text-slate-400">{{ $serviceUnit }}</span>
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-1">Required Date</label>
+                            <input type="datetime-local" wire:model="serviceDate" class="w-full bg-slate-50 border-slate-200 rounded-xl font-bold text-slate-700 focus:ring-teal-500 focus:border-teal-500 p-3" required>
+                        </div>
+                    </div>
+
+                    <div class="pt-4 border-t border-slate-100 flex gap-3">
+                         <button type="button" wire:click="$set('showServiceModal', false)" class="px-6 py-3 rounded-xl border border-slate-200 font-bold text-slate-500 hover:bg-slate-50 transition-colors">Cancel</button>
+                         <button type="submit" class="flex-1 px-6 py-3 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl font-bold uppercase tracking-widest shadow-lg shadow-indigo-900/20 transition-all">
+                            Submit Request
                         </button>
                     </div>
                 </form>

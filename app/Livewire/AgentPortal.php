@@ -43,6 +43,66 @@ class AgentPortal extends Component
         'etd' => 'required|date|after:eta',
     ];
 
+    // Service Request Fields
+    public $showServiceModal = false;
+    public $selectedPortCall = null;
+    public $serviceType = 'water';
+    public $serviceQuantity = 0;
+    public $serviceUnit = 'MT';
+    public $serviceDate;
+
+    public function openServiceModal($portCallId)
+    {
+        $this->selectedPortCall = PortCall::find($portCallId);
+        $this->serviceType = 'water';
+        $this->serviceQuantity = 100;
+        $this->serviceUnit = 'MT';
+        $this->serviceDate = now()->format('Y-m-d\TH:i');
+        $this->showServiceModal = true;
+    }
+
+    public function updatedServiceType()
+    {
+        switch ($this->serviceType) {
+            case 'fuel': 
+                $this->serviceUnit = 'Liters'; 
+                $this->serviceQuantity = 5000;
+                break;
+            case 'waste': 
+                $this->serviceUnit = 'Kg'; 
+                $this->serviceQuantity = 500;
+                break;
+            case 'crane': 
+                $this->serviceUnit = 'Hours'; 
+                $this->serviceQuantity = 4;
+                break;
+            default: 
+                $this->serviceUnit = 'MT';
+                $this->serviceQuantity = 100; // Water
+        }
+    }
+
+    public function saveServiceRequest()
+    {
+        $this->validate([
+            'serviceType' => 'required',
+            'serviceQuantity' => 'required|numeric|min:1',
+            'serviceDate' => 'required|date'
+        ]);
+
+        \App\Models\ServiceRequest::create([
+            'port_call_id' => $this->selectedPortCall->id,
+            'service_type' => $this->serviceType,
+            'quantity' => $this->serviceQuantity,
+            'unit' => $this->serviceUnit,
+            'status' => 'pending',
+            'requested_at' => $this->serviceDate
+        ]);
+
+        $this->showServiceModal = false;
+        $this->dispatch('notify', message: 'Service request submitted for operational review.');
+    }
+
     public function openRequestModal()
     {
         $this->reset(['vessel_id', 'eta', 'etd', 'draft_arrival', 'draft_departure']);

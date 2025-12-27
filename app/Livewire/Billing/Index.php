@@ -45,63 +45,20 @@ class Index extends Component
         $portCall = PortCall::findOrFail($portCallId);
 
         if (!$portCall->atb || !$portCall->atd) {
-            session()->flash('error', 'Cannot generate invoice: Missing arrival (ATB) or departure (ATD) timestamps.');
-            return;
+            // For demo flexibility, we might allow generating partial invoices, 
+            // but the Service enforces ATB. Let's warn if missing but attempt.
+            if (!$portCall->atb) {
+                session()->flash('error', 'Cannot generate invoice: Missing berthing time (ATB).');
+                return;
+            }
         }
 
-        // Calculate Duration (Hours, rounded up)
-        $durationHours = ceil($portCall->atb->diffInHours($portCall->atd, false)); // false allows float, but we ceil it
-        if ($durationHours < 1) $durationHours = 1;
-
-        // Calculate Items
-        $items = [];
-        
-        // 1. Dockage
-        $dockageTotal = $portCall->vessel->loa_meters * $durationHours * $this->rate_dockage_per_meter_hour;
-        $items[] = [
-            'description' => "Dockage Charges ({$portCall->vessel->loa_meters}m x {$durationHours} hrs @ RM{$this->rate_dockage_per_meter_hour})",
-            'quantity' => $durationHours,
-            'unit_price' => $portCall->vessel->loa_meters * $this->rate_dockage_per_meter_hour, // Price per hour unit
-            'total_price' => $dockageTotal
-        ];
-
-        // 2. Wharfage
-        $items[] = [
-            'description' => 'Fixed Wharfage Fee',
-            'quantity' => 1,
-            'unit_price' => $this->rate_wharfage_fixed,
-            'total_price' => $this->rate_wharfage_fixed
-        ];
-
-        // 3. Services (Mocked for now as we don't have service requests seeding fully yet)
-        // In real app: foreach($portCall->serviceRequests as $req) ...
-        
-        $grandTotal = collect($items)->sum('total_price');
-
-        // Create Invoice
-        $invoice = Invoice::create([
-            'port_call_id' => $portCall->id,
-            'organization_id' => $portCall->agent_id, // Invoice to Agent
-            'invoice_no' => 'INV-' . strtoupper(Str::random(8)),
-            'total_amount' => $grandTotal,
-            'status' => 'draft',
-            'issued_date' => Carbon::now(),
-            'due_date' => Carbon::now()->addDays(30),
-        ]);
-
-        // Create Items
-        foreach ($items as $item) {
-            InvoiceItem::create([
-                'invoice_id' => $invoice->id,
-                'description' => $item['description'],
-                'quantity' => $item['quantity'],
-                'unit_price' => $item['unit_price'],
-                'total_price' => $item['total_price']
-            ]);
-        }
+        // Use the centralized Billing Service
+        $service = new \App\Services\BillingService();
+        $invoice = $service->generateInvoice($portCall);
 
         $this->activeTab = 'invoices';
-        session()->flash('success', "Invoice {$invoice->invoice_no} generated successfully!");
+        session()->flash('success', "Invoice {$invoice->invoice_no} generated successfully via BillingService!");
     }
 
     public function markAsPaid($invoiceId)

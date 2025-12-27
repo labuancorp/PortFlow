@@ -12,6 +12,37 @@
         </div>
     </div>
 
+    <!-- Job Queue (Service Requests) -->
+    @if($pendingServices->count() > 0)
+    <div class="px-4 py-4">
+        <h3 class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-3 flex items-center gap-2">
+            <span class="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></span>
+            Pending Service Jobs ({{ $pendingServices->count() }})
+        </h3>
+        <div class="space-y-3">
+            @foreach($pendingServices as $service)
+            <div class="bg-slate-800 rounded-xl p-4 border border-slate-700 shadow-lg relative overflow-hidden">
+                <div class="absolute top-0 left-0 w-1 h-full bg-amber-500"></div>
+                <div class="flex justify-between items-center mb-2 pl-2">
+                    <span class="text-xs font-bold text-slate-300">{{ $service->portCall->vessel->name ?? 'Unknown Vessel' }}</span>
+                    <span class="text-[10px] bg-slate-700 px-2 py-0.5 rounded text-amber-500 font-bold uppercase">{{ $service->service_type }}</span>
+                </div>
+                <div class="pl-2 flex justify-between items-end">
+                    <div>
+                        <div class="text-2xl font-black text-white">{{ $service->quantity }} <span class="text-sm font-medium text-slate-400">{{ $service->unit }}</span></div>
+                        <div class="text-[10px] text-slate-500">{{ $service->requested_at->format('M d, H:i') }} • {{ $service->portCall->berth->name ?? 'Pending Berth' }}</div>
+                    </div>
+                    <button wire:click="fulfillService({{ $service->id }})" class="bg-amber-500 hover:bg-amber-400 text-slate-900 px-4 py-2 rounded-lg font-bold text-xs uppercase tracking-wide shadow-lg shadow-amber-900/20 flex items-center gap-1 transition-all active:scale-95">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                        Complete
+                    </button>
+                </div>
+            </div>
+            @endforeach
+        </div>
+    </div>
+    @endif
+
     <!-- Active Tasks Stream -->
     <div class="p-4 space-y-4">
         @forelse($bookings as $booking)

@@ -75,6 +75,12 @@
                     </li>
 
                     <li>
+                        <a href="{{ route('gate.scanner') }}" class="flex items-center px-3 py-2 rounded-lg group {{ request()->routeIs('gate.scanner') ? 'bg-slate-800 text-white' : 'text-slate-300 hover:bg-slate-800 hover:text-white' }}">
+                            <span class="ml-3 text-emerald-400 font-bold">Gate Security Scanner</span>
+                        </a>
+                    </li>
+
+                    <li>
                          <a href="{{ route('hse.permits.dashboard') }}" class="flex items-center px-3 py-2 rounded-lg group {{ request()->routeIs('hse.*') ? 'bg-slate-800 text-white' : 'text-slate-300 hover:bg-slate-800 hover:text-white' }}">
                              <span class="ml-3 text-red-400 font-bold">HSE Safety Console</span>
                          </a>
@@ -104,6 +110,10 @@
                         <a href="{{ route('agent.portal') }}" target="_blank" class="flex items-center px-3 py-2 rounded-lg text-emerald-400 hover:bg-slate-800 hover:text-emerald-300">
                              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
                             <span class="ml-3 font-bold">Client Portal View</span>
+                        </a>
+                        <a href="{{ route('gate.request') }}" target="_blank" class="flex items-center px-3 py-2 rounded-lg text-indigo-400 hover:bg-slate-800 hover:text-indigo-300">
+                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
+                            <span class="ml-3 font-bold">Vendor Request Portal</span>
                         </a>
                     </li>
                 </ul>

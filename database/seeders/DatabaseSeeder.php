@@ -692,6 +692,11 @@ class DatabaseSeeder extends Seeder
         }
 
         // ============================================
+        // 14. Gate Entries (Phase 1)
+        // ============================================
+        $this->call(GateEntrySeeder::class);
+
+        // ============================================
         // COMPLETION
         // ============================================
         $this->command->info('');
@@ -706,6 +711,7 @@ class DatabaseSeeder extends Seeder
         $this->command->info('   • Cargo Manifests: ' . CargoManifest::count());
         $this->command->info('   • Cargo Items: ' . CargoItem::count());
         $this->command->info('   • Warehouse Zones: ' . WarehouseZone::count());
+        $this->command->info('   • Gate Entries: ' . \App\Models\GateEntry::count());
         $this->command->info('   • Work Permits: ' . WorkPermit::count());
         $this->command->info('   • Service Requests: ' . ServiceRequest::count());
         $this->command->info('   • Invoices: ' . Invoice::count());
