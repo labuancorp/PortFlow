@@ -28,10 +28,10 @@ Route::middleware(['auth', '2fa'])->group(function () {
         Route::get('/warehouse/map', App\Livewire\Warehouse\YardMap::class)->name('warehouse.map');
     });
 
-    // HSE / Safety (Admin, Agent, HSE Role)
     Route::middleware(['role:admin,agent,hse'])->group(function () {
         Route::get('/hse/permits', App\Livewire\HSE\PermitDashboard::class)->name('hse.permits.dashboard');
         Route::get('/hse/permits/create', App\Livewire\HSE\PermitCreate::class)->name('hse.permits.create');
+        Route::get('/hse/incidents', App\Livewire\HSE\IncidentReporting::class)->name('hse.incidents.index');
     });
 
     // Admin Only
