@@ -37,6 +37,7 @@ Route::middleware(['auth', '2fa'])->group(function () {
     // Facility & Asset Rental
     Route::middleware(['role:admin,hse'])->group(function () {
         Route::get('/assets/inventory', App\Livewire\Assets\Inventory::class)->name('assets.inventory');
+        Route::get('/warehouse/spatial', App\Livewire\Warehouse\SpatialLeaseManager::class)->name('warehouse.spatial.index');
     });
     Route::get('/assets/marketplace', App\Livewire\Assets\Booking::class)->name('assets.booking');
 

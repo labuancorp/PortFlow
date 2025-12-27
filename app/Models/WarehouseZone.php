@@ -9,7 +9,24 @@ class WarehouseZone extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['warehouse_id', 'name', 'code', 'capacity_limit_m3', 'is_dg_allowed'];
+    protected $fillable = [
+        'warehouse_id', 
+        'name', 
+        'code', 
+        'capacity_limit_m3', 
+        'is_dg_allowed',
+        'total_area_sqm',
+        'map_coordinates'
+    ];
+
+    protected $casts = [
+        'map_coordinates' => 'array'
+    ];
+
+    public function leases()
+    {
+        return $this->hasMany(SpatialLease::class);
+    }
 
     public function warehouse()
     {
@@ -24,8 +41,12 @@ class WarehouseZone extends Model
     // Helper to calculate utilization
     public function getUtilizationAttribute()
     {
-        $used = $this->items()->sum('volume_m3');
-        return $used;
+        return $this->items()->sum('volume_m3');
+    }
+
+    public function getCurrentUtilizationM3Attribute()
+    {
+        return $this->utilization;
     }
 
     public function getUtilizationPercentageAttribute()

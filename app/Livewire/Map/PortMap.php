@@ -46,7 +46,7 @@ class PortMap extends Component
                     'status' => $call->status,
                     'lat' => $coords[0],
                     'lng' => $coords[1],
-                    'berth' => $call->berth->name ?? 'None'
+                    'berth' => optional($call->berth)->name ?? 'None'
                 ];
             });
 

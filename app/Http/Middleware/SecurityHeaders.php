@@ -23,13 +23,13 @@ class SecurityHeaders
         $response->headers->set('X-Content-Type-Options', 'nosniff');
         $response->headers->set('Referrer-Policy', 'no-referrer-when-downgrade');
         
-        // Content Security Policy (Adjusted for Livewire & Google Fonts)
+        // Content Security Policy (Adjusted for Livewire & Mapping)
         $csp = "default-src 'self'; ";
-        $csp .= "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net; ";
-        $csp .= "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.jsdelivr.net; ";
+        $csp .= "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net https://unpkg.com; ";
+        $csp .= "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.jsdelivr.net https://unpkg.com; ";
         $csp .= "font-src 'self' https://fonts.gstatic.com; ";
         $csp .= "img-src 'self' data: https:; ";
-        $csp .= "connect-src 'self'; ";
+        $csp .= "connect-src 'self' https:; ";
         $csp .= "frame-ancestors 'none';";
         
         $response->headers->set('Content-Security-Policy', $csp);
