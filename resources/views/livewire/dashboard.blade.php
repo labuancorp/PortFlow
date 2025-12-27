@@ -42,9 +42,23 @@
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                         </div>
                     </div>
-                    <div class="flex items-center gap-2 text-xs text-emerald-700">
-                        <span class="flex h-2 w-2 rounded-full bg-emerald-500 animate-pulse"></span>
-                        {{ $pendingBilling['count'] }} active units
+                    <div class="flex flex-col gap-2 mt-4 pt-4 border-t border-emerald-100">
+                        <div class="flex justify-between text-xs text-emerald-800">
+                            <span>Berthing</span>
+                            <span class="font-bold">RM {{ number_format($pendingBilling['berthing_pending'], 0) }}</span>
+                        </div>
+                        <div class="flex justify-between text-xs text-emerald-800">
+                            <span>Warehouse</span>
+                            <span class="font-bold">RM {{ number_format($pendingBilling['warehouse_pending'], 0) }}</span>
+                        </div>
+                        <div class="flex justify-between text-xs text-emerald-800">
+                            <span>Assets (Rental)</span>
+                            <span class="font-bold">RM {{ number_format($pendingBilling['assets_pending'], 0) }}</span>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-2 text-[10px] text-emerald-600 font-bold uppercase tracking-wider mt-2">
+                        <span class="flex h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                        Live Exposure
                     </div>
                 </div>
 
@@ -229,25 +243,45 @@
         <div class="space-y-8">
             <!-- Hero Live Billing -->
             <div class="bg-gradient-to-br from-indigo-900 via-slate-900 to-black rounded-3xl p-10 text-white relative overflow-hidden shadow-2xl">
-                <div class="relative z-10 grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-                    <div>
+                <div class="relative z-10">
+                    <div class="mb-8">
                         <div class="flex items-center gap-3 mb-6">
                             <span class="flex h-3 w-3 rounded-full bg-emerald-400 animate-pulse"></span>
                             <span class="text-xs font-black uppercase tracking-[0.3em] text-emerald-400">Live Port Charges</span>
                         </div>
                         <h2 class="text-6xl font-black tracking-tighter mb-4">RM {{ number_format($liveBilling['total_charges'], 2) }}</h2>
-                        <p class="text-indigo-200/70 max-w-md text-lg leading-relaxed font-medium">Accumulated real-time charges for your active vessels and yard storage.</p>
+                        <p class="text-indigo-200/70 max-w-2xl text-lg leading-relaxed font-medium">Real-time exposure across all your port operations — Marine, Yard, and Asset Rentals.</p>
                     </div>
-                    <div class="grid grid-cols-2 gap-6">
-                        <div class="bg-white/10 backdrop-blur-md p-6 rounded-2xl border border-white/10">
-                            <p class="text-[10px] font-black uppercase tracking-widest text-indigo-300 mb-2">Berthing Fees</p>
-                            <p class="text-2xl font-black">RM {{ number_format($liveBilling['berthing_charges'], 2) }}</p>
-                            <p class="text-[10px] text-indigo-300/50 mt-1">{{ $liveBilling['berthing_vessels'] }} active vessels</p>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <!-- Marine / Berthing -->
+                        <div class="bg-white/10 backdrop-blur-md p-6 rounded-2xl border border-white/10 hover:bg-white/15 transition-all">
+                            <div class="flex items-center gap-3 mb-4">
+                                <div class="w-10 h-10 rounded-full bg-indigo-500/20 flex items-center justify-center text-xl">⚓</div>
+                                <p class="text-[10px] font-black uppercase tracking-widest text-indigo-300">Marine / Berthing</p>
+                            </div>
+                            <p class="text-3xl font-black mb-2">RM {{ number_format($liveBilling['berthing_charges'], 2) }}</p>
+                            <p class="text-[10px] text-indigo-300/50">{{ $liveBilling['berthing_vessels'] }} active vessel{{ $liveBilling['berthing_vessels'] != 1 ? 's' : '' }}</p>
                         </div>
-                        <div class="bg-white/10 backdrop-blur-md p-6 rounded-2xl border border-white/10">
-                            <p class="text-[10px] font-black uppercase tracking-widest text-indigo-300 mb-2">Yard Storage</p>
-                            <p class="text-2xl font-black">RM {{ number_format($liveBilling['warehouse_charges'], 2) }}</p>
-                            <p class="text-[10px] text-indigo-300/50 mt-1">Daily accumulation</p>
+
+                        <!-- Yard / Storage -->
+                        <div class="bg-white/10 backdrop-blur-md p-6 rounded-2xl border border-white/10 hover:bg-white/15 transition-all">
+                            <div class="flex items-center gap-3 mb-4">
+                                <div class="w-10 h-10 rounded-full bg-emerald-500/20 flex items-center justify-center text-xl">📦</div>
+                                <p class="text-[10px] font-black uppercase tracking-widest text-emerald-300">Yard / Storage</p>
+                            </div>
+                            <p class="text-3xl font-black mb-2">RM {{ number_format($liveBilling['warehouse_charges'], 2) }}</p>
+                            <p class="text-[10px] text-emerald-300/50">Daily accumulation</p>
+                        </div>
+
+                        <!-- Assets / Equipment -->
+                        <div class="bg-white/10 backdrop-blur-md p-6 rounded-2xl border border-white/10 hover:bg-white/15 transition-all">
+                            <div class="flex items-center gap-3 mb-4">
+                                <div class="w-10 h-10 rounded-full bg-amber-500/20 flex items-center justify-center text-xl">🚜</div>
+                                <p class="text-[10px] font-black uppercase tracking-widest text-amber-300">Assets / Equipment</p>
+                            </div>
+                            <p class="text-3xl font-black mb-2">RM {{ number_format($liveBilling['assets_charges'], 2) }}</p>
+                            <p class="text-[10px] text-amber-300/50">Rental charges</p>
                         </div>
                     </div>
                 </div>
@@ -256,18 +290,45 @@
             </div>
 
             <!-- Stats Grid -->
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-                <a href="{{ route('vessels.index') }}" class="bg-white p-8 rounded-2xl border border-slate-200 shadow-sm hover:shadow-xl transition-all group">
-                    <p class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">Active Vessels</p>
-                    <h3 class="text-4xl font-black text-slate-900 group-hover:text-indigo-600 transition-colors">{{ $stats['active_vessels'] }}</h3>
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+                <a href="{{ route('vessels.index') }}" class="bg-gradient-to-br from-indigo-50 to-blue-50 p-6 rounded-2xl border border-indigo-200 shadow-sm hover:shadow-xl transition-all group">
+                    <div class="flex items-center gap-3 mb-3">
+                        <div class="p-2 bg-white rounded-lg shadow-sm">
+                            <svg class="w-5 h-5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
+                        </div>
+                        <p class="text-xs font-bold text-indigo-600/70 uppercase tracking-widest">Active Vessels</p>
+                    </div>
+                    <h3 class="text-4xl font-black text-indigo-900 group-hover:text-indigo-600 transition-colors">{{ $stats['active_vessels'] }}</h3>
                 </a>
-                <a href="{{ route('home') }}" class="bg-white p-8 rounded-2xl border border-slate-200 shadow-sm hover:shadow-xl transition-all group">
-                    <p class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">Pending Requests</p>
-                    <h3 class="text-4xl font-black text-slate-900 group-hover:text-amber-600 transition-colors">{{ $stats['pending_requests'] }}</h3>
+                
+                <a href="{{ route('home') }}" class="bg-gradient-to-br from-amber-50 to-orange-50 p-6 rounded-2xl border border-amber-200 shadow-sm hover:shadow-xl transition-all group">
+                    <div class="flex items-center gap-3 mb-3">
+                        <div class="p-2 bg-white rounded-lg shadow-sm">
+                            <svg class="w-5 h-5 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                        </div>
+                        <p class="text-xs font-bold text-amber-600/70 uppercase tracking-widest">Pending Requests</p>
+                    </div>
+                    <h3 class="text-4xl font-black text-amber-900 group-hover:text-amber-600 transition-colors">{{ $stats['pending_requests'] }}</h3>
                 </a>
-                <a href="{{ route('billing.index') }}" class="bg-white p-8 rounded-2xl border border-slate-200 shadow-sm hover:shadow-xl transition-all group">
-                    <p class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">Unpaid Invoices</p>
-                    <h3 class="text-4xl font-black text-slate-900 group-hover:text-rose-600 transition-colors">{{ $stats['unpaid_invoices'] }}</h3>
+                
+                <a href="{{ route('billing.index') }}" class="bg-gradient-to-br from-rose-50 to-pink-50 p-6 rounded-2xl border border-rose-200 shadow-sm hover:shadow-xl transition-all group">
+                    <div class="flex items-center gap-3 mb-3">
+                        <div class="p-2 bg-white rounded-lg shadow-sm">
+                            <svg class="w-5 h-5 text-rose-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                        </div>
+                        <p class="text-xs font-bold text-rose-600/70 uppercase tracking-widest">Unpaid Invoices</p>
+                    </div>
+                    <h3 class="text-4xl font-black text-rose-900 group-hover:text-rose-600 transition-colors">{{ $stats['unpaid_invoices'] }}</h3>
+                </a>
+
+                <a href="{{ route('agent.portal') }}" class="bg-gradient-to-br from-emerald-50 to-teal-50 p-6 rounded-2xl border border-emerald-200 shadow-sm hover:shadow-xl transition-all group">
+                    <div class="flex items-center gap-3 mb-3">
+                        <div class="p-2 bg-white rounded-lg shadow-sm">
+                            <svg class="w-5 h-5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
+                        </div>
+                        <p class="text-xs font-bold text-emerald-600/70 uppercase tracking-widest">Agent Portal</p>
+                    </div>
+                    <h3 class="text-sm font-black text-emerald-900 group-hover:text-emerald-600 transition-colors">Full Operations →</h3>
                 </a>
             </div>
 
@@ -329,14 +390,52 @@
             <div class="p-10 max-h-[60vh] overflow-y-auto">
                 <div class="space-y-4">
                     @forelse($unpaidInvoicesList as $invoice)
-                    <div class="flex items-center justify-between p-5 bg-slate-50 rounded-2xl hover:bg-slate-100/80 transition-all border border-slate-100">
-                        <div class="flex-1">
-                            <p class="font-black text-slate-900 tracking-tight">{{ optional($invoice->organization)->name ?? 'Unknown Agent' }}</p>
-                            <p class="text-xs text-slate-400 font-bold mt-1">INV #{{ $invoice->invoice_no }} • {{ $invoice->created_at->format('d M Y') }}</p>
+                    <div class="flex items-center justify-between p-5 bg-slate-50 rounded-2xl hover:bg-slate-100/80 transition-all border border-slate-100 group">
+                        <div class="flex flex-1 items-center gap-4">
+                            @php
+                                $type = 'marine';
+                                $icon = '⚓';
+                                $color = 'indigo';
+                                if (str_starts_with($invoice->invoice_no, 'INV-ASSET')) {
+                                    $type = 'asset';
+                                    $icon = '🚜';
+                                    $color = 'amber';
+                                } elseif (str_starts_with($invoice->invoice_no, 'INV-WHS')) {
+                                    $type = 'yard';
+                                    $icon = '📦';
+                                    $color = 'emerald';
+                                }
+                            @endphp
+                            
+                            <div class="w-10 h-10 rounded-full bg-{{ $color }}-100 flex items-center justify-center text-xl shadow-sm border border-{{ $color }}-200 group-hover:scale-110 transition-transform">
+                                {{ $icon }}
+                            </div>
+
+                            <div>
+                                <p class="font-black text-slate-900 tracking-tight">{{ optional($invoice->organization)->name ?? 'Unknown Agent' }}</p>
+                                <div class="flex items-center gap-2 mt-1">
+                                    <span class="text-[10px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded bg-slate-200 text-slate-600">{{ $type }}</span>
+                                    <p class="text-xs text-slate-400 font-bold">INV #{{ $invoice->invoice_no }} • {{ $invoice->created_at->format('d M Y') }}</p>
+                                </div>
+                            </div>
                         </div>
-                        <div class="text-right">
+                        <div class="text-right flex flex-col items-end gap-2">
                             <p class="text-xl font-black text-rose-600 tracking-tighter">RM {{ number_format($invoice->total_amount, 2) }}</p>
-                            <span class="inline-block px-2 py-0.5 mt-1.5 text-[10px] font-black uppercase rounded-md bg-rose-100 text-rose-700 tracking-widest">Unpaid</span>
+                            
+                            @if($invoice->status === 'draft')
+                                <button wire:click="approveInvoice({{ $invoice->id }})" class="bg-indigo-600 text-white px-3 py-1 rounded-lg text-[10px] font-bold uppercase tracking-widest hover:bg-indigo-700 transition-colors shadow-sm">
+                                    Approve & Issue
+                                </button>
+                            @else
+                                <div class="flex items-center gap-2">
+                                    <span class="inline-block px-2 py-0.5 text-[10px] font-black uppercase rounded-md bg-rose-100 text-rose-700 tracking-widest">
+                                        Unpaid
+                                    </span>
+                                    <button wire:click="markInvoicePaid({{ $invoice->id }})" class="text-xs text-slate-400 hover:text-emerald-600 font-bold transition-colors shadow-none bg-transparent p-0" title="Mark as Paid">
+                                        ✓
+                                    </button>
+                                </div>
+                            @endif
                         </div>
                     </div>
                     @empty

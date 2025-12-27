@@ -45,144 +45,458 @@
             <p class="text-slate-500 text-lg">Track your vessels in real-time across the port.</p>
         </div>
 
-        <!-- Dashboard Stats -->
+        <!-- Live Operations Stats (Only on Live Tab) -->
+        @if($activeTab === 'live')
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
             <div class="bg-indigo-600 rounded-2xl p-6 text-white shadow-xl shadow-indigo-900/20 relative overflow-hidden group">
                 <div class="absolute top-0 right-0 -mr-4 -mt-4 w-24 h-24 bg-white/10 rounded-full blur-xl group-hover:bg-white/20 transition-all"></div>
                 <p class="text-indigo-200 text-sm font-bold uppercase tracking-widest mb-1">Live Vessels</p>
                 <div class="flex items-end gap-2">
-                    <span class="text-5xl font-black">{{ $portCalls->whereIn('status', ['alongside', 'anchored'])->count() }}</span>
-                    <span class="text-indigo-200 font-medium mb-1">In Port</span>
+                    <span class="text-5xl font-black">{{ $liveVessels->count() }}</span>
+                    <span class="text-indigo-200 font-medium mb-1">Alongisde</span>
                 </div>
             </div>
 
-            <div class="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm relative overflow-hidden">
-                 <p class="text-slate-400 text-sm font-bold uppercase tracking-widest mb-1">Incoming</p>
+            <div class="bg-emerald-600 rounded-2xl p-6 text-white shadow-xl shadow-emerald-900/20 relative overflow-hidden group">
+                <div class="absolute top-0 right-0 -mr-4 -mt-4 w-24 h-24 bg-white/10 rounded-full blur-xl group-hover:bg-white/20 transition-all"></div>
+                <p class="text-emerald-200 text-sm font-bold uppercase tracking-widest mb-1">Yard Storage</p>
                 <div class="flex items-end gap-2">
-                    <span class="text-5xl font-black text-slate-800">{{ $portCalls->whereIn('status', ['requested', 'approved'])->count() }}</span>
-                    <span class="text-slate-400 font-medium mb-1">Expected 24h</span>
+                    <span class="text-5xl font-black">{{ $liveYardItems->count() }}</span>
+                    <span class="text-emerald-200 font-medium mb-1">Items</span>
                 </div>
             </div>
 
-            <button wire:click="openRequestModal" class="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm relative overflow-hidden flex flex-col justify-center items-center gap-3 cursor-pointer hover:border-teal-400 hover:shadow-md transition-all group">
-                <div class="w-12 h-12 bg-teal-50 rounded-full flex items-center justify-center text-teal-600 group-hover:scale-110 transition-transform">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+             <div class="bg-amber-500 rounded-2xl p-6 text-white shadow-xl shadow-amber-900/20 relative overflow-hidden group">
+                <div class="absolute top-0 right-0 -mr-4 -mt-4 w-24 h-24 bg-white/10 rounded-full blur-xl group-hover:bg-white/20 transition-all"></div>
+                <p class="text-amber-100 text-sm font-bold uppercase tracking-widest mb-1">Assets On Hire</p>
+                <div class="flex items-end gap-2">
+                    <span class="text-5xl font-black">{{ $liveAssets->count() }}</span>
+                    <span class="text-amber-100 font-medium mb-1">Active</span>
                 </div>
-                <span class="font-bold text-teal-600">Request New Berth</span>
-            </button>
+            </div>
         </div>
+        @endif
 
         <!-- Quick Actions -->
-        <div class="flex justify-end mb-4">
+        @if($activeTab === 'live' || $activeTab === 'scheduled')
+        <div class="flex justify-end gap-4 mb-4">
+             <button wire:click="openRequestModal" class="text-sm font-bold text-teal-600 hover:text-teal-500 flex items-center gap-2">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+                Request New Berth
+            </button>
              <button wire:click="openVesselModal" class="text-sm font-bold text-indigo-600 hover:text-indigo-500 flex items-center gap-2">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path></svg>
-                Register New Vessel to Fleet
+                Register New Vessel
             </button>
         </div>
+        @endif
 
         <!-- Tabs -->
-        <div class="flex gap-6 border-b border-slate-200 mb-8">
-            <button wire:click="$set('activeTab', 'live')" class="pb-3 text-sm font-bold uppercase tracking-wider transition-all {{ $activeTab === 'live' ? 'text-indigo-600 border-b-2 border-indigo-600' : 'text-slate-400 hover:text-slate-600' }}">
+        <div class="flex gap-6 border-b border-slate-200 mb-8 overflow-x-auto">
+            <button wire:click="$set('activeTab', 'live')" class="pb-3 text-sm font-bold uppercase tracking-wider transition-all whitespace-nowrap {{ $activeTab === 'live' ? 'text-indigo-600 border-b-2 border-indigo-600' : 'text-slate-400 hover:text-slate-600' }}">
                 Live Operations
             </button>
-            <button wire:click="$set('activeTab', 'scheduled')" class="pb-3 text-sm font-bold uppercase tracking-wider transition-all {{ $activeTab === 'scheduled' ? 'text-indigo-600 border-b-2 border-indigo-600' : 'text-slate-400 hover:text-slate-600' }}">
+            <button wire:click="$set('activeTab', 'scheduled')" class="pb-3 text-sm font-bold uppercase tracking-wider transition-all whitespace-nowrap {{ $activeTab === 'scheduled' ? 'text-indigo-600 border-b-2 border-indigo-600' : 'text-slate-400 hover:text-slate-600' }}">
                 Scheduled
             </button>
-            <button wire:click="$set('activeTab', 'history')" class="pb-3 text-sm font-bold uppercase tracking-wider transition-all {{ $activeTab === 'history' ? 'text-indigo-600 border-b-2 border-indigo-600' : 'text-slate-400 hover:text-slate-600' }}">
+            <button wire:click="$set('activeTab', 'history')" class="pb-3 text-sm font-bold uppercase tracking-wider transition-all whitespace-nowrap {{ $activeTab === 'history' ? 'text-indigo-600 border-b-2 border-indigo-600' : 'text-slate-400 hover:text-slate-600' }}">
                 History
+            </button>
+            <button wire:click="$set('activeTab', 'commercial')" class="pb-3 text-sm font-bold uppercase tracking-wider transition-all whitespace-nowrap flex items-center gap-2 {{ $activeTab === 'commercial' ? 'text-emerald-600 border-b-2 border-emerald-600' : 'text-slate-400 hover:text-emerald-600' }}">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                Financials
             </button>
         </div>
 
-        <!-- Cards List -->
-        <div class="space-y-4">
-            @forelse($portCalls as $call)
-                <div class="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm hover:shadow-lg transition-all group relative overflow-hidden">
-                    <!-- Status Strip -->
-                    <div class="absolute left-0 top-0 bottom-0 w-1.5 
-                        {{ $call->status === 'alongside' ? 'bg-green-500' : 
-                           ($call->status === 'anchored' ? 'bg-amber-500' : 
-                           ($call->status === 'completed' ? 'bg-slate-300' : 'bg-indigo-500')) }}"></div>
+        @if($activeTab === 'commercial')
+            <!-- Consolidated Consolidated Financial Dashboard -->
+            <div class="space-y-8 animate-in fade-in duration-300">
+                <!-- 1. Total Aggregated Exposure (The "Money" Card) -->
+                <div class="bg-slate-900 rounded-3xl p-8 text-white relative overflow-hidden shadow-2xl">
+                    <div class="absolute top-0 right-0 -mr-16 -mt-16 w-64 h-64 bg-indigo-500 rounded-full blur-3xl opacity-20"></div>
+                    <div class="relative z-10 text-center">
+                         <p class="text-slate-400 font-bold uppercase tracking-[0.2em] text-xs mb-2">Total Unbilled Exposure</p>
+                         <h2 class="text-5xl font-black tracking-tight text-white mb-4">RM {{ number_format($total_exposure, 2) }}</h2>
+                         <p class="text-sm text-slate-400">Consolidated running costs across all port services.</p>
+                    </div>
+                </div>
 
-                    <div class="pl-4 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
-                        <!-- Vessel Info -->
+                <!-- 2. Interactive KPI Cards -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <!-- Marine Ops Card -->
+                    <div wire:click="toggleSection('marine')" class="cursor-pointer group bg-white rounded-3xl p-6 border-2 transition-all hover:shadow-xl relative overflow-hidden {{ $activeSection === 'marine' ? 'border-indigo-600 ring-4 ring-indigo-50' : 'border-slate-100 hover:border-indigo-300' }}">
+                        <div class="flex justify-between items-start mb-4">
+                            <div class="w-12 h-12 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center group-hover:scale-110 transition-transform">
+                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                            </div>
+                            <span class="px-2 py-1 rounded-lg bg-indigo-100 text-indigo-700 font-bold text-[10px] uppercase group-hover:bg-indigo-600 group-hover:text-white transition-colors">Marine Ops</span>
+                        </div>
+                        <p class="text-3xl font-black text-slate-900 mb-1">RM {{ number_format($marine['exposure'], 2) }}</p>
+                        <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">{{ $marine['count'] }} Active Vessels</p>
+                        
+                        @if($activeSection === 'marine')
+                        <div class="absolute inset-x-0 bottom-0 h-1 bg-indigo-600"></div>
+                        @endif
+                    </div>
+
+                    <!-- Yard Ops Card -->
+                    <div wire:click="toggleSection('yard')" class="cursor-pointer group bg-white rounded-3xl p-6 border-2 transition-all hover:shadow-xl relative overflow-hidden {{ $activeSection === 'yard' ? 'border-emerald-600 ring-4 ring-emerald-50' : 'border-slate-100 hover:border-emerald-300' }}">
+                         <div class="flex justify-between items-start mb-4">
+                            <div class="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center group-hover:scale-110 transition-transform">
+                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
+                            </div>
+                            <span class="px-2 py-1 rounded-lg bg-emerald-100 text-emerald-700 font-bold text-[10px] uppercase group-hover:bg-emerald-600 group-hover:text-white transition-colors">Yard Storage</span>
+                        </div>
+                        <p class="text-3xl font-black text-slate-900 mb-1">RM {{ number_format($yard['exposure'], 2) }}</p>
+                        <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">{{ $yard['count'] }} Items Stored</p>
+
+                        @if($activeSection === 'yard')
+                        <div class="absolute inset-x-0 bottom-0 h-1 bg-emerald-600"></div>
+                        @endif
+                    </div>
+
+                    <!-- Asset Ops Card -->
+                    <div wire:click="toggleSection('assets')" class="cursor-pointer group bg-white rounded-3xl p-6 border-2 transition-all hover:shadow-xl relative overflow-hidden {{ $activeSection === 'assets' ? 'border-amber-500 ring-4 ring-amber-50' : 'border-slate-100 hover:border-amber-300' }}">
+                         <div class="flex justify-between items-start mb-4">
+                            <div class="w-12 h-12 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center group-hover:scale-110 transition-transform">
+                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"></path></svg>
+                            </div>
+                            <span class="px-2 py-1 rounded-lg bg-amber-100 text-amber-700 font-bold text-[10px] uppercase group-hover:bg-amber-600 group-hover:text-white transition-colors">Equipment</span>
+                        </div>
+                        <p class="text-3xl font-black text-slate-900 mb-1">RM {{ number_format($assets['exposure'], 2) }}</p>
+                        <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">{{ $assets['count'] }} Active Rentals</p>
+
+                        @if($activeSection === 'assets')
+                        <div class="absolute inset-x-0 bottom-0 h-1 bg-amber-500"></div>
+                        @endif
+                    </div>
+                </div>
+
+                <!-- 3. Drill Down Detail Sections -->
+                
+                <!-- MARINE DETAILS -->
+                @if($activeSection === 'marine')
+                <div class="bg-white rounded-3xl border border-indigo-100 shadow-xl shadow-indigo-900/10 overflow-hidden animate-in slide-in-from-top-4 duration-300">
+                    <div class="p-6 border-b border-indigo-50 bg-indigo-50/50">
+                        <h3 class="font-black text-indigo-900 uppercase tracking-widest text-xs">Live Marine Charges</h3>
+                    </div>
+                    <div class="p-6">
+                        @forelse($marine['items'] as $call)
+                        <div class="flex items-center justify-between p-4 bg-white border border-slate-100 rounded-xl mb-2 hover:border-indigo-200 transition-colors">
+                            <div class="flex items-center gap-4">
+                                <div class="w-10 h-10 rounded-lg bg-slate-50 flex items-center justify-center font-bold text-slate-400">
+                                    {{ substr($call->vessel->name, 0, 1) }}
+                                </div>
+                                <div>
+                                    <p class="font-bold text-slate-900">{{ $call->vessel->name }}</p>
+                                    <p class="text-xs text-slate-500 uppercase">
+                                        {{ $call->berth->name ?? 'Unassigned' }} • 
+                                        @if($call->atb)
+                                        Berth: {{ $call->atb->format('d M H:i') }}
+                                        @else
+                                        ETA: {{ $call->eta->format('d M H:i') }}
+                                        @endif
+                                    </p>
+                                </div>
+                            </div>
+                            <div class="text-right">
+                                 <p class="font-black text-indigo-600">RM {{ number_format($call->invoice->total_amount ?? 0, 2) }}</p>
+                                 <p class="text-[10px] font-bold text-slate-400 uppercase">Running Total</p>
+                            </div>
+                        </div>
+                        @empty
+                        <p class="text-center text-slate-400 text-sm">No active marine operations.</p>
+                        @endforelse
+                    </div>
+                </div>
+                @endif
+
+                <!-- YARD DETAILS -->
+                @if($activeSection === 'yard')
+                <div class="bg-white rounded-3xl border border-emerald-100 shadow-xl shadow-emerald-900/10 overflow-hidden animate-in slide-in-from-top-4 duration-300">
+                     <div class="p-6 border-b border-emerald-50 bg-emerald-50/50">
+                        <h3 class="font-black text-emerald-900 uppercase tracking-widest text-xs">Warehouse & Yard Storage</h3>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left text-xs">
+                            <thead class="bg-emerald-50/30 text-slate-500 font-bold uppercase tracing-wider border-b border-emerald-50">
+                                <tr>
+                                    <th class="px-6 py-4">Consignment</th>
+                                    <th class="px-6 py-4">Zone</th>
+                                    <th class="px-6 py-4 text-center">Volume</th>
+                                    <th class="px-6 py-4 text-center">Days</th>
+                                    <th class="px-6 py-4 text-right">Est. Cost</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-emerald-50">
+                                @foreach($yard['items'] as $item)
+                                <tr class="hover:bg-emerald-50/20 transition-colors">
+                                    <td class="px-6 py-4">
+                                        <p class="font-bold text-slate-900">{{ $item['tracking_number'] }}</p>
+                                        <p class="text-[10px] text-slate-400 truncate max-w-[200px]">{{ $item['description'] }}</p>
+                                        @if($item['is_dg'])
+                                            <span class="text-[9px] font-black text-red-600 bg-red-50 px-1 py-0.5 rounded border border-red-100 uppercase ml-1">DG Cargo</span>
+                                        @endif
+                                    </td>
+                                    <td class="px-6 py-4">
+                                        <span class="px-2 py-1 rounded-lg bg-white border border-slate-200 text-slate-600 font-bold text-[10px] uppercase">{{ $item['zone_type'] }}</span>
+                                    </td>
+                                    <td class="px-6 py-4 text-center font-bold text-slate-700">{{ $item['volume_m3'] }} m³</td>
+                                    <td class="px-6 py-4 text-center font-bold text-slate-700">{{ $item['days_stored'] }}</td>
+                                    <td class="px-6 py-4 text-right font-black text-emerald-700">RM {{ number_format($item['total'], 2) }}</td>
+                                </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                @endif
+
+                <!-- ASSET DETAILS -->
+                @if($activeSection === 'assets')
+                <div class="bg-white rounded-3xl border border-amber-100 shadow-xl shadow-amber-900/10 overflow-hidden animate-in slide-in-from-top-4 duration-300">
+                    <div class="p-6 border-b border-amber-50 bg-amber-50/50">
+                        <h3 class="font-black text-amber-900 uppercase tracking-widest text-xs">Machine & Equipment Rentals</h3>
+                    </div>
+                    <div class="p-6 grid grid-cols-1 md:grid-cols-2 gap-4">
+                        @forelse($assets['items'] as $booking)
+                        <div class="flex items-center justify-between p-4 bg-white border border-slate-100 rounded-xl hover:border-amber-300 transition-colors">
+                            <div class="flex items-center gap-3">
+                                <div class="w-12 h-12 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center font-bold text-lg">
+                                    {{ substr($booking->asset->name, 0, 1) }}
+                                </div>
+                                <div>
+                                    <p class="font-bold text-slate-900">{{ $booking->asset->name }}</p>
+                                    <p class="text-xs text-slate-500 uppercase">{{ $booking->reference_no }} • {{ $booking->start_time->diffForHumans() }}</p>
+                                </div>
+                            </div>
+                            <div class="text-right">
+                                 @php
+                                    $hours = max(1, now()->diffInHours($booking->start_time));
+                                    $estCost = $hours * ($booking->asset->rate_per_hour ?? 0);
+                                 @endphp
+                                 <p class="font-black text-amber-600">RM {{ number_format($estCost, 2) }}</p>
+                                 <p class="text-[10px] font-bold text-slate-400 uppercase">Est. Cost</p>
+                            </div>
+                        </div>
+                        @empty
+                         <p class="text-center text-slate-400 text-sm col-span-2">No active rentals.</p>
+                        @endforelse
+                    </div>
+                </div>
+                @endif
+
+                <!-- Billing History (Always Visible at Bottom) -->
+                <div class="bg-white rounded-3xl p-8 border border-slate-200 shadow-sm">
+                    <h3 class="font-black text-slate-900 uppercase tracking-widest text-xs mb-6 flex items-center gap-2">
+                        <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                        Recent Invoices
+                    </h3>
+                     <div class="space-y-4">
+                        @forelse($invoices as $invoice)
+                        <div class="flex items-center justify-between p-4 rounded-xl bg-slate-50 border border-slate-100 hover:border-indigo-200 transition-colors group cursor-pointer">
+                            <div class="flex items-center gap-4">
+                                 <div class="w-10 h-10 rounded-full bg-white border border-slate-200 flex items-center justify-center text-slate-400 group-hover:bg-indigo-600 group-hover:text-white transition-colors">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path></svg>
+                                 </div>
+                                <div>
+                                    <p class="text-sm font-black text-slate-900">{{ $invoice->invoice_no }}</p>
+                                    <p class="text-[10px] text-slate-400 font-bold uppercase">{{ $invoice->issued_date->format('d M Y') }} • {{ $invoice->status }}</p>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-6">
+                                <p class="text-lg font-black text-slate-900">RM {{ number_format($invoice->total_amount, 2) }}</p>
+                                <a href="{{ route('invoice.print', $invoice->id) }}" target="_blank" class="px-4 py-2 bg-white rounded-lg border border-slate-200 text-slate-600 text-xs font-bold uppercase tracking-wider hover:bg-slate-50 transition-all">
+                                    Download PDF
+                                </a>
+                            </div>
+                        </div>
+                        @empty
+                        <p class="text-center text-slate-400 text-sm py-4">No invoices generated yet.</p>
+                        @endforelse
+                    </div>
+                </div>
+
+            </div>
+            
+        @elseif($activeTab === 'live')
+        <!-- Live Operations (Marine, Yard, Assets) -->
+        <div class="space-y-8 animate-in fade-in duration-300">
+            
+            <!-- 1. Marine Operations -->
+            <div class="space-y-4">
+                <h3 class="font-black text-indigo-900 uppercase tracking-widest text-xs flex items-center gap-2">
+                    <span class="w-2 h-2 rounded-full bg-indigo-500"></span> Marine Operations
+                </h3>
+                @forelse($liveVessels as $call)
+                <div class="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm hover:border-indigo-300 transition-all group relative overflow-hidden">
+                    <div class="absolute left-0 top-0 bottom-0 w-1.5 bg-indigo-500"></div>
+                    <div class="pl-4 flex flex-col md:flex-row items-center justify-between gap-6">
                         <div class="flex items-center gap-4">
-                            <div class="w-12 h-12 rounded-xl flex items-center justify-center font-bold text-lg
-                                {{ $call->status === 'alongside' ? 'bg-green-50 text-green-600' : 'bg-slate-50 text-slate-500' }}">
+                            <div class="w-12 h-12 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center font-bold text-lg">
                                 {{ substr($call->vessel->name, 0, 1) }}
                             </div>
                             <div>
                                 <h3 class="font-bold text-lg text-slate-900">{{ $call->vessel->name }}</h3>
-                                <p class="text-sm text-slate-500">{{ $call->vessel->vessel_type }} • {{ $call->vessel->imo_number }}</p>
+                                <p class="text-sm text-slate-500">{{ $call->berth->name ?? 'Unassigned' }} • {{ $call->status }}</p>
                             </div>
                         </div>
-
-                        <!-- Timeline Visual -->
-                        <div class="flex-1 w-full md:w-auto px-4">
-                             <div class="flex items-center justify-between text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">
-                                <span>ETA</span>
-                                <span class="{{ $call->status === 'alongside' ? 'text-green-600 animate-pulse' : '' }}">{{ $call->status }}</span>
-                                <span>ETD</span>
-                             </div>
-                             <div class="h-2 bg-slate-100 rounded-full overflow-hidden relative">
-                                 <!-- Progress Bar Logic -->
-                                 @php
-                                    $progress = 0;
-                                    if ($call->status === 'alongside' && $call->atb) {
-                                        $duration = $call->atb->diffInMinutes($call->etd, false);
-                                        $elapsed = $call->atb->diffInMinutes(now(), false);
-                                        $progress = $duration > 0 ? min(100, max(5, ($elapsed / $duration) * 100)) : 0;
-                                    } elseif ($call->status === 'completed') {
-                                        $progress = 100;
-                                    }
-                                 @endphp
-                                 <div class="absolute left-0 top-0 bottom-0 bg-indigo-500 transition-all duration-1000" style="width: {{ $progress }}%"></div>
-                             </div>
+                        <div class="text-right">
+                             <p class="text-xs font-bold text-slate-400 uppercase">Live Charges</p>
+                             <p class="font-black text-indigo-600">RM {{ number_format($call->invoice->total_amount ?? 0, 2) }}</p>
+                             <button wire:click="openServiceModal({{ $call->id }})" class="mt-2 text-[10px] bg-indigo-50 text-indigo-700 px-2 py-1 rounded border border-indigo-200 font-bold hover:bg-indigo-100 uppercase tracking-wide">
+                                + Service
+                            </button>
                         </div>
-
-                        <!-- Actions / Info -->
-                        <div class="text-right min-w-[120px]">
-                            @if($call->status === 'alongside')
-                                <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">Berth</p>
-                                <p class="font-bold text-slate-900">{{ $call->berth->name ?? 'Unassigned' }}</p>
-
-                                <button wire:click="openServiceModal({{ $call->id }})" class="mt-2 text-[10px] bg-teal-50 text-teal-700 px-2 py-1 rounded border border-teal-200 font-bold hover:bg-teal-100 transition-colors uppercase tracking-wide">
-                                    + Request Service
-                                </button>
-                                
-                                @if($call->invoice)
-                                     <span class="inline-block mt-1 px-2 py-0.5 rounded text-[10px] bg-green-100 text-green-700 font-bold border border-green-200">
-                                        Active Billing
-                                     </span>
-                                @endif
-                            @else
-                                <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">Time</p>
-                                <p class="font-bold text-slate-900">{{ $call->eta->format('M d, H:i') }}</p>
-                            @endif
-                        </div>
-                    </div>
-                    
-                    <!-- Expanded Details (Hover or Click in real app) -->
-                    <div class="mt-4 pt-4 border-t border-slate-50 flex gap-4 text-xs text-slate-500">
-                         <div class="flex gap-2 items-center">
-                            <svg class="w-4 h-4 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
-                            {{ $call->berth->name ?? 'Berth Pending' }}
-                         </div>
-                         <div class="flex gap-2 items-center">
-                            <svg class="w-4 h-4 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
-                            Ref: {{ $call->reference_no }}
-                         </div>
                     </div>
                 </div>
+                @empty
+                <div class="text-center py-6 bg-slate-50 rounded-xl border border-dashed border-slate-200 text-slate-400 text-sm">No active marine operations.</div>
+                @endforelse
+            </div>
+
+            <!-- 2. Yard Operations -->
+            <div class="space-y-4">
+                <h3 class="font-black text-emerald-900 uppercase tracking-widest text-xs flex items-center gap-2">
+                    <span class="w-2 h-2 rounded-full bg-emerald-500"></span> Yard Storage
+                </h3>
+                @if($liveYardItems->count() > 0)
+                <div class="bg-white rounded-2xl border border-slate-200 overflow-hidden">
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left text-xs">
+                            <thead class="bg-slate-50 text-slate-500 font-bold uppercase border-b border-slate-100">
+                                <tr>
+                                    <th class="px-6 py-3">Consignment</th>
+                                    <th class="px-6 py-3">Zone</th>
+                                    <th class="px-6 py-3 text-center">Volume</th>
+                                    <th class="px-6 py-3 text-center">Received</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-50">
+                                @foreach($liveYardItems as $item)
+                                <tr class="hover:bg-emerald-50/10">
+                                    <td class="px-6 py-3 block">
+                                        <span class="font-bold text-slate-900">{{ $item->tracking_number }}</span>
+                                        @if($item->is_dg_cargo)
+                                            <span class="ml-2 text-[9px] font-bold text-red-600 bg-red-50 px-1 rounded uppercase">DG</span>
+                                        @endif
+                                    </td>
+                                    <td class="px-6 py-3">{{ $item->zone->zone_name ?? 'General' }}</td>
+                                    <td class="px-6 py-3 text-center">{{ $item->volume_m3 }} m³</td>
+                                    <td class="px-6 py-3 text-center">{{ $item->received_at->format('d M H:i') }}</td>
+                                </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                @else
+                <div class="text-center py-6 bg-slate-50 rounded-xl border border-dashed border-slate-200 text-slate-400 text-sm">No cargo in storage.</div>
+                @endif
+            </div>
+
+            <!-- 3. Asset Operations -->
+            <div class="space-y-4">
+                <h3 class="font-black text-amber-900 uppercase tracking-widest text-xs flex items-center gap-2">
+                    <span class="w-2 h-2 rounded-full bg-amber-500"></span> Equipment Rentals
+                </h3>
+                @forelse($liveAssets as $booking)
+                <div class="bg-white rounded-2xl p-4 border border-slate-200 shadow-sm hover:border-amber-300 transition-all flex items-center justify-between">
+                    <div class="flex items-center gap-4">
+                        <div class="w-10 h-10 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center font-bold">
+                            {{ substr($booking->asset->name, 0, 1) }}
+                        </div>
+                        <div>
+                            <p class="font-bold text-slate-900">{{ $booking->asset->name }}</p>
+                            <p class="text-xs text-slate-500 uppercase">Deployed: {{ $booking->start_time->format('d M H:i') }}</p>
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        @php
+                            $hours = max(1, now()->diffInHours($booking->start_time));
+                            $estCost = $hours * ($booking->asset->rate_per_hour ?? 0);
+                        @endphp
+                        <p class="font-black text-amber-600">RM {{ number_format($estCost, 2) }}</p>
+                        <span class="text-[10px] bg-amber-100 text-amber-700 px-2 py-1 rounded font-bold uppercase">Active</span>
+                    </div>
+                </div>
+                @empty
+                <div class="text-center py-6 bg-slate-50 rounded-xl border border-dashed border-slate-200 text-slate-400 text-sm">No active equipment rentals.</div>
+                @endforelse
+            </div>
+        </div>
+
+        @elseif($activeTab === 'scheduled')
+        <!-- Scheduled Berthing Requests -->
+        <div class="space-y-4 animate-in fade-in duration-300">
+            @forelse($portCalls as $call)
+            <div class="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm hover:shadow-lg transition-all relative overflow-hidden">
+                <div class="absolute left-0 top-0 bottom-0 w-1.5 bg-indigo-500"></div>
+                <div class="pl-4 flex flex-col md:flex-row items-center justify-between gap-6">
+                    <div class="flex items-center gap-4">
+                        <div class="w-12 h-12 rounded-xl bg-slate-50 text-slate-500 flex items-center justify-center font-bold text-lg">
+                            {{ substr($call->vessel->name, 0, 1) }}
+                        </div>
+                        <div>
+                            <h3 class="font-bold text-lg text-slate-900">{{ $call->vessel->name }}</h3>
+                            <p class="text-sm text-slate-500">{{ $call->vessel->vessel_type }} • {{ $call->status }}</p>
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <p class="text-xs font-bold text-slate-400 uppercase">ETA</p>
+                        <p class="font-bold text-slate-900">{{ $call->eta->format('d M, H:i') }}</p>
+                    </div>
+                </div>
+            </div>
             @empty
-                <div class="text-center py-12 bg-white rounded-2xl border border-dashed border-slate-300">
-                    <div class="inline-flex justify-center items-center w-16 h-16 rounded-full bg-slate-50 text-slate-300 mb-4">
-                        <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
-                    </div>
-                    <h3 class="text-lg font-bold text-slate-900">No Vessels Found</h3>
-                    <p class="text-slate-500">You don't have any {{ $activeTab }} bookings at the moment.</p>
+            <div class="text-center py-12 bg-white rounded-2xl border border-dashed border-slate-300">
+                <div class="inline-flex justify-center items-center w-16 h-16 rounded-full bg-slate-50 text-slate-300 mb-4">
+                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
                 </div>
+                <h3 class="text-lg font-bold text-slate-900">No Scheduled Arrivals</h3>
+                <p class="text-slate-500">You don't have any pending berthing requests.</p>
+            </div>
             @endforelse
         </div>
+
+        @elseif($activeTab === 'history')
+        <!-- Unified History Timeline -->
+        <div class="space-y-4 animate-in fade-in duration-300">
+            @forelse($history as $item)
+            <div class="bg-white rounded-2xl p-4 border border-slate-200 hover:border-slate-300 transition-all flex items-center justify-between group">
+                <div class="flex items-center gap-4">
+                    <!-- Icon based on type -->
+                    <div class="w-10 h-10 rounded-full flex items-center justify-center font-bold text-lg
+                        {{ $item['type'] === 'marine' ? 'bg-indigo-50 text-indigo-600' : 
+                           ($item['type'] === 'yard' ? 'bg-emerald-50 text-emerald-600' : 'bg-amber-50 text-amber-600') }}">
+                        @if($item['type'] === 'marine') ⚓ @elseif($item['type'] === 'yard') 📦 @else 🚜 @endif
+                    </div>
+                    <div>
+                        <p class="font-bold text-slate-900">{{ $item['description'] }}</p>
+                        <p class="text-xs text-slate-500 uppercase">{{ $item['reference'] }} • {{ $item['date']->format('d M Y, H:i') }}</p>
+                    </div>
+                </div>
+                <div class="flex items-center gap-4">
+                    <div class="text-right">
+                        @if($item['amount'] > 0)
+                        <p class="font-bold text-slate-900">RM {{ number_format($item['amount'], 2) }}</p>
+                        @endif
+                        <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400">{{ $item['status'] }}</span>
+                    </div>
+                    @if($item['invoice_id'])
+                    <a href="{{ route('invoice.print', $item['invoice_id']) }}" target="_blank" class="p-2 text-slate-400 hover:text-indigo-600 transition-colors">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                    </a>
+                    @endif
+                </div>
+            </div>
+            @empty
+            <div class="text-center py-12 bg-white rounded-2xl border border-dashed border-slate-300">
+                <p class="text-slate-500">No history records found.</p>
+            </div>
+            @endforelse
+        </div>
+        @endif
     </div>
 
     <!-- New Berth Request Modal -->
@@ -440,3 +754,4 @@
             <span x-text="toast.message"></span>
         </div>
     </div>
+</div>

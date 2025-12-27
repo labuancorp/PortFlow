@@ -7,6 +7,7 @@ use Livewire\WithPagination;
 use App\Models\PortAsset;
 use App\Models\AssetBooking;
 use App\Services\AuditService;
+use App\Services\WarehouseBillingService;
 
 class Inventory extends Component
 {
@@ -85,9 +86,6 @@ class Inventory extends Component
             'technician_name' => $this->mTechnician,
         ]);
 
-        // If status was maintenance, we could prompt to set back to available
-        // $this->selectedAsset->update(['status' => 'available']);
-
         AuditService::log('Create', 'Maintenance', $this->assetId, "Logged {$this->mType} for {$this->selectedAsset->identifier}");
         
         $this->showMaintenanceModal = false;
@@ -127,13 +125,36 @@ class Inventory extends Component
     public function approveBooking($bookingId)
     {
         $booking = AssetBooking::find($bookingId);
-        $booking->update(['status' => 'approved']);
+        $booking->update(['status' => 'active']);
         
         // Update asset status
         $booking->asset->update(['status' => 'occupied']);
 
-        AuditService::log('Update', 'Bookings', $booking->id, "Approved booking ref: {$booking->reference_no}");
-        $this->dispatch('notify', message: 'Booking approved. Resource allocated.', type: 'success');
+        AuditService::log('Update', 'Bookings', $booking->id, "Approved and deployed booking ref: {$booking->reference_no}");
+        $this->dispatch('notify', message: 'Booking approved. Resource deployed.', type: 'success');
+    }
+
+    public function completeBooking($bookingId)
+    {
+        $booking = AssetBooking::with('asset')->find($bookingId);
+        
+        if (!$booking) return;
+
+        // Set end time to now for accurate billing
+        $booking->end_time = now();
+        $booking->status = 'completed';
+        $booking->save();
+        
+        // Free up the asset
+        $booking->asset->update(['status' => 'available']);
+
+        // Generate Invoice
+        $billingService = new WarehouseBillingService();
+        $invoice = $billingService->createInvoiceFromAssetBooking($booking);
+
+        AuditService::log('Update', 'Bookings', $booking->id, "Completed booking {$booking->reference_no}. Invoice generated: " . ($invoice ? $invoice->invoice_no : 'N/A'));
+        
+        $this->dispatch('notify', message: 'Resource returned. Billing finalized.', type: 'success');
     }
 
     public function render()

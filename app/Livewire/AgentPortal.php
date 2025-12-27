@@ -12,19 +12,20 @@ use Illuminate\Support\Facades\Auth;
 class AgentPortal extends Component
 {
     public $agentId;
-    public $activeTab = 'live'; // live, scheduled, history
+    public $activeTab = 'live'; // live, scheduled, history, commercial
+    
+    // Drill Down State
+    public $activeSection = null; // 'marine', 'yard', 'assets'
     
     // Modal State
     public $showModal = false;
     public $showVesselModal = false;
     
-    // Request Form Fields
+    // Request Form Fields - Berthing
     public $vessel_id;
     public $eta;
     public $etd;
-    public $draft_arrival;
-    public $draft_departure;
-
+    
     // Vessel Registration Fields
     public $new_vessel_name = '';
     public $new_vessel_type = 'Offshore Support Vessel';
@@ -105,7 +106,7 @@ class AgentPortal extends Component
 
     public function openRequestModal()
     {
-        $this->reset(['vessel_id', 'eta', 'etd', 'draft_arrival', 'draft_departure']);
+        $this->reset(['vessel_id', 'eta', 'etd']);
         $this->showModal = true;
     }
 
@@ -127,8 +128,8 @@ class AgentPortal extends Component
 
         Vessel::create([
             'name' => $this->new_vessel_name,
-            'organization_id' => null, // Deprecated owner field
-            'agent_id' => $this->agentId, // IMPORTANT: Link to this agent
+            'organization_id' => null, // Deprecated
+            'agent_id' => $this->agentId,
             'vessel_type' => $this->new_vessel_type,
             'imo_number' => $this->new_vessel_imo,
             'loa_meters' => $this->new_vessel_loa,
@@ -142,27 +143,20 @@ class AgentPortal extends Component
 
     public function getSmartSuggestions()
     {
-        // Validate that we have the required fields
         if (!$this->vessel_id || !$this->eta || !$this->etd) {
             $this->dispatch('notify', message: 'Please select vessel and dates first!');
             return;
         }
 
         $vessel = Vessel::find($this->vessel_id);
-        
-        if (!$vessel) {
-            return;
-        }
+        if (!$vessel) return;
 
-        // Use AI optimization service
         $optimizer = new \App\Services\BerthOptimizationService();
         $suggestions = $optimizer->findOptimalBerths($vessel, $this->eta, $this->etd);
 
-        // Take top 3 suggestions
         $this->berthSuggestions = array_slice($suggestions, 0, 3);
         $this->showSuggestions = true;
 
-        // Auto-select the best suggestion if available
         if (!empty($this->berthSuggestions) && $this->berthSuggestions[0]['available']) {
             $this->selectedSuggestedBerth = $this->berthSuggestions[0]['berth']->id;
         }
@@ -180,7 +174,7 @@ class AgentPortal extends Component
         PortCall::create([
             'vessel_id' => $this->vessel_id,
             'agent_id' => $this->agentId,
-            'assigned_berth_id' => $this->selectedSuggestedBerth, // Use AI suggestion if selected
+            'assigned_berth_id' => $this->selectedSuggestedBerth,
             'status' => 'requested',
             'eta' => $this->eta,
             'etd' => $this->etd,
@@ -188,22 +182,90 @@ class AgentPortal extends Component
         ]);
 
         $this->showModal = false;
-        $this->activeTab = 'scheduled'; // Switch tab to show new request
+        $this->activeTab = 'scheduled';
         $this->dispatch('notify', message: 'Berth request submitted successfully!');
+    }
+    
+    // Toggle drill-down section
+    public function toggleSection($section)
+    {
+        if ($this->activeSection === $section) {
+            $this->activeSection = null;
+        } else {
+            $this->activeSection = $section;
+        }
     }
 
     public function mount()
     {
-        // For Demo purposes: Use authenticated user's org
-        // UNLESS the user is an Admin/Authority, then show the Agent view for demo
         $user = Auth::user();
         if ($user && $user->organization_id && $user->role !== 'admin') {
             $this->agentId = $user->organization_id;
         } else {
-            // Fallback for Admins or Guests: Show the first agent's view
             $agent = Organization::where('type', 'agent')->first();
             $this->agentId = $agent ? $agent->id : null;
         }
+    }
+
+    public function getFinancialData()
+    {
+        // 1. Yard / Warehouse Exposure
+        $warehouseService = new \App\Services\WarehouseBillingService();
+        $yardData = $warehouseService->calculateLiveCharges($this->agentId);
+        
+        // 2. Asset Rental Exposure
+        $activeAssetBookings = \App\Models\AssetBooking::with('asset')
+            ->where('organization_id', $this->agentId)
+            ->where('status', 'active')
+            ->get();
+            
+        $assetExposure = 0;
+        foreach ($activeAssetBookings as $booking) {
+            $start = $booking->start_time;
+            $now = now();
+            // Estimate based on hourly rate for now
+            $hours = max(1, $now->diffInHours($start));
+            $assetExposure += $hours * ($booking->asset->rate_per_hour ?? 0);
+        }
+
+        // 3. Marine / Vessel Exposure (Port Calls)
+        $marineService = new \App\Services\BillingService();
+        $activePortCalls = PortCall::where('agent_id', $this->agentId)
+            ->where('status', 'alongside')
+            ->get();
+            
+        $marineExposure = 0;
+        foreach ($activePortCalls as $call) {
+            // Update the draft invoice to reflect current time
+            $invoice = $marineService->generateInvoice($call);
+            $marineExposure += $invoice->total_amount;
+        }
+
+        // 4. Invoices History
+        $invoices = \App\Models\Invoice::where('organization_id', $this->agentId)
+            ->latest()
+            ->take(10)
+            ->get();
+            
+        return [
+            'yard' => [
+                'exposure' => $yardData['total_charges'],
+                'count' => $yardData['items_count'],
+                'items' => $yardData['items_breakdown']
+            ],
+            'assets' => [
+                'exposure' => $assetExposure,
+                'count' => $activeAssetBookings->count(),
+                'items' => $activeAssetBookings
+            ],
+            'marine' => [
+                'exposure' => $marineExposure,
+                'count' => $activePortCalls->count(),
+                'items' => $activePortCalls
+            ],
+            'total_exposure' => $yardData['total_charges'] + $assetExposure + $marineExposure,
+            'invoices' => $invoices
+        ];
     }
 
     public function render()
@@ -211,22 +273,124 @@ class AgentPortal extends Component
         if (!$this->agentId) {
             return view('livewire.agent-portal', ['portCalls' => []]);
         }
+        
+        $params = [];
 
-        $query = PortCall::where('agent_id', $this->agentId)
-            ->with(['vessel', 'berth', 'invoice']);
-
-        if ($this->activeTab === 'live') {
-            $query->whereIn('status', ['anchored', 'alongside', 'approaching']);
+        if ($this->activeTab === 'commercial') {
+            $financialData = $this->getFinancialData();
+            $params = array_merge($params, $financialData);
+            
+        } elseif ($this->activeTab === 'live') {
+            // CONSOLIDATED LIVE OPERATIONS
+            // 1. Marine: Vessels currently alongside or anchored
+            $liveVessels = PortCall::where('agent_id', $this->agentId)
+                ->with(['vessel', 'berth', 'invoice'])
+                ->whereIn('status', ['anchored', 'alongside', 'approaching'])
+                ->orderBy('eta', 'desc')
+                ->get();
+            
+            // 2. Yard: Cargo currently in storage
+            $liveYardItems = \App\Models\CargoItem::whereHas('manifest', function($q) {
+                $q->where('agent_id', $this->agentId);
+            })
+            ->with(['zone', 'manifest'])
+            ->whereNull('discharged_at')
+            ->latest()
+            ->get();
+            
+            // 3. Assets: Equipment currently on rent
+            $liveAssets = \App\Models\AssetBooking::with(['asset', 'organization'])
+                ->where('organization_id', $this->agentId)
+                ->where('status', 'active')
+                ->latest()
+                ->get();
+            
+            $params['liveVessels'] = $liveVessels;
+            $params['liveYardItems'] = $liveYardItems;
+            $params['liveAssets'] = $liveAssets;
+            
         } elseif ($this->activeTab === 'scheduled') {
-            $query->whereIn('status', ['requested', 'approved']);
+            // SCHEDULED: Berthing requests only
+            $params['portCalls'] = PortCall::where('agent_id', $this->agentId)
+                ->with(['vessel', 'berth', 'invoice'])
+                ->whereIn('status', ['requested', 'approved'])
+                ->orderBy('eta', 'desc')
+                ->get();
+                
         } elseif ($this->activeTab === 'history') {
-            $query->whereIn('status', ['completed', 'cancelled']);
+            // CONSOLIDATED HISTORY
+            // 1. Completed Port Calls
+            $completedVessels = PortCall::where('agent_id', $this->agentId)
+                ->with(['vessel', 'berth', 'invoice'])
+                ->whereIn('status', ['completed', 'cancelled'])
+                ->orderBy('updated_at', 'desc')
+                ->limit(20)
+                ->get()
+                ->map(function($call) {
+                    return [
+                        'type' => 'marine',
+                        'date' => $call->atd ?? $call->updated_at,
+                        'description' => $call->vessel->name,
+                        'reference' => $call->reference_no,
+                        'status' => $call->status,
+                        'amount' => $call->invoice->total_amount ?? 0,
+                        'invoice_id' => $call->invoice->id ?? null,
+                    ];
+                });
+            
+            // 2. Discharged Cargo
+            $dischargedCargo = \App\Models\CargoItem::whereHas('manifest', function($q) {
+                $q->where('agent_id', $this->agentId);
+            })
+            ->with(['manifest'])
+            ->whereNotNull('discharged_at')
+            ->orderBy('discharged_at', 'desc')
+            ->limit(20)
+            ->get()
+            ->map(function($item) {
+                return [
+                    'type' => 'yard',
+                    'date' => $item->discharged_at,
+                    'description' => $item->tracking_number . ' - ' . $item->description,
+                    'reference' => $item->manifest->manifest_no ?? 'N/A',
+                    'status' => 'discharged',
+                    'amount' => 0, // Would need invoice lookup
+                    'invoice_id' => null,
+                ];
+            });
+            
+            // 3. Completed Asset Rentals
+            $completedAssets = \App\Models\AssetBooking::with(['asset'])
+                ->where('organization_id', $this->agentId)
+                ->where('status', 'completed')
+                ->orderBy('updated_at', 'desc')
+                ->limit(20)
+                ->get()
+                ->map(function($booking) {
+                    return [
+                        'type' => 'asset',
+                        'date' => $booking->end_time ?? $booking->updated_at,
+                        'description' => $booking->asset->name,
+                        'reference' => $booking->reference_no,
+                        'status' => 'completed',
+                        'amount' => $booking->total_cost ?? 0,
+                        'invoice_id' => null, // Would need invoice lookup
+                    ];
+                });
+            
+            // Merge and sort by date
+            $allHistory = $completedVessels
+                ->concat($dischargedCargo)
+                ->concat($completedAssets)
+                ->sortByDesc('date')
+                ->take(30);
+            
+            $params['history'] = $allHistory;
         }
 
-        return view('livewire.agent-portal', [
-            'portCalls' => $query->orderBy('eta', 'desc')->get(),
-            'agent' => Organization::find($this->agentId),
-            'myVessels' => Vessel::where('agent_id', $this->agentId)->get() // Only show vessels linked to this agent
-        ])->layout('components.layouts.client');
+        $params['agent'] = Organization::find($this->agentId);
+        $params['myVessels'] = Vessel::where('agent_id', $this->agentId)->get();
+
+        return view('livewire.agent-portal', $params)->layout('components.layouts.client');
     }
 }

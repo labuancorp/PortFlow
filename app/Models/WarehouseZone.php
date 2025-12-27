@@ -13,6 +13,7 @@ class WarehouseZone extends Model
         'warehouse_id', 
         'name', 
         'code', 
+        'type',
         'capacity_limit_m3', 
         'is_dg_allowed',
         'total_area_sqm',

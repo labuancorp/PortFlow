@@ -114,8 +114,9 @@
             </div>
         </div>
 
-        <!-- Pending Approvals Sidebar -->
+        <!-- Sidebar -->
         <div class="space-y-6">
+            <!-- Pending Approvals -->
             <div class="bg-white rounded-3xl shadow-sm border border-slate-200 overflow-hidden">
                 <div class="p-6 border-b border-slate-100 bg-slate-900 text-white">
                     <h3 class="font-black uppercase tracking-widest text-xs">Awaiting Approval</h3>
@@ -142,6 +143,38 @@
                     @empty
                     <div class="text-center py-8">
                         <p class="text-slate-400 font-bold uppercase text-[10px] tracking-widest">No pending requests</p>
+                    </div>
+                    @endforelse
+                </div>
+            </div>
+
+            <!-- Active Deployments -->
+            <div class="bg-white rounded-3xl shadow-sm border border-slate-200 overflow-hidden">
+                <div class="p-6 border-b border-slate-100 bg-emerald-600 text-white">
+                    <h3 class="font-black uppercase tracking-widest text-xs">Active Deployments</h3>
+                    <p class="text-[10px] text-emerald-100 font-bold uppercase mt-1">Resources currently on hire</p>
+                </div>
+                <div class="p-6 space-y-4">
+                    @forelse($activeBookings as $booking)
+                    <div class="p-4 rounded-2xl bg-slate-50 border border-slate-100 group transition-all hover:border-slate-300">
+                        <div class="flex justify-between items-start mb-2">
+                             <div>
+                                <p class="text-xs font-black text-slate-900">{{ $booking->asset->name }}</p>
+                                <p class="text-[10px] font-bold text-slate-400 uppercase">{{ $booking->organization->name }}</p>
+                             </div>
+                             <span class="text-[9px] font-black text-slate-900 bg-white px-2 py-0.5 rounded border border-slate-200">#{{ $booking->reference_no }}</span>
+                        </div>
+                        <div class="flex items-center gap-2 text-[10px] text-slate-500 mb-4">
+                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                            Deployed: {{ $booking->start_time->format('d M, H:i') }}
+                        </div>
+                        <button wire:click="completeBooking({{ $booking->id }})" wire:confirm="Are you sure you want to end this rental? This will generate the invoice instantly." class="w-full bg-slate-900 hover:bg-slate-800 text-white py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all shadow-lg shadow-slate-900/10">
+                            Check-In & Bill
+                        </button>
+                    </div>
+                    @empty
+                    <div class="text-center py-8">
+                        <p class="text-slate-400 font-bold uppercase text-[10px] tracking-widest">No active deployments</p>
                     </div>
                     @endforelse
                 </div>

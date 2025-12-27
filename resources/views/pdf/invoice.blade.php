@@ -49,10 +49,16 @@
             <p class="text-slate-600">{{ $invoice->organization->address ?? 'No Address on File' }}</p>
         </div>
         <div class="w-1/2 text-right">
-            <h3 class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">Vessel / Port Call</h3>
-            <p class="font-bold text-xl text-slate-900">{{ $invoice->portCall->vessel->name ?? 'Unknown Vessel' }}</p>
-            <p class="text-slate-600 mb-1">{{ $invoice->portCall->vessel->vessel_type ?? '' }} ({{ $invoice->portCall->vessel->imo_number ?? '' }})</p>
-            <p class="text-sm text-slate-500">Ref: {{ $invoice->portCall->reference_no ?? '-' }}</p>
+            <h3 class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">Vessel / Reference</h3>
+            @if($invoice->portCall)
+                <p class="font-bold text-xl text-slate-900">{{ $invoice->portCall->vessel->name ?? 'Unknown Vessel' }}</p>
+                <p class="text-slate-600 mb-1">{{ $invoice->portCall->vessel->vessel_type ?? '' }} ({{ $invoice->portCall->vessel->imo_number ?? '' }})</p>
+                <p class="text-sm text-slate-500">Ref: {{ $invoice->portCall->reference_no ?? '-' }}</p>
+            @else
+                <p class="font-bold text-xl text-slate-900">General Billing</p>
+                <p class="text-slate-600 mb-1">{{ $invoice->created_at->format('F Y') }} Services</p>
+                <p class="text-sm text-slate-500">Type: {{ $invoice->invoiceItems->first()->description ?? 'Miscellaneous' }}</p>
+            @endif
         </div>
     </div>
 
