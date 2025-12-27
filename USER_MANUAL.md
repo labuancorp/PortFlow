@@ -31,13 +31,13 @@ PortFlow offers a flexible pricing model tailored for single-port operators or l
 
 ### 🏢 Single License (Enterprise)
 *For a single Supply Base or Terminal.*
-*   **Cost:** USD $45,000 / Year (SaaS) or USD $180,000 (One-time Perpetual).
+*   **Cost:** RM 185,000 / Year (SaaS) or RM 740,000 (One-time Perpetual).
 *   **Includes:** Unlimited users, 24/7 technical support, and monthly updates.
 *   **Onboarding:** Professional deployment and data migration included.
 
 ### 🏢 Reseller / OEM / White-Label
 *For maritime consultants and tech providers.*
-*   **Cost:** USD $120,000 / Year (Bulk License Pack - Up to 5 Ports).
+*   **Cost:** RM 495,000 / Year (Bulk License Pack - Up to 5 Ports).
 *   **Markup Potential:** 100% (Resellers can set their own end-user pricing).
 *   **Customization:** Full white-labeling (Your Logo, Your Colors) and API access for custom integrations.
 
