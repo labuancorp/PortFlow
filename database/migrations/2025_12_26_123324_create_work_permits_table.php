@@ -17,6 +17,7 @@ return new class extends Migration
             $table->enum('type', ['hot_work', 'working_at_height', 'confined_space', 'cold_work', 'electrical']);
             $table->string('location'); // e.g., 'Berth 1', 'Workshop'
             $table->string('applicant_name');
+            $table->foreignId('organization_id')->nullable()->constrained('organizations')->onDelete('cascade');
             $table->foreignId('approved_by')->nullable()->constrained('users');
             $table->dateTime('valid_from');
             $table->dateTime('valid_to');

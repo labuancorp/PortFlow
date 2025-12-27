@@ -43,6 +43,10 @@ class ViewBooking extends Component
 
     public function updateStatus($newStatus)
     {
+        if (auth()->user()->role !== 'admin') {
+            return;
+        }
+
         $now = now();
         $updates = ['status' => $newStatus];
 

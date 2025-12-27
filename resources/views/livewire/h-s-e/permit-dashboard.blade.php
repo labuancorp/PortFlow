@@ -36,10 +36,10 @@
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
                 Simulate Conflict (Demo)
             </button>
-            <button disabled class="bg-slate-100 text-slate-400 px-6 py-3 rounded-xl font-bold flex items-center gap-2 cursor-not-allowed">
+            <a href="{{ route('hse.permits.create') }}" class="bg-indigo-600 hover:bg-indigo-500 text-white px-6 py-3 rounded-xl font-bold flex items-center gap-2 shadow-lg shadow-indigo-900/20 transition-all">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v3m0 0v3m0-3h3m-3 0H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                 Request Permit
-            </button>
+            </a>
         </div>
     </div>
 
@@ -96,11 +96,10 @@
                         </div>
                     </td>
                     <td class="px-6 py-4 text-right">
-                        @if($permit->status === 'requested')
-                            <button wire:click="approve({{ $permit->id }})" class="text-emerald-600 hover:text-emerald-800 text-xs font-bold mr-3 uppercase hover:underline">Approve</button>
-                            <button wire:click="reject({{ $permit->id }})" class="text-red-500 hover:text-red-700 text-xs font-bold uppercase hover:underline">Reject</button>
-                        @elseif($permit->status === 'approved' || $permit->status === 'active')
-                             <button wire:click="close({{ $permit->id }})" wire:confirm="Close this work permit?" class="text-slate-500 hover:text-slate-700 text-xs font-bold uppercase hover:underline">Close Permit</button>
+                        @if(auth()->user()->role === 'admin')
+                            <button wire:click="openReview({{ $permit->id }})" class="bg-slate-900 text-white px-3 py-1.5 rounded-lg text-xs font-bold hover:bg-slate-800 transition-all">Review</button>
+                        @else
+                            <button wire:click="openReview({{ $permit->id }})" class="bg-indigo-50 text-indigo-600 border border-indigo-100 px-3 py-1.5 rounded-lg text-xs font-bold hover:bg-indigo-100 transition-all">View Details</button>
                         @endif
                     </td>
                 </tr>
@@ -118,4 +117,78 @@
             {{ $permits->links() }}
         </div>
     </div>
+    <!-- Review Modal -->
+    @if($showReviewModal && $selectedPermit)
+    <div class="fixed inset-0 z-50 flex items-center justify-center p-4">
+        <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm" wire:click="closeReviewModal"></div>
+        <div class="relative bg-white w-full max-w-2xl rounded-3xl shadow-2xl border border-slate-200 overflow-hidden transform transition-all">
+            <div class="p-8">
+                <div class="flex justify-between items-start mb-6">
+                    <div>
+                        <p class="text-[10px] font-black text-indigo-600 uppercase tracking-widest leading-none mb-1">{{ $selectedPermit->control_no }}</p>
+                        <h3 class="text-2xl font-black text-slate-900 tracking-tight">Permit Dossier & Review</h3>
+                    </div>
+                    <button wire:click="closeReviewModal" class="text-slate-400 hover:text-slate-600">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                    </button>
+                </div>
+ 
+                <div class="grid grid-cols-2 gap-8 mb-8">
+                    <div class="space-y-4">
+                        <div>
+                            <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Type / Risk Level</label>
+                            <div class="flex items-center gap-2 mt-1">
+                                <span class="px-2 py-0.5 rounded bg-red-50 text-red-700 text-[10px] font-black border border-red-200 uppercase">{{ str_replace('_', ' ', $selectedPermit->type) }}</span>
+                                <span class="px-2 py-0.5 rounded bg-slate-100 text-slate-700 text-[10px] font-black border border-slate-200 uppercase">HIGH RISK</span>
+                            </div>
+                        </div>
+                        <div>
+                            <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Work Description</label>
+                            <p class="text-sm text-slate-600 font-medium leading-relaxed mt-1">{{ $selectedPermit->description ?: 'No description provided.' }}</p>
+                        </div>
+                        <div>
+                            <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Location</label>
+                            <p class="text-sm font-bold text-slate-900 mt-1">{{ $selectedPermit->location }}</p>
+                        </div>
+                    </div>
+ 
+                    <div class="bg-slate-50 rounded-2xl p-5 border border-slate-100">
+                        <label class="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-3 block">Digital Safety Proof</label>
+                        <div class="space-y-3">
+                            @foreach($safetyChecklist as $check => $value)
+                            <div class="flex items-center justify-between">
+                                <span class="text-[11px] font-bold text-slate-600">{{ $check }}</span>
+                                @if(is_bool($value))
+                                    @if($value)
+                                        <svg class="w-4 h-4 text-emerald-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg>
+                                    @else
+                                        <svg class="w-4 h-4 text-red-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"></path></svg>
+                                    @endif
+                                @else
+                                    <span class="text-[10px] font-black text-indigo-600">{{ $value }}</span>
+                                @endif
+                            </div>
+                            @endforeach
+                        </div>
+                    </div>
+                </div>
+ 
+                <div class="flex gap-3 pt-6 border-t border-slate-100">
+                    <button wire:click="closeReviewModal" class="px-6 py-2.5 rounded-xl border border-slate-200 font-bold text-slate-500 hover:bg-slate-50 transition-colors text-sm">Close</button>
+                    
+                    @if(auth()->user()->role === 'admin')
+                        @if($selectedPermit->status === 'requested')
+                            <div class="flex-1 flex gap-2">
+                                <button wire:click="reject({{ $selectedPermit->id }})" class="flex-1 px-6 py-2.5 bg-red-100 text-red-700 hover:bg-red-200 rounded-xl font-bold uppercase tracking-widest text-xs transition-all">Reject Permit</button>
+                                <button wire:click="approve({{ $selectedPermit->id }})" class="flex-2 px-8 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl font-bold uppercase tracking-widest text-xs shadow-lg shadow-emerald-900/20 transition-all">Approve & Issue</button>
+                            </div>
+                        @elseif(in_array($selectedPermit->status, ['approved', 'active']))
+                            <button wire:click="close({{ $selectedPermit->id }})" class="flex-1 px-8 py-2.5 bg-slate-900 hover:bg-slate-800 text-white rounded-xl font-bold uppercase tracking-widest text-xs transition-all">Complete & Close Work</button>
+                        @endif
+                    @endif
+                </div>
+            </div>
+        </div>
+    </div>
+    @endif
 </div>

@@ -61,6 +61,7 @@ class PermitCreate extends Component
             'type' => $this->type,
             'location' => $this->location,
             'applicant_name' => $this->applicant_name,
+            'organization_id' => auth()->user()->organization_id,
             'valid_from' => $this->valid_from,
             'valid_to' => $this->valid_to,
             'status' => 'requested',

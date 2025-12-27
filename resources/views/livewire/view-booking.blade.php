@@ -60,6 +60,7 @@
                     </div>
                 </div>
                 
+                @if(auth()->user()->role === 'admin')
                 <!-- Operational Controls (Ground Ops) -->
                 <div class="mb-6 p-4 bg-slate-100 rounded-xl border border-slate-200">
                     <h5 class="text-xs font-bold text-slate-500 uppercase tracking-widest mb-3">Ground Operations</h5>
@@ -93,6 +94,7 @@
                         @endif
                     </div>
                 </div>
+                @endif
 
                 <!-- Live Invoice Section -->
                 <div class="mb-6 border border-slate-200 rounded-xl overflow-hidden">

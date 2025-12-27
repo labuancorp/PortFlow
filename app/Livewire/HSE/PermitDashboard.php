@@ -12,7 +12,28 @@ class PermitDashboard extends Component
     use WithPagination;
 
     public $filterStatus = 'all';
+    public $showReviewModal = false;
+    public $selectedPermit = null;
+    public $safetyChecklist = [];
     
+    public function openReview($id)
+    {
+        $this->selectedPermit = WorkPermit::find($id);
+        $this->safetyChecklist = [
+            'JSA Verified' => true,
+            'PPE Inspection' => true,
+            'Isolation Confirmed' => $this->selectedPermit->type !== 'cold_work',
+            'Gas Test Result' => $this->selectedPermit->type === 'hot_work' ? '0.0% LEL (Safe)' : 'N/A',
+            'Standby Man Appointed' => true
+        ];
+        $this->showReviewModal = true;
+    }
+
+    public function closeReviewModal()
+    {
+        $this->showReviewModal = false;
+    }
+
     public function createTestConflict() 
     {
         WorkPermit::create([
@@ -39,9 +60,16 @@ class PermitDashboard extends Component
             return;
         }
 
+        // 2. Role Check
+        if (auth()->user()->role !== 'admin') {
+            $this->dispatch('notify', message: 'Unauthorized action. Only HSE Officers can approve permits.', type: 'error');
+            return;
+        }
+
         if ($permit->status === 'requested') {
             $permit->update(['status' => 'approved', 'approved_by' => auth()->id()]);
             AuditService::log('Update', 'HSE', $permit->id, "Approved Permit {$permit->control_no}");
+            $this->closeReviewModal();
             $this->dispatch('notify', message: 'Permit has been approved.', type: 'success');
         }
     }
@@ -67,6 +95,11 @@ class PermitDashboard extends Component
 
     public function reject($id)
     {
+        if (auth()->user()->role !== 'admin') {
+            $this->dispatch('notify', message: 'Unauthorized action.', type: 'error');
+            return;
+        }
+
         $permit = WorkPermit::find($id);
         if ($permit && $permit->status === 'requested') {
             $permit->update(['status' => 'rejected', 'approved_by' => auth()->id()]);
@@ -77,6 +110,11 @@ class PermitDashboard extends Component
 
     public function close($id)
     {
+        if (auth()->user()->role !== 'admin') {
+            $this->dispatch('notify', message: 'Unauthorized action.', type: 'error');
+            return;
+        }
+
         $permit = WorkPermit::find($id);
         if ($permit && in_array($permit->status, ['approved', 'active'])) {
             $permit->update(['status' => 'closed']);
@@ -87,8 +125,14 @@ class PermitDashboard extends Component
 
     public function render()
     {
-        $permits = WorkPermit::query()
-            ->when($this->filterStatus !== 'all', fn($q) => $q->where('status', $this->filterStatus))
+        $query = WorkPermit::query();
+
+        // Filter for Agents: Show only their own organization's permits
+        if (auth()->user()->role === 'agent') {
+            $query->where('organization_id', auth()->user()->organization_id);
+        }
+
+        $permits = $query->when($this->filterStatus !== 'all', fn($q) => $q->where('status', $this->filterStatus))
             ->latest()
             ->paginate(10);
 
