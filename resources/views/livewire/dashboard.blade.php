@@ -40,6 +40,264 @@
     @endif
 
 @if($mode === 'admin')
+    <!-- Admin Dashboard with Pastel Colors -->
+    <div class="bg-gradient-to-br from-slate-50 to-indigo-50/20 rounded-3xl p-8 mb-8">
+        <!-- KPI Cards Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+            <!-- Live Pending Billing -->
+            <div class="bg-gradient-to-br from-emerald-50 to-teal-50 p-6 rounded-2xl border border-emerald-200 shadow-sm hover:shadow-md transition-all cursor-pointer">
+                <div class="flex justify-between items-start mb-4">
+                    <div>
+                        <p class="text-xs font-bold text-emerald-600/70 uppercase tracking-widest">Pending Billing</p>
+                        <h3 class="text-3xl font-black text-emerald-900 mt-2">RM {{ number_format($pendingBilling['total_pending'], 0) }}</h3>
+                    </div>
+                    <div class="p-2 bg-emerald-200/50 rounded-lg">
+                        <svg class="w-5 h-5 text-emerald-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                    </div>
+                </div>
+                <div class="flex items-center gap-2 text-xs text-emerald-700">
+                    <span class="flex h-2 w-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                    {{ $pendingBilling['count'] }} active vessels
+                </div>
+            </div>
+
+            <!-- Unpaid Invoices (Clickable) -->
+            <button wire:click="openUnpaidModal" class="bg-gradient-to-br from-rose-50 to-pink-50 p-6 rounded-2xl border border-rose-200 shadow-sm hover:shadow-lg transition-all text-left group">
+                <div class="flex justify-between items-start mb-4">
+                    <div>
+                        <p class="text-xs font-bold text-rose-600/70 uppercase tracking-widest">Unpaid Invoices</p>
+                        <h3 class="text-3xl font-black text-rose-900 mt-2">RM {{ number_format($unpaidInvoices['total'], 0) }}</h3>
+                    </div>
+                    <div class="p-2 bg-rose-200/50 rounded-lg group-hover:bg-rose-300 transition-colors">
+                        <svg class="w-5 h-5 text-rose-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                    </div>
+                </div>
+                <div class="flex items-center justify-between text-xs text-rose-700">
+                    <span>{{ $unpaidInvoices['count'] }} outstanding invoices</span>
+                    <span class="font-bold group-hover:translate-x-1 transition-transform">View →</span>
+                </div>
+            </button>
+
+            <!-- Berth Occupancy -->
+            <div class="bg-gradient-to-br from-blue-50 to-indigo-50 p-6 rounded-2xl border border-blue-200 shadow-sm hover:shadow-md transition-shadow">
+                <div class="flex justify-between items-start mb-4">
+                    <div>
+                        <p class="text-xs font-bold text-blue-600/70 uppercase tracking-widest">Berth Occupancy</p>
+                        <h3 class="text-3xl font-black text-blue-900 mt-2">{{ $stats['occupancy_rate'] }}%</h3>
+                    </div>
+                    <div class="p-2 bg-blue-200/50 rounded-lg">
+                        <svg class="w-5 h-5 text-blue-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
+                    </div>
+                </div>
+                <div class="text-xs text-blue-700">
+                    {{ $stats['alongside'] }} vessels alongside
+                </div>
+            </div>
+
+            <!-- Service Requests -->
+            <div class="bg-gradient-to-br from-amber-50 to-orange-50 p-6 rounded-2xl border border-amber-200 shadow-sm hover:shadow-md transition-shadow">
+                <div class="flex justify-between items-start mb-4">
+                    <div>
+                        <p class="text-xs font-bold text-amber-600/70 uppercase tracking-widest">Active Requests</p>
+                        <h3 class="text-3xl font-black text-amber-900 mt-2">{{ $activeServiceRequests }}</h3>
+                    </div>
+                    <div class="p-2 bg-amber-200/50 rounded-lg">
+                        <svg class="w-5 h-5 text-amber-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path></svg>
+                    </div>
+                </div>
+                <div class="text-xs text-amber-700">
+                    Pending & in progress
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Actions Section -->
+        <div class="mb-8">
+            <h3 class="text-lg font-bold text-slate-900 mb-4">Quick Actions</h3>
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <a href="{{ route('home') }}" class="group bg-gradient-to-br from-indigo-100 to-purple-100 p-4 rounded-xl border border-indigo-200 hover:shadow-md transition-all">
+                    <div class="flex items-center gap-3">
+                        <div class="p-2 bg-indigo-200/50 rounded-lg group-hover:bg-indigo-300 transition-colors">
+                            <svg class="w-5 h-5 text-indigo-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
+                        </div>
+                        <div>
+                            <p class="font-bold text-indigo-900 text-sm">Berth Planner</p>
+                            <p class="text-xs text-indigo-600">Manage schedule</p>
+                        </div>
+                    </div>
+                </a>
+
+                <a href="{{ route('warehouse.map') }}" class="group bg-gradient-to-br from-purple-100 to-pink-100 p-4 rounded-xl border border-purple-200 hover:shadow-md transition-all">
+                    <div class="flex items-center gap-3">
+                        <div class="p-2 bg-purple-200/50 rounded-lg group-hover:bg-purple-300 transition-colors">
+                            <svg class="w-5 h-5 text-purple-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path></svg>
+                        </div>
+                        <div>
+                            <p class="font-bold text-purple-900 text-sm">Manage Yard</p>
+                            <p class="text-xs text-purple-600">Warehouse map</p>
+                        </div>
+                    </div>
+                </a>
+
+                <a href="{{ route('gate.scanner') }}" class="group bg-gradient-to-br from-emerald-100 to-teal-100 p-4 rounded-xl border border-emerald-200 hover:shadow-md transition-all">
+                    <div class="flex items-center gap-3">
+                        <div class="p-2 bg-emerald-200/50 rounded-lg group-hover:bg-emerald-300 transition-colors">
+                            <svg class="w-5 h-5 text-emerald-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"></path></svg>
+                        </div>
+                        <div>
+                            <p class="font-bold text-emerald-900 text-sm">Gate Scanner</p>
+                            <p class="text-xs text-emerald-600">Security control</p>
+                        </div>
+                    </div>
+                </a>
+
+                <a href="{{ route('admin.audit') }}" class="group bg-gradient-to-br from-cyan-100 to-blue-100 p-4 rounded-xl border border-cyan-200 hover:shadow-md transition-all">
+                    <div class="flex items-center gap-3">
+                        <div class="p-2 bg-cyan-200/50 rounded-lg group-hover:bg-cyan-300 transition-colors">
+                            <svg class="w-5 h-5 text-cyan-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
+                        </div>
+                        <div>
+                            <p class="font-bold text-cyan-900 text-sm">Analytics</p>
+                            <p class="text-xs text-cyan-600">Audit trail</p>
+                        </div>
+                    </div>
+                </a>
+            </div>
+        </div>
+
+        <!-- Secondary Metrics -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            <!-- Warehouse Revenue -->
+            <div class="bg-white/60 backdrop-blur-sm p-6 rounded-xl border border-purple-200 shadow-sm">
+                <div class="flex items-center gap-3 mb-3">
+                    <div class="p-2 bg-purple-100 rounded-lg">
+                        <svg class="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path></svg>
+                    </div>
+                    <div>
+                        <p class="text-xs font-bold text-purple-600 uppercase">Warehouse Revenue</p>
+                        <p class="text-xl font-black text-purple-900">RM {{ number_format($warehouseSummary['total_charges'] ?? 0, 2) }}</p>
+                    </div>
+                </div>
+                <p class="text-xs text-purple-600">{{ $warehouseSummary['total_items'] ?? 0 }} items in storage</p>
+            </div>
+
+            <!-- Expected Arrivals -->
+            <div class="bg-white/60 backdrop-blur-sm p-6 rounded-xl border border-cyan-200 shadow-sm">
+                <div class="flex items-center gap-3 mb-3">
+                    <div class="p-2 bg-cyan-100 rounded-lg">
+                        <svg class="w-5 h-5 text-cyan-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                    </div>
+                    <div>
+                        <p class="text-xs font-bold text-cyan-600 uppercase">Expected (24h)</p>
+                        <p class="text-xl font-black text-cyan-900">{{ $stats['expected_arrivals'] }}</p>
+                    </div>
+                </div>
+                <p class="text-xs text-cyan-600">Vessels arriving soon</p>
+            </div>
+
+            <!-- Completed This Month -->
+            <div class="bg-white/60 backdrop-blur-sm p-6 rounded-xl border border-green-200 shadow-sm">
+                <div class="flex items-center gap-3 mb-3">
+                    <div class="p-2 bg-green-100 rounded-lg">
+                        <svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                    </div>
+                    <div>
+                        <p class="text-xs font-bold text-green-600 uppercase">Completed (Month)</p>
+                        <p class="text-xl font-black text-green-900">{{ $stats['completed_month'] }}</p>
+                    </div>
+                </div>
+                <p class="text-xs text-green-600">Port calls completed</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content Grid -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <!-- Recent Activity -->
+        <div class="lg:col-span-2 bg-white rounded-2xl p-8 shadow-sm border border-slate-200">
+            <h3 class="text-xl font-bold text-slate-900 mb-6">Recent Activity</h3>
+            <div class="space-y-3">
+                @forelse($recentActivity as $activity)
+                <div class="flex items-center gap-4 p-4 bg-slate-50 rounded-xl hover:bg-slate-100 transition-colors">
+                    <div class="w-10 h-10 rounded-full bg-gradient-to-br from-blue-400 to-indigo-500 flex items-center justify-center flex-shrink-0 shadow-md">
+                        <span class="font-bold text-white text-sm">{{ substr($activity->vessel->name, 0, 1) }}</span>
+                    </div>
+                    <div class="flex-1">
+                        <p class="font-bold text-slate-900 text-sm">{{ $activity->vessel->name }}</p>
+                        <p class="text-xs text-slate-500">{{ $activity->agent->name }} • {{ ucfirst($activity->status) }}</p>
+                    </div>
+                    <div class="text-right">
+                        <p class="text-xs font-bold text-indigo-600">{{ $activity->berth->name ?? 'Unassigned' }}</p>
+                        <p class="text-xs text-slate-400">{{ $activity->updated_at->diffForHumans() }}</p>
+                    </div>
+                </div>
+                @empty
+                <p class="text-slate-400 italic text-center py-8">No recent activity</p>
+                @endforelse
+            </div>
+        </div>
+
+        <!-- Top Agents -->
+        <div class="bg-white rounded-2xl p-8 shadow-sm border border-slate-200">
+            <h3 class="text-xl font-bold text-slate-900 mb-6">Top Agents (This Month)</h3>
+            <div class="space-y-4">
+                @forelse($topAgents as $index => $agent)
+                <div class="flex items-center gap-3">
+                    <div class="w-8 h-8 rounded-full bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center flex-shrink-0 font-bold text-white text-sm">
+                        {{ $index + 1 }}
+                    </div>
+                    <div class="flex-1">
+                        <p class="font-bold text-slate-900 text-sm">{{ $agent->organization->name }}</p>
+                        <p class="text-xs text-emerald-600 font-bold">RM {{ number_format($agent->revenue, 2) }}</p>
+                    </div>
+                </div>
+                @empty
+                <p class="text-slate-400 italic text-center py-4">No data available</p>
+                @endforelse
+            </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Unpaid Invoices Modal -->
+    @if($showUnpaidModal)
+    <div class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm" wire:click="closeModal">
+        <div class="bg-white rounded-3xl shadow-2xl w-full max-w-3xl max-h-[80vh] overflow-hidden" @click.stop>
+            <div class="p-8 border-b border-slate-200">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h2 class="text-2xl font-black text-slate-900">Unpaid Invoices</h2>
+                        <p class="text-sm text-slate-500 mt-1">{{ count($unpaidInvoicesList) }} outstanding invoices</p>
+                    </div>
+                    <button wire:click="closeModal" class="p-2 hover:bg-slate-100 rounded-lg transition-colors">
+                        <svg class="w-6 h-6 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                    </button>
+                </div>
+            </div>
+            <div class="p-8 overflow-y-auto max-h-[60vh]">
+                <div class="space-y-3">
+                    @forelse($unpaidInvoicesList as $invoice)
+                    <div class="flex items-center justify-between p-4 bg-slate-50 rounded-xl hover:bg-slate-100 transition-colors">
+                        <div class="flex-1">
+                            <p class="font-bold text-slate-900">{{ $invoice->organization->name }}</p>
+                            <p class="text-xs text-slate-500 mt-1">Invoice #{{ $invoice->invoice_number }} • {{ $invoice->created_at->format('d M Y') }}</p>
+                        </div>
+                        <div class="text-right">
+                            <p class="text-lg font-black text-rose-600">RM {{ number_format($invoice->total_amount, 2) }}</p>
+                            <span class="inline-block px-2 py-1 text-xs font-bold rounded-full {{ $invoice->status === 'overdue' ? 'bg-red-100 text-red-700' : 'bg-amber-100 text-amber-700' }}">
+                                {{ ucfirst($invoice->status) }}
+                            </span>
+                        </div>
+                    </div>
+                    @empty
+                    <p class="text-slate-400 italic text-center py-8">No unpaid invoices</p>
+                    @endforelse
+                </div>
+            </div>
+        </div>
+    </div>
+    @endif
+@elseif($mode === 'agent')
     <!-- KPI Cards Grid -->
     <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
         <!-- ... existing admin content ... -->
@@ -337,115 +595,153 @@
         </div>
     </div>
 @elseif($mode === 'agent')
-    <!-- Agent Dashboard Layout -->
-    <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-        <!-- Live Billing KPI (Prominent) -->
-        <div class="md:col-span-2 bg-gradient-to-br from-emerald-500 to-teal-600 p-8 rounded-3xl shadow-2xl text-white relative overflow-hidden">
-            <div class="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full -mr-32 -mt-32"></div>
-            <div class="relative z-10">
-                <div class="flex items-center justify-between mb-4">
+    <!-- Premium Agent Dashboard -->
+    <div class="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50/30">
+        
+        <!-- Hero Section with Live Billing -->
+        <div class="relative overflow-hidden bg-gradient-to-br from-blue-100 via-indigo-100 to-purple-100 rounded-3xl mb-8 shadow-lg border border-blue-200/50">
+            <!-- Subtle Background Pattern -->
+            <div class="absolute inset-0 opacity-30">
+                <div class="absolute w-96 h-96 bg-white rounded-full -top-48 -left-48"></div>
+                <div class="absolute w-96 h-96 bg-white rounded-full -bottom-48 -right-48"></div>
+            </div>
+            
+            <div class="relative z-10 p-12">
+                <div class="flex items-start justify-between mb-8">
                     <div>
-                        <p class="text-xs font-bold uppercase tracking-widest text-emerald-100">Live Billing</p>
-                        <p class="text-[10px] text-emerald-200 mt-0.5">Real-time charges</p>
+                        <p class="text-indigo-600/70 text-sm font-medium mb-2">Welcome back,</p>
+                        <h1 class="text-4xl font-black text-indigo-900 tracking-tight">{{ auth()->user()->organization->name }}</h1>
                     </div>
-                    <span class="flex h-3 w-3 rounded-full bg-white animate-pulse shadow-lg"></span>
-                </div>
-                
-                <div class="mb-6">
-                    <h2 class="text-5xl font-black mb-2">RM {{ number_format($liveBilling['total_charges'], 2) }}</h2>
-                    <p class="text-sm text-emerald-100">Total Outstanding Charges</p>
-                </div>
-
-                <div class="grid grid-cols-2 gap-4 pt-4 border-t border-white/20">
-                    <div>
-                        <div class="flex items-center gap-2 mb-1">
-                            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zM3 10a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H4a1 1 0 01-1-1v-6zM14 9a1 1 0 00-1 1v6a1 1 0 001 1h2a1 1 0 001-1v-6a1 1 0 00-1-1h-2z"></path></svg>
-                            <span class="text-xs font-bold">Berthing</span>
-                        </div>
-                        <p class="text-2xl font-black">RM {{ number_format($liveBilling['berthing_charges'], 2) }}</p>
-                        <p class="text-[10px] text-emerald-200">{{ $liveBilling['berthing_vessels'] }} vessel(s)</p>
-                    </div>
-                    <div>
-                        <div class="flex items-center gap-2 mb-1">
-                            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path d="M10 2a5 5 0 00-5 5v2a2 2 0 00-2 2v5a2 2 0 002 2h10a2 2 0 002-2v-5a2 2 0 00-2-2H7V7a3 3 0 015.905-.75 1 1 0 001.937-.5A5.002 5.002 0 0010 2z"></path></svg>
-                            <span class="text-xs font-bold">Warehouse</span>
-                        </div>
-                        <p class="text-2xl font-black">RM {{ number_format($liveBilling['warehouse_charges'], 2) }}</p>
-                        <p class="text-[10px] text-emerald-200">{{ $liveBilling['warehouse_items'] }} item(s)</p>
+                    <div class="flex items-center gap-2 bg-white/60 backdrop-blur-sm px-4 py-2 rounded-full border border-indigo-200">
+                        <span class="flex h-2 w-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                        <span class="text-indigo-700 text-sm font-bold">Live</span>
                     </div>
                 </div>
-            </div>
-        </div>
 
-        <!-- Other Stats -->
-        <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex items-center justify-between">
-            <div>
-                <p class="text-xs font-bold text-slate-400 uppercase tracking-[0.2em]">Active Vessels</p>
-                <h3 class="text-3xl font-black text-slate-900 mt-2">{{ $stats['active_vessels'] }}</h3>
-            </div>
-            <div class="p-3 bg-indigo-50 text-indigo-600 rounded-xl">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
-            </div>
-        </div>
-        <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex items-center justify-between">
-            <div>
-                <p class="text-xs font-bold text-slate-400 uppercase tracking-[0.2em]">Unpaid Invoices</p>
-                <h3 class="text-3xl font-black text-slate-900 mt-2">{{ $stats['unpaid_invoices'] }}</h3>
-            </div>
-            <div class="p-3 bg-purple-50 text-purple-600 rounded-xl">
-                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-            </div>
-        </div>
-    </div>
-
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        <div class="lg:col-span-2 space-y-6">
-            <!-- Quick Actions -->
-            <div class="grid grid-cols-2 gap-4">
-                <a href="{{ route('home') }}" class="p-6 bg-teal-600 rounded-3xl text-white shadow-xl shadow-teal-900/10 hover:shadow-2xl hover:-translate-y-1 transition-all group relative overflow-hidden">
-                    <div class="relative z-10">
-                        <h3 class="text-xl font-bold">Plan New Voyage</h3>
-                        <p class="text-teal-100 text-sm mt-1">Check berth availability and submit NOA</p>
-                    </div>
-                    <div class="absolute right-[-20px] bottom-[-20px] text-teal-500 opacity-20 group-hover:scale-110 transition-transform">
-                        <svg class="w-32 h-32" fill="currentColor" viewBox="0 0 24 24"><path d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
-                    </div>
-                </a>
-                 <a href="{{ route('billing.index') }}" class="p-6 bg-purple-600 rounded-3xl text-white shadow-xl shadow-purple-900/10 hover:shadow-2xl hover:-translate-y-1 transition-all group relative overflow-hidden">
-                    <div class="relative z-10">
-                        <h3 class="text-xl font-bold">Billing & Invoices</h3>
-                        <p class="text-purple-100 text-sm mt-1">Manage payments and view history</p>
-                    </div>
-                     <div class="absolute right-[-20px] bottom-[-20px] text-purple-500 opacity-20 group-hover:scale-110 transition-transform">
-                        <svg class="w-32 h-32" fill="currentColor" viewBox="0 0 24 24"><path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                    </div>
-                </a>
-            </div>
-
-            <!-- Agent Activity Feed -->
-            <div class="bg-white rounded-3xl border border-slate-200 shadow-sm p-8">
-                <h3 class="text-lg font-bold text-slate-900 mb-6">Your Fleet Activity</h3>
-                <div class="space-y-6">
-                    @forelse($recentActivity as $activity)
-                    <div class="flex gap-4 items-start">
-                         <div class="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center flex-shrink-0">
-                            <span class="font-bold text-slate-500">{{ substr($activity->vessel->name, 0, 1) }}</span>
-                        </div>
-                        <div>
-                            <p class="text-sm font-bold text-slate-800">{{ $activity->vessel->name }}</p>
-                            <p class="text-xs text-slate-500 mt-0.5">
-                                {{ ucfirst($activity->status) }} • {{ $activity->updated_at->diffForHumans() }}
-                            </p>
+                <!-- Live Billing Display -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <!-- Total Charges -->
+                    <div class="md:col-span-2 bg-white/60 backdrop-blur-sm rounded-2xl p-8 border border-indigo-200/50 shadow-sm">
+                        <p class="text-indigo-600/70 text-xs uppercase tracking-widest font-bold mb-3">Total Outstanding</p>
+                        <h2 class="text-6xl font-black text-indigo-900 mb-4">RM {{ number_format($liveBilling['total_charges'], 2) }}</h2>
+                        
+                        <div class="grid grid-cols-2 gap-4 mt-6">
+                            <div class="bg-blue-50/80 rounded-xl p-4 border border-blue-200/50">
+                                <div class="flex items-center gap-2 mb-2">
+                                    <svg class="w-4 h-4 text-blue-600" fill="currentColor" viewBox="0 0 20 20"><path d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zM3 10a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H4a1 1 0 01-1-1v-6zM14 9a1 1 0 00-1 1v6a1 1 0 001 1h2a1 1 0 001-1v-6a1 1 0 00-1-1h-2z"></path></svg>
+                                    <span class="text-blue-700 text-xs font-bold">Berthing</span>
+                                </div>
+                                <p class="text-2xl font-black text-blue-900">RM {{ number_format($liveBilling['berthing_charges'], 2) }}</p>
+                                <p class="text-blue-600/60 text-xs mt-1">{{ $liveBilling['berthing_vessels'] }} vessel(s)</p>
+                            </div>
+                            <div class="bg-amber-50/80 rounded-xl p-4 border border-amber-200/50">
+                                <div class="flex items-center gap-2 mb-2">
+                                    <svg class="w-4 h-4 text-amber-600" fill="currentColor" viewBox="0 0 20 20"><path d="M10 2a5 5 0 00-5 5v2a2 2 0 00-2 2v5a2 2 0 002 2h10a2 2 0 002-2v-5a2 2 0 00-2-2H7V7a3 3 0 015.905-.75 1 1 0 001.937-.5A5.002 5.002 0 0010 2z"></path></svg>
+                                    <span class="text-amber-700 text-xs font-bold">Warehouse</span>
+                                </div>
+                                <p class="text-2xl font-black text-amber-900">RM {{ number_format($liveBilling['warehouse_charges'], 2) }}</p>
+                                <p class="text-amber-600/60 text-xs mt-1">{{ $liveBilling['warehouse_items'] }} item(s)</p>
+                            </div>
                         </div>
                     </div>
-                    @empty
-                    <p class="text-slate-400 italic text-center py-4">No recent activity.</p>
-                    @endforelse
+
+                    <!-- Quick Stats -->
+                    <div class="space-y-4">
+                        <div class="bg-white/60 backdrop-blur-sm rounded-2xl p-6 border border-emerald-200/50 shadow-sm">
+                            <p class="text-emerald-600/70 text-xs uppercase tracking-widest font-bold mb-2">Active Vessels</p>
+                            <p class="text-4xl font-black text-emerald-900">{{ $stats['active_vessels'] }}</p>
+                        </div>
+                        <div class="bg-white/60 backdrop-blur-sm rounded-2xl p-6 border border-rose-200/50 shadow-sm">
+                            <p class="text-rose-600/70 text-xs uppercase tracking-widest font-bold mb-2">Unpaid Invoices</p>
+                            <p class="text-4xl font-black text-rose-900">{{ $stats['unpaid_invoices'] }}</p>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
 
-        <!-- Sidebar -->
+        <!-- Main Content Grid -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <!-- Left Column - Actions & Activity -->
+            <div class="lg:col-span-2 space-y-8">
+                <!-- Quick Actions -->
+                <div>
+                    <h2 class="text-2xl font-black text-slate-900 mb-6">Quick Actions</h2>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <a href="{{ route('home') }}" class="group relative overflow-hidden bg-gradient-to-br from-emerald-100 to-teal-100 rounded-2xl p-8 shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-1 border border-emerald-200">
+                            <div class="absolute top-0 right-0 w-32 h-32 bg-white/40 rounded-full -mr-16 -mt-16 group-hover:scale-150 transition-transform duration-500"></div>
+                            <div class="relative z-10">
+                                <div class="w-12 h-12 bg-emerald-200/50 rounded-xl flex items-center justify-center mb-4">
+                                    <svg class="w-6 h-6 text-emerald-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path></svg>
+                                </div>
+                                <h3 class="text-xl font-bold text-emerald-900 mb-2">Plan New Voyage</h3>
+                                <p class="text-emerald-700 text-sm">Book berth & submit NOA</p>
+                            </div>
+                        </a>
+
+                        <a href="{{ route('vessels.index') }}" class="group relative overflow-hidden bg-gradient-to-br from-indigo-100 to-purple-100 rounded-2xl p-8 shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-1 border border-indigo-200">
+                            <div class="absolute top-0 right-0 w-32 h-32 bg-white/40 rounded-full -mr-16 -mt-16 group-hover:scale-150 transition-transform duration-500"></div>
+                            <div class="relative z-10">
+                                <div class="w-12 h-12 bg-indigo-200/50 rounded-xl flex items-center justify-center mb-4">
+                                    <svg class="w-6 h-6 text-indigo-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                                </div>
+                                <h3 class="text-xl font-bold text-indigo-900 mb-2">Manage Fleet</h3>
+                                <p class="text-indigo-700 text-sm">View & register vessels</p>
+                            </div>
+                        </a>
+
+                        <a href="{{ route('cargo.manifests.index') }}" class="group relative overflow-hidden bg-gradient-to-br from-amber-100 to-orange-100 rounded-2xl p-8 shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-1 border border-amber-200">
+                            <div class="absolute top-0 right-0 w-32 h-32 bg-white/40 rounded-full -mr-16 -mt-16 group-hover:scale-150 transition-transform duration-500"></div>
+                            <div class="relative z-10">
+                                <div class="w-12 h-12 bg-amber-200/50 rounded-xl flex items-center justify-center mb-4">
+                                    <svg class="w-6 h-6 text-amber-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path></svg>
+                                </div>
+                                <h3 class="text-xl font-bold text-amber-900 mb-2">Cargo Manifests</h3>
+                                <p class="text-amber-700 text-sm">Declare & track cargo</p>
+                            </div>
+                        </a>
+
+                        <a href="{{ route('billing.index') }}" class="group relative overflow-hidden bg-gradient-to-br from-rose-100 to-pink-100 rounded-2xl p-8 shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-1 border border-rose-200">
+                            <div class="absolute top-0 right-0 w-32 h-32 bg-white/40 rounded-full -mr-16 -mt-16 group-hover:scale-150 transition-transform duration-500"></div>
+                            <div class="relative z-10">
+                                <div class="w-12 h-12 bg-rose-200/50 rounded-xl flex items-center justify-center mb-4">
+                                    <svg class="w-6 h-6 text-rose-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"></path></svg>
+                                </div>
+                                <h3 class="text-xl font-bold text-rose-900 mb-2">Billing & Invoices</h3>
+                                <p class="text-rose-700 text-sm">Payments & history</p>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Fleet Activity -->
+                <div class="bg-white rounded-2xl p-8 shadow-xl border border-slate-200">
+                    <h3 class="text-xl font-bold text-slate-900 mb-6">Fleet Activity</h3>
+                    <div class="space-y-4">
+                        @forelse($recentActivity as $activity)
+                        <div class="flex items-center gap-4 p-4 bg-slate-50 rounded-xl hover:bg-slate-100 transition-colors">
+                            <div class="w-12 h-12 rounded-full bg-gradient-to-br from-cyan-400 to-blue-500 flex items-center justify-center flex-shrink-0 shadow-lg">
+                                <span class="font-bold text-white text-lg">{{ substr($activity->vessel->name, 0, 1) }}</span>
+                            </div>
+                            <div class="flex-1">
+                                <p class="font-bold text-slate-900">{{ $activity->vessel->name }}</p>
+                                <p class="text-sm text-slate-500">{{ ucfirst($activity->status) }} • {{ $activity->updated_at->diffForHumans() }}</p>
+                            </div>
+                            <div class="px-3 py-1 bg-indigo-100 rounded-full">
+                                <span class="text-xs font-bold text-indigo-700">{{ $activity->berth->name ?? 'N/A' }}</span>
+                            </div>
+                        </div>
+                        @empty
+                        <div class="text-center py-12">
+                            <svg class="w-16 h-16 text-slate-300 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"></path></svg>
+                            <p class="text-slate-400 italic">No recent activity</p>
+                        </div>
+                        @endforelse
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Sidebar -->
         <div class="space-y-6">
             @if($warehouseBilling)
             <!-- Live Warehouse Billing -->

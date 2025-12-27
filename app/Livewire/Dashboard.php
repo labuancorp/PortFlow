@@ -10,6 +10,23 @@ use Carbon\Carbon;
 
 class Dashboard extends Component
 {
+    public $mode = 'admin'; // or 'agent'
+    public $showUnpaidModal = false;
+    public $unpaidInvoicesList = [];
+
+    public function openUnpaidModal()
+    {
+        $this->unpaidInvoicesList = \App\Models\Invoice::where('status', '!=', 'paid')
+            ->with('organization')
+            ->orderBy('created_at', 'desc')
+            ->get();
+        $this->showUnpaidModal = true;
+    }
+
+    public function closeModal()
+    {
+        $this->showUnpaidModal = false;
+    }
     // Modal States
     public $showReviewModal = false;
     public $selectedBooking = null;
@@ -152,39 +169,77 @@ class Dashboard extends Component
             ->whereMonth('atd', $now->month)
             ->count();
 
+        // Live Pending Billing Summary
+        $pendingBilling = [
+            'total_pending' => 0,
+            'berthing_pending' => 0,
+            'warehouse_pending' => 0,
+            'count' => 0
+        ];
+
+        // Calculate berthing charges for all active vessels
+        $activePortCalls = PortCall::whereIn('status', ['anchored', 'alongside'])
+            ->with('berth')
+            ->get();
+
+        foreach ($activePortCalls as $portCall) {
+            if ($portCall->berth && $portCall->eta) {
+                $daysAlongside = max(1, now()->diffInDays($portCall->eta));
+                $berthRate = $portCall->berth->rate_per_day ?? 500;
+                $pendingBilling['berthing_pending'] += $daysAlongside * $berthRate;
+                $pendingBilling['count']++;
+            }
+        }
+
+        // Calculate warehouse charges for all subscribed organizations
+        $billingService = new \App\Services\WarehouseBillingService();
+        $warehouseSummary = $billingService->getOrganizationSummary();
+        $pendingBilling['warehouse_pending'] = $warehouseSummary['total_charges'] ?? 0;
+        
+        $pendingBilling['total_pending'] = $pendingBilling['berthing_pending'] + $pendingBilling['warehouse_pending'];
+
+        // Unpaid Invoices Summary
+        $unpaidInvoices = \App\Models\Invoice::where('status', '!=', 'paid')->get();
+        $unpaidTotal = $unpaidInvoices->sum('total_amount');
+        $unpaidCount = $unpaidInvoices->count();
+
+        // Active Service Requests
+        $activeServiceRequests = \App\Models\ServiceRequest::whereIn('status', ['pending', 'in_progress'])->count();
+
         // Recent Activity
         $recentActivity = PortCall::with(['vessel', 'agent', 'berth'])
             ->orderBy('updated_at', 'desc')
-            ->take(5)
+            ->take(8)
             ->get();
 
-        // Pending Requests
-        $pendingRequests = PortCall::where('status', 'requested')
-            ->orderBy('eta', 'asc')
-            ->with(['vessel', 'agent'])
+        // Top Agents by Revenue (This Month)
+        $topAgents = \App\Models\Invoice::where('status', 'paid')
+            ->whereMonth('created_at', $now->month)
+            ->selectRaw('organization_id, SUM(total_amount) as revenue')
+            ->groupBy('organization_id')
+            ->orderByDesc('revenue')
+            ->limit(5)
+            ->with('organization')
             ->get();
-
-        // IoT Sensor Data
-        $iotService = new \App\Services\IotService();
-        $iotService->syncReadings(); // Simulate live update
-        $iotReadings = \App\Models\IotSensor::where('status', 'active')->get();
-
-        // Warehouse Billing Summary
-        $billingService = new \App\Services\WarehouseBillingService();
-        $warehouseBillingSummary = $billingService->getOrganizationSummary();
 
         return view('livewire.dashboard', [
             'mode' => 'admin',
-            'alongsideCount' => $alongsideCount,
-            'expectedArrivals' => $expectedArrivals,
-            'occupancyRate' => $occupancyRate,
-            'completedThisMonth' => $completedThisMonth,
+            'stats' => [
+                'alongside' => $alongsideCount,
+                'expected_arrivals' => $expectedArrivals,
+                'occupancy_rate' => $occupancyRate,
+                'completed_month' => $completedThisMonth,
+            ],
+            'pendingBilling' => $pendingBilling,
+            'unpaidInvoices' => [
+                'total' => $unpaidTotal,
+                'count' => $unpaidCount
+            ],
+            'activeServiceRequests' => $activeServiceRequests,
+            'warehouseSummary' => $warehouseSummary,
             'recentActivity' => $recentActivity,
-            'pendingRequests' => $pendingRequests,
-            'now' => $now,
-            'berths' => $activeBerths,
-            'iotReadings' => $iotReadings,
-            'warehouseBillingSummary' => $warehouseBillingSummary
+            'topAgents' => $topAgents,
+            'now' => $now
         ]);
     }
 

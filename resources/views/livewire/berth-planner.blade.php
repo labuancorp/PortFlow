@@ -37,7 +37,28 @@
      }"
      @schedule-error.window="showToast($event.detail.message, 'error')"
      @schedule-success.window="showToast($event.detail.message, 'success')"
+     @notify.window="showToast($event.detail.message, $event.detail.type || 'success')"
      @show-prerequisite-modal.window="showPrerequisiteModal = true">
+
+    <!-- Toast Notification -->
+    <template x-if="toast.show">
+        <div class="fixed top-8 right-8 z-[60] bg-slate-900 text-white px-6 py-4 rounded-xl shadow-2xl flex items-center gap-4 border border-slate-700"
+             x-transition:enter="transition ease-out duration-300"
+             x-transition:enter-start="opacity-0 translate-x-8"
+             x-transition:enter-end="opacity-100 translate-x-0"
+             x-transition:leave="transition ease-in duration-200"
+             x-transition:leave-start="opacity-100 translate-x-0"
+             x-transition:leave-end="opacity-0 translate-x-8">
+            <div :class="toast.type === 'error' ? 'bg-red-500/20 text-red-400' : 'bg-teal-500/20 text-teal-400'" class="p-2 rounded-lg">
+                <svg x-show="toast.type !== 'error'" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                <svg x-show="toast.type === 'error'" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+            </div>
+            <div>
+                <h4 class="font-bold text-sm tracking-wide uppercase" :class="toast.type === 'error' ? 'text-red-400' : 'text-teal-400'" x-text="toast.type === 'error' ? 'Error' : 'Success'"></h4>
+                <p class="text-sm text-slate-300" x-text="toast.message"></p>
+            </div>
+        </div>
+    </template>
 
     <!-- Header & Tools -->
     <div class="flex justify-between items-end mb-8">
