@@ -1,6 +1,7 @@
 <div class="p-8 bg-slate-50 min-h-screen font-sans relative" 
      x-data="{ 
         toast: { show: false, message: '', type: 'success' },
+        showPrerequisiteModal: false,
         showToast(message, type = 'success') {
             this.toast = { show: true, message, type };
             setTimeout(() => { this.toast.show = false; }, 4000);
@@ -35,7 +36,8 @@
         }
      }"
      @schedule-error.window="showToast($event.detail.message, 'error')"
-     @schedule-success.window="showToast($event.detail.message, 'success')">
+     @schedule-success.window="showToast($event.detail.message, 'success')"
+     @show-prerequisite-modal.window="showPrerequisiteModal = true">
 
     <!-- Header & Tools -->
     <div class="flex justify-between items-end mb-8">
@@ -372,4 +374,49 @@
         </div>
     </div>
     @endif
+
+    <!-- Prerequisite Setup Modal -->
+    <template x-if="showPrerequisiteModal">
+        <div class="fixed inset-0 z-50 flex items-center justify-center p-4">
+            <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm" @click="showPrerequisiteModal = false"></div>
+            <div class="bg-white rounded-3xl shadow-2xl w-full max-w-md overflow-hidden transform transition-all relative z-10">
+                <div class="p-8">
+                    <div class="text-center mb-6">
+                        <div class="w-16 h-16 bg-amber-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <svg class="w-8 h-8 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+                        </div>
+                        <h3 class="text-2xl font-black text-slate-900 mb-2">Setup Required</h3>
+                        <p class="text-slate-600">Complete these steps before booking a berth</p>
+                    </div>
+
+                    <div class="space-y-3 mb-6">
+                        <div class="flex items-start gap-3 p-3 bg-green-50 border border-green-200 rounded-xl">
+                            <svg class="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg>
+                            <div class="flex-1">
+                                <p class="font-bold text-sm text-slate-800">Organization Profile</p>
+                                <p class="text-xs text-slate-600">Your profile is complete</p>
+                            </div>
+                        </div>
+
+                        <div class="flex items-start gap-3 p-3 bg-red-50 border border-red-200 rounded-xl">
+                            <svg class="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"></path></svg>
+                            <div class="flex-1">
+                                <p class="font-bold text-sm text-slate-800">Vessel Registration</p>
+                                <p class="text-xs text-slate-600">You need to register at least one vessel</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="flex gap-3">
+                        <button @click="showPrerequisiteModal = false" class="flex-1 px-4 py-3 border border-slate-200 rounded-xl font-bold text-slate-600 hover:bg-slate-50 transition-colors">
+                            Cancel
+                        </button>
+                        <a href="{{ route('vessels.index') }}" class="flex-1 px-4 py-3 bg-teal-600 hover:bg-teal-700 text-white rounded-xl font-bold text-center transition-colors">
+                            Register Vessel
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </template>
 </div>

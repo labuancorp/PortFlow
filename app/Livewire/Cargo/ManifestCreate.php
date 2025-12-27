@@ -17,6 +17,10 @@ class ManifestCreate extends Component
     public $reference_no;
     public $type = 'inbound';
     public $eta_etd;
+    
+    // Yard Storage Request
+    public $yard_storage_requested = false;
+    public $preferred_zone_type = 'general';
 
     // Items
     public $items = [];
@@ -51,6 +55,51 @@ class ManifestCreate extends Component
         $this->items = array_values($this->items);
     }
 
+    public function downloadTemplate()
+    {
+        $csv = "Description,Weight (kg),Volume (m³),DG Class\n";
+        $csv .= "Container of Electronics,1500,12.5,\n";
+        $csv .= "Chemicals - Flammable,800,6.0,Class 3\n";
+        $csv .= "Refrigerated Goods,2000,15.0,\n";
+        
+        return response()->streamDownload(function() use ($csv) {
+            echo $csv;
+        }, 'cargo_manifest_template.csv', [
+            'Content-Type' => 'text/csv',
+        ]);
+    }
+
+    public function uploadCsv($csvContent)
+    {
+        try {
+            $lines = explode("\n", $csvContent);
+            $header = str_getcsv(array_shift($lines)); // Remove header
+            
+            $newItems = [];
+            foreach ($lines as $line) {
+                if (empty(trim($line))) continue;
+                
+                $data = str_getcsv($line);
+                if (count($data) >= 3) {
+                    $newItems[] = [
+                        'tracking_number' => 'TRK-' . strtoupper(Str::random(6)),
+                        'description' => $data[0] ?? '',
+                        'weight_kg' => $data[1] ?? '',
+                        'volume_m3' => $data[2] ?? '',
+                        'dg_class' => !empty($data[3]) ? $data[3] : '',
+                    ];
+                }
+            }
+            
+            // Add to existing items
+            $this->items = array_merge($this->items, $newItems);
+            $this->dispatch('notify', message: count($newItems) . ' items imported from CSV successfully!');
+            
+        } catch (\Exception $e) {
+            $this->dispatch('notify', message: 'Error parsing CSV: ' . $e->getMessage(), type: 'error');
+        }
+    }
+
     protected $rules = [
         'vessel_id' => 'required|exists:vessels,id',
         'agent_id' => 'required|exists:organizations,id',
@@ -81,6 +130,8 @@ class ManifestCreate extends Component
             'type' => $this->type,
             'status' => 'draft',
             'eta_etd' => $this->eta_etd,
+            'yard_storage_requested' => $this->yard_storage_requested,
+            'preferred_zone_type' => $this->yard_storage_requested ? $this->preferred_zone_type : null,
         ]);
 
         foreach ($this->items as $item) {

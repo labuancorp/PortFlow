@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Organization extends Model
 {
-    protected $fillable = ['name', 'type', 'code', 'billing_address'];
+    protected $fillable = ['name', 'type', 'code', 'billing_address', 'warehouse_subscribed'];
 
     public function vessels()
     {

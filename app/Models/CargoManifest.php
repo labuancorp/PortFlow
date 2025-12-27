@@ -15,7 +15,9 @@ class CargoManifest extends Model
         'reference_no',
         'type',
         'status',
-        'eta_etd'
+        'eta_etd',
+        'yard_storage_requested',
+        'preferred_zone_type'
     ];
 
     protected $casts = [

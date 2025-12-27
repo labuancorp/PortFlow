@@ -58,6 +58,20 @@ class BerthPlanner extends Component
 
     public function openCreateModal()
     {
+        // Check prerequisites for agents
+        if (auth()->user()->role === 'agent') {
+            $vesselCount = \App\Models\Vessel::where('organization_id', auth()->user()->organization_id)->count();
+            
+            if ($vesselCount === 0) {
+                $this->dispatch('notify', 
+                    message: 'Please register at least one vessel before booking a berth.', 
+                    type: 'error'
+                );
+                $this->dispatch('show-prerequisite-modal');
+                return;
+            }
+        }
+
         $this->reset(['newVesselId', 'newAgentId', 'newBerthId', 'newEta', 'newEtd']);
         
         if (auth()->user()->role === 'agent') {

@@ -65,13 +65,90 @@
             </div>
         </div>
 
+        <!-- Yard Storage Request (Phase 1) -->
+        @if(auth()->user()->role === 'agent' && auth()->user()->organization->warehouse_subscribed)
+        <div class="bg-gradient-to-br from-amber-50 to-orange-50 rounded-2xl shadow-sm border-2 border-amber-200 overflow-hidden">
+            <div class="p-6">
+                <div class="flex items-start gap-4">
+                    <div class="flex-shrink-0">
+                        <svg class="w-8 h-8 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path></svg>
+                    </div>
+                    <div class="flex-1">
+                        <h2 class="text-lg font-bold text-slate-800 mb-2">Yard Storage Request</h2>
+                        <p class="text-sm text-slate-600 mb-4">Request yard space for your cargo upon vessel arrival</p>
+                        
+                        <div class="space-y-4">
+                            <label class="flex items-center gap-3 cursor-pointer">
+                                <input type="checkbox" wire:model.live="yard_storage_requested" class="w-5 h-5 text-amber-600 border-amber-300 rounded focus:ring-amber-500">
+                                <span class="font-bold text-slate-700">Request Yard Storage for this cargo</span>
+                            </label>
+
+                            @if($yard_storage_requested)
+                            <div class="pl-8 pt-2 space-y-3 border-l-4 border-amber-300">
+                                <div>
+                                    <label class="block text-sm font-bold text-slate-700 mb-1">Preferred Zone Type</label>
+                                    <select wire:model="preferred_zone_type" class="w-full border-amber-200 rounded-lg focus:ring-amber-500 focus:border-amber-500 bg-white">
+                                        <option value="general">General Cargo</option>
+                                        <option value="dg">Dangerous Goods (DG)</option>
+                                        <option value="refrigerated">Refrigerated</option>
+                                    </select>
+                                    <p class="text-xs text-slate-500 mt-1">Port will assign available zone based on your preference</p>
+                                </div>
+                                <div class="bg-white/60 rounded-lg p-3 text-xs text-slate-600">
+                                    <strong>Note:</strong> Yard billing starts when cargo is placed (RM 5.00/m³/day). DG cargo has +50% surcharge.
+                                </div>
+                            </div>
+                            @endif
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        @endif
+
         <!-- Cargo Items -->
         <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
-            <div class="p-6 border-b border-slate-100 bg-slate-50/50 flex justify-between items-center">
-                <h2 class="text-lg font-bold text-slate-800">Cargo Items</h2>
-                <button type="button" wire:click="addItem" class="text-xs font-bold bg-slate-900 text-white px-3 py-1.5 rounded-lg hover:bg-slate-800 transition-colors">
-                    + Add Item
-                </button>
+            <div class="p-6 border-b border-slate-100 bg-slate-50/50">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-lg font-bold text-slate-800">Cargo Items</h2>
+                    <button type="button" wire:click="addItem" class="text-xs font-bold bg-slate-900 text-white px-3 py-1.5 rounded-lg hover:bg-slate-800 transition-colors">
+                        + Add Item Manually
+                    </button>
+                </div>
+                
+                <!-- CSV Upload Section -->
+                <div class="bg-blue-50 border border-blue-200 rounded-xl p-4" x-data="{ uploading: false }">
+                    <div class="flex items-start gap-3">
+                        <svg class="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path></svg>
+                        <div class="flex-1">
+                            <h3 class="font-bold text-sm text-slate-800 mb-1">Bulk Import via CSV</h3>
+                            <p class="text-xs text-slate-600 mb-3">Upload a CSV file to add multiple cargo items at once</p>
+                            <div class="flex gap-2">
+                                <button type="button" wire:click="downloadTemplate" class="text-xs font-bold bg-white border border-blue-300 text-blue-700 px-3 py-1.5 rounded-lg hover:bg-blue-50 transition-colors">
+                                    📥 Download Template
+                                </button>
+                                <label class="text-xs font-bold bg-blue-600 text-white px-3 py-1.5 rounded-lg hover:bg-blue-700 transition-colors cursor-pointer">
+                                    📤 Upload CSV
+                                    <input type="file" accept=".csv" class="hidden" 
+                                           @change="
+                                               uploading = true;
+                                               const file = $event.target.files[0];
+                                               const reader = new FileReader();
+                                               reader.onload = (e) => {
+                                                   $wire.uploadCsv(e.target.result);
+                                                   uploading = false;
+                                                   $event.target.value = '';
+                                               };
+                                               reader.readAsText(file);
+                                           ">
+                                </label>
+                            </div>
+                            <p class="text-[10px] text-slate-500 mt-2">
+                                <strong>Format:</strong> Description, Weight (kg), Volume (m³), DG Class (optional)
+                            </p>
+                        </div>
+                    </div>
+                </div>
             </div>
             <div class="p-8">
                 @error('items') <span class="text-red-500 text-sm font-bold block mb-4">{{ $message }}</span> @enderror

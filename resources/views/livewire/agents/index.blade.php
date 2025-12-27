@@ -65,13 +65,24 @@
                             {{ $agent->billing_address }}
                         </td>
                         <td class="px-6 py-4 text-center">
-                            <div class="flex justify-center gap-3">
+                            <div class="flex justify-center gap-2 flex-wrap">
                                 <span class="bg-blue-50 text-blue-600 px-2 py-1 rounded text-[10px] font-bold" title="Registered Vessels">
                                     {{ $agent->vessels()->count() }} Vessels
                                 </span>
                                 <span class="bg-emerald-50 text-emerald-600 px-2 py-1 rounded text-[10px] font-bold" title="Total Port Calls">
                                     {{ $agent->portCalls()->count() }} Calls
                                 </span>
+                                <button wire:click="toggleWarehouseSubscription({{ $agent->id }})" 
+                                        class="px-2 py-1 rounded text-[10px] font-bold transition-all {{ $agent->warehouse_subscribed ? 'bg-purple-100 text-purple-700 hover:bg-purple-200' : 'bg-slate-100 text-slate-500 hover:bg-slate-200' }}" 
+                                        title="{{ $agent->warehouse_subscribed ? 'Warehouse: Active' : 'Warehouse: Inactive' }}">
+                                    @if($agent->warehouse_subscribed)
+                                        <svg class="w-3 h-3 inline mr-1" fill="currentColor" viewBox="0 0 20 20"><path d="M10 2a5 5 0 00-5 5v2a2 2 0 00-2 2v5a2 2 0 002 2h10a2 2 0 002-2v-5a2 2 0 00-2-2H7V7a3 3 0 015.905-.75 1 1 0 001.937-.5A5.002 5.002 0 0010 2z"></path></svg>
+                                        Warehouse ✓
+                                    @else
+                                        <svg class="w-3 h-3 inline mr-1" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd"></path></svg>
+                                        Warehouse
+                                    @endif
+                                </button>
                             </div>
                         </td>
                         <td class="px-6 py-4 text-right">

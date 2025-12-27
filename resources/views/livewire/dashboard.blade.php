@@ -176,23 +176,208 @@
             </div>
 
             <!-- Alerts Grid -->
-            <!-- ... -->
-             <!-- Reuse existing Alerts Logic here, truncated for brevity in replacement but kept in file if I select carefully -->
-             @include('livewire.dashboard.partials.alerts') 
-             <!-- Wait, I don't have partials. I must duplicate or use component. For now, I will assume the user wanted a refactor so I will just implement the structure and let the content block remain if possible. -->
-             <!-- Actually, I will just paste the content back because I need to wrap it. -->
+            <div class="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden mb-8">
+                <div class="px-8 py-6 border-b border-slate-50 flex justify-between items-center bg-slate-50/30">
+                    <h3 class="text-lg font-bold text-slate-900">Operational Notices</h3>
+                    <button type="button" wire:click="toggleAlertsModal" class="text-xs font-bold text-blue-600 hover:text-blue-800 uppercase tracking-widest">Archive History →</button>
+                </div>
+                <div class="p-2 grid grid-cols-1 md:grid-cols-2 gap-2">
+                    @forelse(array_slice($activeAlerts, 0, 4) as $alert)
+                    <div wire:key="alert-{{ $alert['id'] }}" class="p-5 rounded-2xl border border-slate-100 hover:border-slate-300 transition-all group relative">
+                        <button type="button" wire:click="dismissAlert({{ $alert['id'] }})" class="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity p-1 hover:bg-slate-100 rounded">
+                            <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                        </button>
+                        <div class="flex gap-4">
+                            <div class="w-2 h-10 {{ $alert['type'] === 'critical' ? 'bg-red-500' : ($alert['type'] === 'warning' ? 'bg-amber-500' : 'bg-blue-500') }} rounded-full flex-shrink-0 mt-1"></div>
+                            <div>
+                                <h4 class="text-sm font-bold text-slate-800">{{ $alert['title'] }}</h4>
+                                <p class="text-xs text-slate-500 mt-1 leading-relaxed">{{ Str::limit($alert['message'], 80) }}</p>
+                                <p class="text-[10px] text-slate-400 font-bold uppercase mt-3 tracking-wider">{{ $alert['time'] }}</p>
+                            </div>
+                        </div>
+                    </div>
+                    @empty
+                    <div class="col-span-2 py-8 text-center text-slate-400 italic text-sm">No new notices.</div>
+                    @endforelse
+                </div>
+            </div>
+
+            <!-- IoT Environmental Monitoring -->
+            <div class="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden">
+                <div class="px-8 py-6 border-b border-slate-50 flex justify-between items-center bg-slate-50/30">
+                     <div>
+                        <h3 class="text-lg font-bold text-slate-900">Environmental Conditions</h3>
+                        <p class="text-xs text-slate-500 mt-1 uppercase tracking-wider font-semibold">Live IoT Sensor Data</p>
+                    </div>
+                    <div class="flex items-center gap-2">
+                         <span class="flex h-2 w-2 rounded-full bg-green-500 animate-pulse"></span>
+                         <span class="text-[10px] font-bold text-green-600 uppercase tracking-widest">LIVE FEED</span>
+                    </div>
+                </div>
+                <div class="p-6 grid grid-cols-2 md:grid-cols-4 gap-4">
+                    @foreach($iotReadings as $reading)
+                    <div class="p-4 bg-slate-50 rounded-2xl border border-slate-100 relative overflow-hidden group">
+                        <div class="relative z-10">
+                            <p class="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-2">{{ $reading['name'] }}</p>
+                            <div class="flex items-baseline gap-1">
+                                <span class="text-2xl font-black {{ $reading['risk'] === 'critical' ? 'text-red-600' : ($reading['risk'] === 'warning' ? 'text-amber-500' : 'text-slate-800') }}">
+                                    {{ $reading['value'] }}
+                                </span>
+                                <span class="text-xs font-bold text-slate-500">{{ $reading['unit'] }}</span>
+                            </div>
+                             @if($reading['risk'] !== 'normal')
+                            <div class="mt-2 text-[10px] font-bold uppercase px-2 py-1 rounded bg-white inline-block shadow-sm {{ $reading['risk'] === 'critical' ? 'text-red-600 border border-red-100' : 'text-amber-600 border border-amber-100' }}">
+                                {{ $reading['risk'] }}
+                            </div>
+                            @endif
+                        </div>
+                        <!-- Icon Background -->
+                        <div class="absolute -right-2 -bottom-2 text-slate-200 opacity-20 group-hover:opacity-40 transition-opacity">
+                            @if($reading['type'] == 'wind')
+                                <svg class="w-16 h-16" fill="currentColor" viewBox="0 0 24 24"><path d="M14.5 12.5L14.5 12.5C14.5 11.67 13.83 11 13 11C12.17 11 11.5 11.67 11.5 12.5C11.5 13.33 12.17 14 13 14H18V16H13C11.07 16 9.5 14.43 9.5 12.5C9.5 10.57 11.07 9 13 9H17V7H13C9.97 7 7.5 9.47 7.5 12.5C7.5 15.53 9.97 18 13 18H20V12.5H14.5Z"></path></svg>
+                            @elseif($reading['type'] == 'tide')
+                                <svg class="w-16 h-16" fill="currentColor" viewBox="0 0 24 24"><path d="M21.5 9.87L20.1 8.45C19.8 8.16 19.33 8.16 19.04 8.45L16.5 11L14 8.45C13.7 8.16 13.23 8.16 12.94 8.45L10.5 11L8 8.45C7.71 8.16 7.23 8.16 6.94 8.45L4.41 11L3 9.58V14C3 15.1 3.9 16 5 16H19C20.1 16 21 15.1 21 14V9.87Z"></path></svg>
+                            @elseif($reading['type'] == 'swell')
+                                <svg class="w-16 h-16" fill="currentColor" viewBox="0 0 24 24"><path d="M2 12C2 17.52 6.48 22 12 22C17.52 22 22 17.52 22 12C22 6.48 17.52 2 12 2C6.48 2 2 6.48 2 12ZM12 4C14.21 4 16.21 4.9 17.66 6.34L12 12L6.34 6.34C7.79 4.9 9.79 4 12 4Z"></path></svg>
+                            @else
+                                <svg class="w-16 h-16" fill="currentColor" viewBox="0 0 24 24"><path d="M12 4.5C7 4.5 2.73 7.61 1 12C2.73 16.39 7 19.5 12 19.5C17 19.5 21.27 16.39 23 12C21.27 7.61 17 4.5 12 4.5ZM12 17C9.24 17 7 14.76 7 12C7 9.24 9.24 7 12 7C14.76 7 17 9.24 17 12C17 14.76 14.76 17 12 17ZM12 9C10.34 9 9 10.34 9 12C9 13.66 10.34 15 12 15C13.66 15 15 13.66 15 12C15 10.34 13.66 9 12 9Z"></path></svg>
+                            @endif
+                        </div>
+                    </div>
+                    @endforeach
+                </div>
+            </div>
         </div>
 
-        <!-- Sidebar (IoT, Feed, Pilot) -->
+        <!-- Sidebar: Feed & Tools -->
         <div class="space-y-6">
-             <!-- IoT and other side widgets -->
-             <!-- ... -->
+            <!-- Activity Feed -->
+            <div class="bg-white rounded-3xl border border-slate-200 shadow-sm p-8">
+                <h3 class="text-lg font-bold text-slate-900 mb-8 flex items-center justify-between">
+                    System Feed
+                    <span class="flex h-2 w-2 rounded-full bg-blue-500"></span>
+                </h3>
+                <div class="relative border-l-2 border-slate-100 ml-4 space-y-10">
+                    @foreach($recentActivity as $activity)
+                    <div class="relative pl-8">
+                        <div class="absolute -left-[9px] top-1.5 w-4 h-4 rounded-full border-4 border-white shadow-sm
+                            {{ $activity->status === 'alongside' ? 'bg-green-500' : 
+                               ($activity->status === 'completed' ? 'bg-slate-300' : 
+                               ($activity->status === 'requested' ? 'bg-amber-400' : 'bg-blue-500')) 
+                            }}"></div>
+                        <p class="text-[10px] text-slate-400 font-extrabold uppercase tracking-widest mb-1.5">
+                            {{ $activity->updated_at->diffForHumans(null, true, true) }}
+                        </p>
+                        <p class="text-sm text-slate-800 leading-snug">
+                            <span class="font-bold text-slate-900 tracking-tight">{{ $activity->vessel->name }}</span> 
+                            <span class="text-slate-500">
+                                @if($activity->status === 'alongside') moored at {{ $activity->berth?->name ?? 'Facility' }}
+                                @elseif($activity->status === 'requested') submitted NOA
+                                @elseif($activity->status === 'completed') dropped lines
+                                @else status: {{ $activity->status }}
+                                @endif
+                            </span>
+                        </p>
+                    </div>
+                    @endforeach
+                </div>
+            </div>
+
+            <!-- Pilotage Simulator -->
+            <div class="bg-indigo-900 rounded-3xl shadow-2xl p-8 text-white relative overflow-hidden group">
+                <div class="absolute -top-12 -right-12 w-48 h-48 bg-indigo-800/10 rounded-full blur-3xl"></div>
+                
+                <div class="flex items-center justify-between mb-8 relative z-10">
+                    <div>
+                        <h3 class="text-xl font-black italic tracking-tighter">PILOT-OS</h3>
+                        <p class="text-[10px] text-indigo-300 font-bold uppercase tracking-widest mt-0.5">Maritime Guidance</p>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <span class="flex h-2 w-2 rounded-full {{ $pilotRequested ? 'bg-green-400 animate-pulse' : 'bg-slate-400' }}"></span>
+                        <span class="text-[10px] font-bold uppercase">{{ $pilotStatus }}</span>
+                    </div>
+                </div>
+
+                <div class="space-y-6 relative z-10">
+                    @if($pilotRequested)
+                    <div class="bg-white/5 border border-white/10 rounded-2xl p-4">
+                        <div class="flex justify-between text-xs font-bold mb-3">
+                            <span class="text-indigo-200 uppercase tracking-widest">Progress to Berth</span>
+                            <span>{{ $pilotProgress }}%</span>
+                        </div>
+                        <div class="h-2 bg-indigo-950/50 rounded-full overflow-hidden">
+                            <div class="h-full bg-gradient-to-r from-indigo-400 to-teal-400 transition-all duration-1000 shadow-[0_0_10px_rgba(79,70,229,0.5)]" 
+                                 style="width: {{ $pilotProgress }}%"></div>
+                        </div>
+                    </div>
+                    @endif
+
+                    <div class="grid grid-cols-2 gap-3">
+                        <div class="p-3 bg-white/5 rounded-xl border border-white/10">
+                            <span class="block text-[10px] text-indigo-300 font-bold uppercase tracking-wider mb-1">Fleet 1</span>
+                            <span class="text-xs font-bold">ALPHA 01</span>
+                        </div>
+                        <div class="p-3 bg-white/5 rounded-xl border border-white/10">
+                            <span class="block text-[10px] text-indigo-300 font-bold uppercase tracking-wider mb-1">Fleet 2</span>
+                            <span class="text-xs font-bold">READY</span>
+                        </div>
+                    </div>
+
+                    @if(!$pilotRequested)
+                    <button type="button" wire:click="requestPilot" class="w-full py-4 bg-teal-500 hover:bg-teal-400 text-white rounded-2xl font-bold text-xs uppercase tracking-widest transition-all shadow-xl shadow-teal-900/40">
+                        Dispatch Pilotage
+                    </button>
+                    @else
+                    <button type="button" wire:click="advancePilotSimulation" class="w-full py-4 bg-white/10 hover:bg-white/20 text-white rounded-2xl font-bold text-xs uppercase tracking-widest border border-white/10 transition-all">
+                        {{ $pilotProgress < 100 ? 'Advance Sequence' : 'Reset Simulator' }}
+                    </button>
+                    @endif
+                </div>
+            </div>
         </div>
     </div>
 @elseif($mode === 'agent')
     <!-- Agent Dashboard Layout -->
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-        <!-- Agent Stats -->
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+        <!-- Live Billing KPI (Prominent) -->
+        <div class="md:col-span-2 bg-gradient-to-br from-emerald-500 to-teal-600 p-8 rounded-3xl shadow-2xl text-white relative overflow-hidden">
+            <div class="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full -mr-32 -mt-32"></div>
+            <div class="relative z-10">
+                <div class="flex items-center justify-between mb-4">
+                    <div>
+                        <p class="text-xs font-bold uppercase tracking-widest text-emerald-100">Live Billing</p>
+                        <p class="text-[10px] text-emerald-200 mt-0.5">Real-time charges</p>
+                    </div>
+                    <span class="flex h-3 w-3 rounded-full bg-white animate-pulse shadow-lg"></span>
+                </div>
+                
+                <div class="mb-6">
+                    <h2 class="text-5xl font-black mb-2">RM {{ number_format($liveBilling['total_charges'], 2) }}</h2>
+                    <p class="text-sm text-emerald-100">Total Outstanding Charges</p>
+                </div>
+
+                <div class="grid grid-cols-2 gap-4 pt-4 border-t border-white/20">
+                    <div>
+                        <div class="flex items-center gap-2 mb-1">
+                            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zM3 10a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H4a1 1 0 01-1-1v-6zM14 9a1 1 0 00-1 1v6a1 1 0 001 1h2a1 1 0 001-1v-6a1 1 0 00-1-1h-2z"></path></svg>
+                            <span class="text-xs font-bold">Berthing</span>
+                        </div>
+                        <p class="text-2xl font-black">RM {{ number_format($liveBilling['berthing_charges'], 2) }}</p>
+                        <p class="text-[10px] text-emerald-200">{{ $liveBilling['berthing_vessels'] }} vessel(s)</p>
+                    </div>
+                    <div>
+                        <div class="flex items-center gap-2 mb-1">
+                            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path d="M10 2a5 5 0 00-5 5v2a2 2 0 00-2 2v5a2 2 0 002 2h10a2 2 0 002-2v-5a2 2 0 00-2-2H7V7a3 3 0 015.905-.75 1 1 0 001.937-.5A5.002 5.002 0 0010 2z"></path></svg>
+                            <span class="text-xs font-bold">Warehouse</span>
+                        </div>
+                        <p class="text-2xl font-black">RM {{ number_format($liveBilling['warehouse_charges'], 2) }}</p>
+                        <p class="text-[10px] text-emerald-200">{{ $liveBilling['warehouse_items'] }} item(s)</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Other Stats -->
         <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex items-center justify-between">
             <div>
                 <p class="text-xs font-bold text-slate-400 uppercase tracking-[0.2em]">Active Vessels</p>
@@ -202,16 +387,7 @@
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
             </div>
         </div>
-         <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex items-center justify-between">
-            <div>
-                <p class="text-xs font-bold text-slate-400 uppercase tracking-[0.2em]">Pending Requests</p>
-                <h3 class="text-3xl font-black text-slate-900 mt-2">{{ $stats['pending_requests'] }}</h3>
-            </div>
-            <div class="p-3 bg-amber-50 text-amber-600 rounded-xl">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-            </div>
-        </div>
-         <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex items-center justify-between">
+        <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex items-center justify-between">
             <div>
                 <p class="text-xs font-bold text-slate-400 uppercase tracking-[0.2em]">Unpaid Invoices</p>
                 <h3 class="text-3xl font-black text-slate-900 mt-2">{{ $stats['unpaid_invoices'] }}</h3>
@@ -271,6 +447,35 @@
 
         <!-- Sidebar -->
         <div class="space-y-6">
+            @if($warehouseBilling)
+            <!-- Live Warehouse Billing -->
+            <div class="bg-gradient-to-br from-amber-500 to-orange-600 rounded-3xl p-6 text-white shadow-2xl">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="font-bold text-sm uppercase tracking-widest">Warehouse Charges</h3>
+                    <span class="flex h-2 w-2 rounded-full bg-white animate-pulse"></span>
+                </div>
+                <div class="mb-4">
+                    <div class="text-3xl font-black">RM {{ number_format($warehouseBilling['total_charges'], 2) }}</div>
+                    <div class="text-amber-100 text-xs font-bold mt-1">{{ $warehouseBilling['items_count'] }} items in storage</div>
+                </div>
+                <div class="pt-4 border-t border-white/20">
+                    <div class="text-xs space-y-1 text-amber-100">
+                        <div class="flex justify-between">
+                            <span>Base Rate:</span>
+                            <span class="font-bold">RM {{ $warehouseBilling['rate_info']['base_rate'] }}/m³/day</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span>DG Surcharge:</span>
+                            <span class="font-bold">+{{ $warehouseBilling['rate_info']['dg_surcharge_pct'] }}%</span>
+                        </div>
+                    </div>
+                </div>
+                <a href="{{ route('warehouse.map') }}" class="mt-4 block w-full py-2 bg-white/20 hover:bg-white/30 rounded-xl text-center text-xs font-bold uppercase tracking-widest transition-colors">
+                    View Yard Map
+                </a>
+            </div>
+            @endif
+
             <!-- Reuse Pilot Simulator? Or Simplified Info -->
             <div class="bg-slate-900 rounded-3xl p-6 text-white">
                 <h3 class="font-bold text-lg mb-2">Support</h3>

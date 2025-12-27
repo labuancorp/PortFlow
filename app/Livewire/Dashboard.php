@@ -75,6 +75,41 @@ class Dashboard extends Component
             ->where('status', '!=', 'paid')
             ->count();
 
+        // Live Billing Calculation
+        $liveBilling = [
+            'berthing_charges' => 0,
+            'warehouse_charges' => 0,
+            'total_charges' => 0,
+            'berthing_vessels' => 0,
+            'warehouse_items' => 0
+        ];
+
+        // Calculate Berthing Charges (Active Vessels)
+        $activePortCalls = PortCall::where('agent_id', $orgId)
+            ->whereIn('status', ['anchored', 'alongside'])
+            ->with('berth')
+            ->get();
+
+        foreach ($activePortCalls as $portCall) {
+            if ($portCall->berth && $portCall->eta) {
+                $daysAlongside = max(1, now()->diffInDays($portCall->eta));
+                $berthRate = $portCall->berth->rate_per_day ?? 500; // Default RM 500/day
+                $liveBilling['berthing_charges'] += $daysAlongside * $berthRate;
+                $liveBilling['berthing_vessels']++;
+            }
+        }
+
+        // Warehouse Billing (if subscribed)
+        $warehouseBilling = null;
+        if ($user->organization->warehouse_subscribed ?? false) {
+            $billingService = new \App\Services\WarehouseBillingService();
+            $warehouseBilling = $billingService->calculateLiveCharges($orgId);
+            $liveBilling['warehouse_charges'] = $warehouseBilling['total_charges'];
+            $liveBilling['warehouse_items'] = $warehouseBilling['items_count'];
+        }
+
+        $liveBilling['total_charges'] = $liveBilling['berthing_charges'] + $liveBilling['warehouse_charges'];
+
         // Recent Activity filter
         $recentActivity = PortCall::where('agent_id', $orgId)
             ->with(['vessel', 'berth'])
@@ -89,6 +124,8 @@ class Dashboard extends Component
                 'pending_requests' => $myPendingRequests,
                 'unpaid_invoices' => $unpaidInvoices,
             ],
+            'liveBilling' => $liveBilling,
+            'warehouseBilling' => $warehouseBilling,
             'recentActivity' => $recentActivity,
             'now' => $now
         ]);
@@ -132,6 +169,10 @@ class Dashboard extends Component
         $iotService->syncReadings(); // Simulate live update
         $iotReadings = \App\Models\IotSensor::where('status', 'active')->get();
 
+        // Warehouse Billing Summary
+        $billingService = new \App\Services\WarehouseBillingService();
+        $warehouseBillingSummary = $billingService->getOrganizationSummary();
+
         return view('livewire.dashboard', [
             'mode' => 'admin',
             'alongsideCount' => $alongsideCount,
@@ -142,7 +183,8 @@ class Dashboard extends Component
             'pendingRequests' => $pendingRequests,
             'now' => $now,
             'berths' => $activeBerths,
-            'iotReadings' => $iotReadings
+            'iotReadings' => $iotReadings,
+            'warehouseBillingSummary' => $warehouseBillingSummary
         ]);
     }
 

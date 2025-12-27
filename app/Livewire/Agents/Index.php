@@ -104,6 +104,17 @@ class Index extends Component
         $this->dispatch('notify', message: 'Agent profile deleted.');
     }
 
+    public function toggleWarehouseSubscription($id)
+    {
+        $agent = Organization::findOrFail($id);
+        $newStatus = !$agent->warehouse_subscribed;
+        
+        $agent->update(['warehouse_subscribed' => $newStatus]);
+        
+        $statusText = $newStatus ? 'subscribed to' : 'unsubscribed from';
+        $this->dispatch('notify', message: "{$agent->name} {$statusText} warehouse service.");
+    }
+
     public function render()
     {
         $agents = Organization::where('type', 'agent')

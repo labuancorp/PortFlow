@@ -1,5 +1,43 @@
 <div class="h-[calc(100vh-64px)] flex flex-col md:flex-row font-sans">
     
+@if(!$subscribed && auth()->user()->role === 'agent')
+    <!-- Subscription Required Screen -->
+    <div class="flex-1 flex items-center justify-center bg-gradient-to-br from-slate-50 to-slate-100 p-8">
+        <div class="max-w-md w-full bg-white rounded-3xl shadow-2xl p-8 border border-slate-200">
+            <div class="text-center mb-6">
+                <div class="w-16 h-16 bg-indigo-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <svg class="w-8 h-8 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path></svg>
+                </div>
+                <h2 class="text-2xl font-black text-slate-900">Warehouse Service</h2>
+                <p class="text-slate-500 mt-2">Subscribe to access yard mapping & cargo tracking</p>
+            </div>
+            
+            <div class="space-y-3 mb-6">
+                <div class="flex items-start gap-3">
+                    <svg class="w-5 h-5 text-teal-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                    <span class="text-sm text-slate-700">Real-time yard space availability</span>
+                </div>
+                <div class="flex items-start gap-3">
+                    <svg class="w-5 h-5 text-teal-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                    <span class="text-sm text-slate-700">Track your cargo location</span>
+                </div>
+                <div class="flex items-start gap-3">
+                    <svg class="w-5 h-5 text-teal-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                    <span class="text-sm text-slate-700">See occupied zones (owner names only)</span>
+                </div>
+                <div class="flex items-start gap-3">
+                    <svg class="w-5 h-5 text-teal-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                    <span class="text-sm text-slate-700">Aging cargo alerts</span>
+                </div>
+            </div>
+
+            <a href="{{ route('settings') }}" class="block w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold text-center transition-colors">
+                Contact Admin to Subscribe
+            </a>
+            <p class="text-xs text-slate-400 text-center mt-4">Subscription managed by port administration</p>
+        </div>
+    </div>
+@else
     <!-- Sidebar -->
     <div class="w-full md:w-80 bg-white border-r border-slate-200 flex flex-col z-20 shadow-xl overflow-hidden md:h-full">
         <div class="p-6 border-b border-slate-100">
@@ -196,3 +234,5 @@
         loadLeaflet(initYardMap);
     }
 </script>
+@endif
+</div>

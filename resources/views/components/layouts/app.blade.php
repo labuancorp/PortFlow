@@ -72,13 +72,15 @@
                          </a>
                     </li>
                     
-                    @if(auth()->user()->role === 'admin')
+                    @if(auth()->user()->role === 'admin' || (auth()->user()->role === 'agent' && auth()->user()->organization->warehouse_subscribed))
                     <li>
                          <a href="{{ route('warehouse.map') }}" class="flex items-center px-3 py-2 rounded-lg group {{ request()->routeIs('warehouse.*') ? 'bg-slate-800 text-white' : 'text-slate-300 hover:bg-slate-800 hover:text-white' }}">
                              <span class="ml-3 text-amber-400 font-bold">Yard / Warehouse Map</span>
                          </a>
                     </li>
+                    @endif
  
+                    @if(auth()->user()->role === 'admin')
                     <li>
                         <a href="{{ route('gate.scanner') }}" class="flex items-center px-3 py-2 rounded-lg group {{ request()->routeIs('gate.scanner') ? 'bg-slate-800 text-white' : 'text-slate-300 hover:bg-slate-800 hover:text-white' }}">
                             <span class="ml-3 text-emerald-400 font-bold">Gate Security Scanner</span>
