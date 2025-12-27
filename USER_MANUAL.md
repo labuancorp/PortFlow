@@ -1,32 +1,21 @@
 # PortFlow: The Definitive OSB & Supply Base Management Manual
-## Version 1.2 | Digital Transformation in Oil & Gas
-
+## Version 1.5 | Digital Transformation in Oil & Gas & Logistics
 ---
 
-## 🔑 1. User Access & Login
-To explore the system with full functionality, use the following pre-configured credentials:
+## 🔑 1. Secure Access & User Roles
+PortFlow utilizes an **Identity-First** security model. Access is restricted based on the "Least Privilege" principle.
 
-| Role | Email | Password | Primary Objective |
+| Role | Primary Endpoint | Access level | Key Responsibilities |
 | :--- | :--- | :--- | :--- |
-| **Port Admin** | `admin@asb.com` | `password` | Complete oversight of berths, wharfs, and billing. |
-| **HSE Officer** | `hse@asb.com` | `password` | Reviewing high-risk permits and safety compliance. |
-| **Shipping Agent** | `agent@baram.com` | `password` | Managing fleet, manifests, and logistics requests. |
+| **Port Admin** | `admin@asb.com` | Full Administrative | Global oversight, financial audits, resource allocation. |
+| **HSE Officer** | `hse@asb.com` | Safety Enforcement | High-risk permit approval, incident investigation, regulatory compliance. |
+| **Shipping Agent** | `agent@baram.com` | Logistics Partner | Fleet operations, manifest submission, cargo tracking. |
+
+**Security Note:** All logins are protected by **2FA (Two-Factor Authentication)** and brute-force rate limiting.
 
 ---
 
-## 🏆 2. Why PortFlow? (The "Winning in Asia" Factor)
-Asia's maritime sector is the fastest-growing but often the most fragmented. Shell, Petronas, and Murphy Oil require more than just "logs"—they require **Risk Mitigation**.
-
-### 5 Key Areas Where PortFlow Wins:
-1.  **Safety Clash Integration:** Unlike generic port software, PortFlow links the GIS map with the HSE permit system. It prevents a fuel vessel from berthing next to an active welding site automatically.
-2.  **O&G Vertical Depth:** Specifically designed for Supply Bases (OSB). We handle "bulk fluids" (Mud/brine/Fuel) and "tubulars" (Pipes) as first-class citizens, not just generic containers.
-3.  **Real-Time Revenue Assurance:** In a market with thin margins, our "Zero-Leakage" billing ensures that every minute a vessel spends alongside is captured and invoiced instantly.
-4.  **Local Expertise, Global Standards:** While based on Asian port workflows, we follow international IMO and ISPS safety standards, allowing global giants to trust our compliance logs.
-5.  **Offline-Ready Edge Mobility:** We understand that port corners often have poor connectivity. Our mobile-first design allows ground crews to capture data "at the edge" and sync when back in range.
-
----
-
-## 💼 3. Commercial & License Pricing
+## � 3. Commercial & License Pricing
 PortFlow offers a flexible pricing model tailored for single-port operators or large regional logistics aggregators.
 
 ### 🏢 Single License (Enterprise)
@@ -43,78 +32,90 @@ PortFlow offers a flexible pricing model tailored for single-port operators or l
 
 ---
 
-## 🛠️ 4. Admin Menu Usage Guide (Port Authority)
-*Logged as: `admin@asb.com`*
+## �🛠️ 4. Comprehensive Module Guide (Menu-by-Menu)
 
-### 🚢 **Berth Planner (Schedule)**
-*   **Action:** Click any empty slot on the grid to create a "Port Call."
-*   **Validation:** Use the "Review" detail (Admin Only) to confirm arrivals (**ATA**) and secure lines (**ATB**).
-*   **Result:** This triggers the billing engine to start the "Alongside" timer.
+### 🟦 ADMINISTRATION & OPERATIONS (For Admins)
 
-### 📦 **Cargo Logistics**
-*   **Action:** Review manifests submitted by agents. 
-*   **Verification:** Click on specific items to assign them to a **Warehouse Zone** on the GIS map.
-*   **Control:** Use the "QR Label" button to print tracking tags for ground operations.
+#### 🚢 **Berth Planner (The Digital Twin of your Wharf)**
+*   **Purpose:** Visual scheduling of vessel arrivals and departures.
+*   **Usage:** Click an empty grid cell to initiate a **Port Call Request**.
+*   **Admin Power:** Admins can Drag-and-Drop port calls to optimize berth utilization. 
+*   **Financial Trigger:** Setting an **ATB (Actual Time of Berthing)** initiates the automated billing clock.
 
-### 🗺️ **GIS Map View (Advanced GIS)**
-*   **Action:** Click "GIS Map View" for a satellite/topographic overlay.
-*   **Live Data:** Hover over active vessels to see real-time speed and heading (simulated).
-*   **Spatial Awareness:** Visualize exact vessel placement on the wharf in 2D space.
+#### 📊 **Analytics Dashboard**
+*   **Purpose:** Executive intelligence for decision makers.
+*   **KPIs Tracked:** 
+    *   **MTT (Mean Turnaround Time):** Measure efficiency in vessel servicing.
+    *   **Berth Occupancy:** Identify bottlenecks in port infrastructure.
+    *   **Revenue Heatmap:** See which clients (Shell, Petronas, etc.) generate the highest margin.
 
-### 👥 **Crew Terminal & Registry**
-*   **Action:** Manage personnel transfers (Shore to Vessel).
-*   **Compliance:** Verify "Crew Pass" validity and ISPS clearance before allowing boarding.
+#### 📦 **Cargo Logistics & Manifests**
+*   **Purpose:** End-to-end tracking of "Total Cargo".
+*   **Workflow:** Review manifests submitted by agents. Confirm weight, volume, and **DG (Dangerous Goods)** class.
+*   **Inventory:** Items are tracked in real-time from "On Vessel" -> "In Transit" -> "Stored in Yard".
 
-### 📊 **Analytics Dashboard**
-*   **Insight:** Monitor **MTT (Mean Turnaround Time)** and **Berth Occupancy Rates**.
-*   **Financials:** Track revenue by Project (e.g., Shell vs. Petronas) to identify high-value clients.
+#### 🗺️ **GIS & Warehouse Map**
+*   **Purpose:** Spatial awareness of the supply base.
+*   **Feature:** Zoom into specific warehouse zones. Hover over cargo icons to see tracking numbers and aging data (how long it has been sitting in your yard).
 
-### 📶 **Mobile Ops & Security Scanner**
-*   **Gate Control:** Use the **Gate Scanner** to verify incoming trucks against manifest QR codes.
-*   **Field Ops:** Use the **Mobile Ops (Field)** menu on tablets to confirm cargo discharging at the wharf side.
-*   **Real-time Synch:** Ground observations immediately update the central Command Center.
-
-### 🛡️ **HSE Safety Console**
-*   **Action:** Review "Requested" permits.
-*   **Checklist:** Inspect the **Digital Safety Proof** (JSA, PPE, Gas Tests).
-*   **Clash Logic:** If the status turns Red, the system has detected a conflict. **Reject immediately.**
-
-### 💳 **Billing Management**
-*   **Action:** View generated invoices.
-*   **Adjustment:** Admins can manually add "Advisories" (Extra services like Fresh Water or Trash Removal).
-*   **Export:** Click "Export CSV" for integration with SAP or Oracle.
+#### 👥 **Crew Terminal**
+*   **Purpose:** ISPS-compliant personnel management.
+*   **Function:** Log crew changes, shore leave, and visitor access. Ensures every soul on the port is accounted for in case of emergency.
 
 ---
 
-## ⚓ 5. Agent Menu Usage Guide (Vessel Agents)
-*Logged as: `agent@baram.com`*
+### �️ 3. HSE GUARDIAN SUITE (End-to-End Safety)
+PortFlow treats safety as a **Revenue Protector**, not just a cost center.
 
-### 💻 **Agent Management Console**
-*   **Access:** Direct shortcut from the top-right header ("Management Console").
-*   **Fleet Management:** Add new vessels to your agency's authorized fleet. 
-*   **Logistics Tracking:** Monitor real-time status of your cargo items (In Transit vs. In Yard).
+#### � **PTW Safety Console (Permit-to-Work)**
+*   **Usage:** Central hub for high-risk activity management (Hot Work, Cold Work, Confined Space).
+*   **Logic:** The system utilizes **Clash Detection**. It will alert you if a maintenance permit overlaps with a vessel refueling operation at the same location.
+*   **Review Process:** HSE Officers must verify JSAs (Job Safety Analysis) and PPE requirements digitally before "Issuing" the permit.
 
-### 📝 **Request Port Call**
-*   **Action:** Use the Berth Planner to "Claim" a slot for an incoming vessel.
-*   **Priority:** Submitted requests appear as "Draft" for the Admin to verify.
-
-### 📦 **Submit Manifest**
-*   **Action:** Upload your cargo Manifest before the vessel arrivals.
-*   **Storage Alert:** If your client (e.g., Shell) needs yard space, check the "Yard Storage Requested" box and specify the Zone Type (e.g., Cold Store).
-
-### 🆘 **HSE Permit Request**
-*   **Action:** If your crew needs to perform maintenance (e.g., Welding), you must submit a permit here.
-*   **Transparency:** You can track if your permit is "In Review" or "Approved" by the HSE officer in real-time.
+#### � **Safety Intelligence (Incident & Near-Miss Reporter)**
+*   **Usage:** A proactive hazard identification tool.
+*   **Reporting:** Anyone on the port can snap a photo of a hazard and report it via mobile.
+*   **Investigation:** HSE Officers use the **Investigation Dossier** to log Root Cause Analysis and define "Corrective Actions."
+*   **Status Tracking:** Reports move through "Open" -> "Investigating" -> "Resolved" -> "Closed" with full timestamps.
 
 ---
 
-## 🏗️ 6. Training Scenarios (The ROI)
-*   **Scenario A:** "I need to find a valve lost 3 months ago." 
-    *   *Solution:* Go to **Warehouse Map** -> Sidebar -> **Aging Cargo**. Click the item to see its exact historical zone.
-*   **Scenario B:** "Vessel arrived early, is the berth free?" 
-    *   *Solution:* Open the **GIS Map**. Green berths are idle. Drag the vessel to the new slot.
+### ⚓ 4. AGENT PORTAL (The Partner Interface)
+Designed to reduce the administrative burden on port partners.
+
+#### 💻 **Management Console**
+*   **Dashboard:** Real-time view of the agent's fleet and active cargo. 
+*   **Self-Service:** Agents can add new vessels and register manifests without calling the port office.
+
+#### 🆘 **Permit Requests**
+*   **Workflow:** Agents apply for permits for their crews. They receive **Live Status Notifications** (Approved/Rejected/More Info) directly on their mobile devices.
+
+---
+
+## � 5. Return on Investment (ROI) Analysis
+*Investing in PortFlow isn't a cost; it's a strategic capital optimization.*
+
+### 📈 ROI Factors:
+1.  **Revenue Leakage Elimination (15-20% Increase):** Manual billing often misses "extra hours" and "auxiliary services" (Water, Trash, Crane time). PortFlow's automated timers ensure 100% billing accuracy.
+2.  **Incident Cost Mitigation (Millions Saved):** The average O&L incident (explosion/fire) costs upwards of RM 5M in fines and downtime. PortFlow's **Safety Clash Logic** reduces this risk by ~90%.
+3.  **Efficiency Gains (30% Faster Turnaround):** Real-time cargo tracking reduces "Lost Item Searches" from hours to seconds.
+
+### ⏱️ The ROI Timeline:
+*   **Months 1-3:** System familiarization; Initial revenue uplift from accurate billing discovered.
+*   **Months 4-6:** **Full Investment Recovery (Break-Even)** achieved through saved man-hours and zero billing leakage.
+*   **Month 12+:** Pure profit scaling through optimized berth occupancy and high-value data analytics.
+
+---
+
+## 🚀 6. Future HSE Roadmap (What's Next?)
+We are committed to making PortFlow the most advanced HSE OS in the world.
+
+*   **Phase 2: Digital Induction Portal:** Automated safety videos and quizzes for contractors before gate access is granted.
+*   **Phase 3: AI-PPE Monitoring:** Integration with existing CCTV to automatically detect personnel not wearing hard-hats or high-vis vests.
+*   **Phase 4: HSE Contractor Scorecard:** A ranking system that rewards safe agents with "Priority Berth Access" and penalizes repeat offenders.
+*   **Phase 5: Drone Integration:** Automated aerial inspections for warehouse roof integrity and perimeter security.
 
 ---
 
 **Confidentiality Notice:** This manual contains proprietary business logic for PortFlow.
-**Support:** support@portflow.io | **Emergency HSE Line:** +60 87 XXX XXXX
+**Support:** support@labuan.dev | +60198691289
