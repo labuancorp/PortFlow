@@ -22,14 +22,27 @@ class Register extends Component
     public $company_code = '';
     public $billing_address = '';
 
-    protected $rules = [
-        'name' => 'required|string|max:255',
-        'email' => 'required|email|unique:users,email',
-        'password' => 'required|min:8|same:password_confirmation',
-        'company_name' => 'required|string|max:255',
-        'company_code' => 'required|string|max:10|unique:organizations,code',
-        'billing_address' => 'required|string',
-    ];
+    protected function rules()
+    {
+        return [
+            'name' => 'required|string|max:255',
+            'email' => 'required|email|unique:users,email',
+            'password' => [
+                'required',
+                'min:8',
+                'same:password_confirmation',
+                \Illuminate\Validation\Rules\Password::min(8)
+                    ->letters()
+                    ->mixedCase()
+                    ->numbers()
+                    ->symbols()
+                    ->uncompromised(),
+            ],
+            'company_name' => 'required|string|max:255',
+            'company_code' => 'required|string|max:10|unique:organizations,code',
+            'billing_address' => 'required|string',
+        ];
+    }
 
     public function register()
     {

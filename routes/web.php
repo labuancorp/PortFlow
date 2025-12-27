@@ -48,10 +48,14 @@ Route::middleware(['auth', '2fa'])->group(function () {
 });
 });
 
-// Auth Routes
-Route::get('/login', App\Livewire\Auth\Login::class)->name('login');
-Route::get('/register', App\Livewire\Auth\Register::class)->name('register');
-Route::get('/2fa/verify', App\Livewire\Auth\TwoFactorChallenge::class)->name('2fa.verify')->middleware('auth');
+// Auth Routes (Rate Limited)
+Route::middleware('throttle:6,1')->group(function () {
+    Route::get('/login', App\Livewire\Auth\Login::class)->name('login');
+    Route::get('/register', App\Livewire\Auth\Register::class)->name('register');
+});
+
+Route::get('/2fa/verify', App\Livewire\Auth\TwoFactorChallenge::class)->name('2fa.verify')->middleware(['auth', 'throttle:10,1']);
+
 Route::get('/logout', function () {
     Illuminate\Support\Facades\Auth::logout();
     session()->invalidate();
