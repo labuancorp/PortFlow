@@ -6,7 +6,11 @@ use Illuminate\Database\Eloquent\Model;
 
 class Organization extends Model
 {
-    protected $fillable = ['name', 'type', 'code', 'billing_address', 'warehouse_subscribed'];
+    protected $fillable = ['name', 'type', 'code', 'billing_address', 'warehouse_subscribed', 'enabled_modules'];
+
+    protected $casts = [
+        'enabled_modules' => 'array',
+    ];
 
     public function vessels()
     {
@@ -16,5 +20,13 @@ class Organization extends Model
     public function portCalls()
     {
         return $this->hasMany(PortCall::class, 'agent_id');
+    }
+
+    public function hasModule($moduleName)
+    {
+        if (!$this->enabled_modules) {
+            return false;
+        }
+        return in_array($moduleName, $this->enabled_modules);
     }
 }

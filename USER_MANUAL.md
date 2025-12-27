@@ -20,13 +20,13 @@ PortFlow offers a flexible pricing model tailored for single-port operators or l
 
 ### 🏢 Single License (Enterprise)
 *For a single Supply Base or Terminal.*
-*   **Cost:** RM 185,000 / Year (SaaS) or RM 740,000 (One-time Perpetual).
+*   **Cost:** RM 100,000 / Year (SaaS) or RM 550,000 (One-time Perpetual).[Negotiable]
 *   **Includes:** Unlimited users, 24/7 technical support, and monthly updates.
 *   **Onboarding:** Professional deployment and data migration included.
 
 ### 🏢 Reseller / OEM / White-Label
 *For maritime consultants and tech providers.*
-*   **Cost:** RM 395,000 / Year (Bulk License Pack - Up to 5 Ports).
+*   **Cost:** RM 495,000 / Year (Bulk License Pack - Up to 5 Ports). [Negotiable]
 *   **Markup Potential:** 100% (Resellers can set their own end-user pricing).
 *   **Customization:** Full white-labeling (Your Logo, Your Colors) and API access for custom integrations.
 
@@ -101,6 +101,7 @@ This section outlines the rigorous technical and functional framework used to bu
 2.  **Requirement 102:** The system must detect safety "clashes" between cargo operations and maintenance work.
 3.  **Requirement 103:** Automation of the billing clock based on Actual Time of Berthing (ATB) and Actual Time of Unberthing (ATU).
 4.  **Requirement 104:** Role-based access control (RBAC) specifically separating Port Authority, Safety, and Third-party Agents.
+5.  **Requirement 105:** Automated metered billing for heavy equipment (Cranes/Forklifts) and specialized facilities.
 
 ### ⚙️ 5.2 Software Requirement Specification (SRS)
 *How the software delivers the URS.*
@@ -112,7 +113,7 @@ This section outlines the rigorous technical and functional framework used to bu
 ### 📖 5.3 User Stories (The Human Perspective)
 *   **As a Port Admin,** I want to see a thermal map of berth occupancy so I can maximize wharf revenue and reduce idle time.
 *   **As an HSE Officer,** I want to receive instant photo-evidence of hazards so I can investigate and close safety gaps within 4 hours.
-*   **As a Shipping Agent,** I want to track my vessel's cargo status (In Transit vs. In Yard) without calling the port office repeatedly.
+*   **As a Shipping Agent,** I want to book a 250T Crane autonomously so I can proceed with urgent offshore tubular loading without manual paperwork.
 
 ---
 
@@ -125,6 +126,7 @@ This section outlines the rigorous technical and functional framework used to bu
 | **"Communication Black-holes"**: Agents use paper manifests that get lost or misfiled. | **Digital Manifest Portal**: One-click upload with instant QR tracking for every single cargo item. |
 | **"Reactive Safety"**: Safety officers only find out about hazards *after* an accident occurs. | **Safety Intelligence**: Real-time reporting of "Hazard Observations" to enable preventative action. |
 | **"Berth Clashes"**: Two vessels scheduled for one slot due to spreadsheet errors. | **Visual GIS Grid**: Collision detection system prevents overlapping bookings in the scheduler. |
+| **"Equipment Under-utilization"**: Cranes and forklifts sitting idle or used without billing. | **Resource Marketplace**: Digital metered booking ensures every asset hour is captured and billed. |
 | **"Audit Pain"**: Spent weeks compiling records for Petronas/Shell safety audits. | **One-Click Compliance**: A complete, unalterable Audit Trail is exported in seconds. |
 
 ---

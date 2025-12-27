@@ -34,6 +34,12 @@ Route::middleware(['auth', '2fa'])->group(function () {
         Route::get('/hse/incidents', App\Livewire\HSE\IncidentReporting::class)->name('hse.incidents.index');
     });
 
+    // Facility & Asset Rental
+    Route::middleware(['role:admin,hse'])->group(function () {
+        Route::get('/assets/inventory', App\Livewire\Assets\Inventory::class)->name('assets.inventory');
+    });
+    Route::get('/assets/marketplace', App\Livewire\Assets\Booking::class)->name('assets.booking');
+
     // Admin Only
     Route::middleware(['role:admin'])->group(function () {
         Route::get('/agents', App\Livewire\Agents\Index::class)->name('agents.index');

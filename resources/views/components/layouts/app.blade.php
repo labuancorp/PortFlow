@@ -133,11 +133,29 @@
                     @if(auth()->user()->role !== 'hse')
                     <li>
                         <a href="{{ route('billing.index') }}" class="flex items-center px-3 py-2 rounded-lg group {{ request()->routeIs('billing.*') ? 'bg-slate-800 text-white' : 'text-slate-300 hover:bg-slate-800 hover:text-white' }}">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"></path></svg>
-                            <span class="ml-3">Billing</span>
+                            <svg class="w-5 h-5 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"></path></svg>
+                            <span class="ml-3 font-bold">Billing & Invoices</span>
                         </a>
                     </li>
                     @endif
+
+                    <li class="mt-4 px-3 text-[10px] font-black text-slate-500 uppercase tracking-widest">Resources</li>
+                    
+                    @if(in_array(auth()->user()->role, ['admin', 'hse']))
+                    <li>
+                        <a href="{{ route('assets.inventory') }}" class="flex items-center px-3 py-2 rounded-lg group {{ request()->routeIs('assets.inventory') ? 'bg-slate-800 text-white' : 'text-slate-300 hover:bg-slate-800 hover:text-white' }}">
+                            <svg class="w-5 h-5 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17V7m0 10a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h2a2 2 0 012 2m0 10a2 2 0 002 2h2a2 2 0 002-2M9 7a2 2 0 012-2h2a2 2 0 012 2m0 10V7m0 10a2 2 0 002 2h2a2 2 0 002-2V7a2 2 0 00-2-2h-2a2 2 0 00-2 2"></path></svg>
+                            <span class="ml-3">Resource Inventory</span>
+                        </a>
+                    </li>
+                    @endif
+
+                    <li>
+                        <a href="{{ route('assets.booking') }}" class="flex items-center px-3 py-2 rounded-lg group {{ request()->routeIs('assets.booking') ? 'bg-slate-800 text-white' : 'text-slate-300 hover:bg-slate-800 hover:text-white' }}">
+                            <svg class="w-5 h-5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                            <span class="ml-3">Resource Marketplace</span>
+                        </a>
+                    </li>
                     
                     @if(auth()->user()->role === 'admin')
                     <li class="mt-8 border-t border-slate-800 pt-4">

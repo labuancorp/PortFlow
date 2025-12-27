@@ -52,7 +52,8 @@ class DatabaseSeeder extends Seeder
                 'name' => 'Baram Shipyard Agents',
                 'type' => 'agent',
                 'billing_address' => 'Lot 123, Miri Port, Sarawak',
-                'warehouse_subscribed' => true
+                'warehouse_subscribed' => true,
+                'enabled_modules' => ['yard_management', 'resource_booking']
             ]
         );
 
@@ -61,7 +62,8 @@ class DatabaseSeeder extends Seeder
             [
                 'name' => 'Oceanic Maritime Services',
                 'type' => 'agent',
-                'billing_address' => 'Marina Bay, Singapore'
+                'billing_address' => 'Marina Bay, Singapore',
+                'enabled_modules' => ['resource_booking']
             ]
         );
 
@@ -735,6 +737,11 @@ class DatabaseSeeder extends Seeder
         // 14. Gate Entries (Phase 1)
         // ============================================
         $this->call(GateEntrySeeder::class);
+
+        // ============================================
+        // 15. Port Assets (Rental Equipment)
+        // ============================================
+        $this->call(PortAssetSeeder::class);
 
         // ============================================
         // COMPLETION
