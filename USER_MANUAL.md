@@ -26,7 +26,7 @@ PortFlow offers a flexible pricing model tailored for single-port operators or l
 
 ### 🏢 Reseller / OEM / White-Label
 *For maritime consultants and tech providers.*
-*   **Cost:** RM 495,000 / Year (Bulk License Pack - Up to 5 Ports).
+*   **Cost:** RM 395,000 / Year (Bulk License Pack - Up to 5 Ports).
 *   **Markup Potential:** 100% (Resellers can set their own end-user pricing).
 *   **Customization:** Full white-labeling (Your Logo, Your Colors) and API access for custom integrations.
 
@@ -92,7 +92,44 @@ Designed to reduce the administrative burden on port partners.
 
 ---
 
-## � 5. Return on Investment (ROI) Analysis
+## 🏗️ 5. Engineering Design & Documentation (URS / SRS)
+This section outlines the rigorous technical and functional framework used to build PortFlow for the **Asian Supply Base (ASB)**.
+
+### 📋 5.1 User Requirement Specification (URS)
+*What the business needs to achieve.*
+1.  **Requirement 101:** The system must provide a real-time visual "Digital Twin" of the wharf to eliminate berthing overlaps.
+2.  **Requirement 102:** The system must detect safety "clashes" between cargo operations and maintenance work.
+3.  **Requirement 103:** Automation of the billing clock based on Actual Time of Berthing (ATB) and Actual Time of Unberthing (ATU).
+4.  **Requirement 104:** Role-based access control (RBAC) specifically separating Port Authority, Safety, and Third-party Agents.
+
+### ⚙️ 5.2 Software Requirement Specification (SRS)
+*How the software delivers the URS.*
+*   **Architectural Stack:** TALL Stack (Tailwind CSS, Alpine.js, Laravel, Livewire) for high-reactivity without page reloads.
+*   **Security Layer:** Middleware-based RBAC & Rate Limiting (6 req/min) to prevent brute-force attacks.
+*   **Database Engine:** Transactional-safe SQL for financial billing integrity.
+*   **Edge Capability:** Mobile-responsive layout for field ops with image-compression for low-bandwidth zones.
+
+### 📖 5.3 User Stories (The Human Perspective)
+*   **As a Port Admin,** I want to see a thermal map of berth occupancy so I can maximize wharf revenue and reduce idle time.
+*   **As an HSE Officer,** I want to receive instant photo-evidence of hazards so I can investigate and close safety gaps within 4 hours.
+*   **As a Shipping Agent,** I want to track my vessel's cargo status (In Transit vs. In Yard) without calling the port office repeatedly.
+
+---
+
+## 💡 6. Problem vs. Solution Matrix
+*The core operational challenges PortFlow solves for ASB.*
+
+| The Problem | PortFlow’s Digital Solution |
+| :--- | :--- |
+| **"Phantom Billing"**: Berthing time is rounded off manually, leading to thousands in lost income. | **Automatic Timers**: Invoices are generated based on exact server-logged berthing timestamps. |
+| **"Communication Black-holes"**: Agents use paper manifests that get lost or misfiled. | **Digital Manifest Portal**: One-click upload with instant QR tracking for every single cargo item. |
+| **"Reactive Safety"**: Safety officers only find out about hazards *after* an accident occurs. | **Safety Intelligence**: Real-time reporting of "Hazard Observations" to enable preventative action. |
+| **"Berth Clashes"**: Two vessels scheduled for one slot due to spreadsheet errors. | **Visual GIS Grid**: Collision detection system prevents overlapping bookings in the scheduler. |
+| **"Audit Pain"**: Spent weeks compiling records for Petronas/Shell safety audits. | **One-Click Compliance**: A complete, unalterable Audit Trail is exported in seconds. |
+
+---
+
+## 💰 7. Return on Investment (ROI) Analysis
 *Investing in PortFlow isn't a cost; it's a strategic capital optimization.*
 
 ### 📈 ROI Factors:
@@ -107,13 +144,48 @@ Designed to reduce the administrative burden on port partners.
 
 ---
 
-## 🚀 6. Future HSE Roadmap (What's Next?)
+## 🚀 8. Future HSE Roadmap (What's Next?)
 We are committed to making PortFlow the most advanced HSE OS in the world.
 
 *   **Phase 2: Digital Induction Portal:** Automated safety videos and quizzes for contractors before gate access is granted.
 *   **Phase 3: AI-PPE Monitoring:** Integration with existing CCTV to automatically detect personnel not wearing hard-hats or high-vis vests.
 *   **Phase 4: HSE Contractor Scorecard:** A ranking system that rewards safe agents with "Priority Berth Access" and penalizes repeat offenders.
 *   **Phase 5: Drone Integration:** Automated aerial inspections for warehouse roof integrity and perimeter security.
+
+---
+
+## ⚡ 9. Technology Architecture (The Engine)
+PortFlow is engineered using the **TALL Stack**, a high-performance modern web architecture designed for real-time reactivity and mission-critical reliability.
+
+### 🛠️ Core Technology Stack:
+*   **Backend (Laravel 11):** The world's most robust PHP framework, providing Enterprise-grade routing, ORM (Eloquent), and deep security layers.
+*   **Reactivity (Livewire 3):** Allows the system to update UI components (like the Berth Planner or Safety Dashboard) in real-time without refreshing the page.
+*   **Interactivity (Alpine.js):** Lightweight JavaScript for fluid client-side interactions (like the Password Eye toggle).
+*   **Design System (Tailwind CSS):** A utility-first CSS framework that ensures a stunning, responsive, and mobile-first experience for field operators.
+*   **Data Layer (MySQL/MariaDB):** Transactional-safe relational database ensuring zero-loss billing and audit logging.
+
+### 📡 System Resilience:
+*   **PWA (Progressive Web App):** PortFlow can be "installed" on mobile devices, providing a native app experience for ground crews at the wharf.
+*   **Edge Ops:** Optimized for low-bandwidth satellite connections common in remote port zones.
+
+---
+
+## 🛡️ 10. Cybersecurity & Data Hardening
+We have implemented a **"Hard as Rock"** security posture to protect ASB's operational data and financial integrity.
+
+### 🔐 10.1 Perimeter Defense:
+*   **CSP (Content Security Policy):** Strict browser-level instructions that block unauthorized scripts and data-injection attacks (XSS).
+*   **HSTS & SSL:** All traffic is forced through 256-bit encrypted tunnels.
+*   **Harden Headers:** Enforced `X-Frame-Options: DENY` and `X-Content-Type: nosniff` to prevent clickjacking and MIME-type sniffing.
+
+### 👤 10.2 Identity & Auth Security:
+*   **2FA (Multi-Factor Authentication):** Critical actions require a secondary verification code, protecting against stolen credentials.
+*   **Password Entropy:** Enforced high-complexity password rules and leak-detection (checking against known breached passwords).
+*   **Route Throttling:** Intelligent rate-limiting (e.g., 6 req/min on login) to neutralize brute-force automation.
+
+### 🗒️ 10.3 Immutable Audit Trails:
+*   Every change in the system—from permit approvals to invoice adjustments—is logged with a **User ID, IP Address, and Timestamp**. 
+*   These logs are immutable and serve as the "Black Box" for port safety investigations and financial audits.
 
 ---
 
