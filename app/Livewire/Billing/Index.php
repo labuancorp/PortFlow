@@ -34,16 +34,26 @@ class Index extends Component
     public function render()
     {
         // 1. Unbilled Completed Port Calls
-        $unbilledCalls = PortCall::where('status', 'completed')
-            ->whereDoesntHave('invoice') // Assuming relationship defined in PortCall
-            ->with(['vessel', 'agent', 'berth'])
-            ->orderBy('atd', 'desc')
-            ->paginate(5, ['*'], 'unbilledPage');
+        $unbilledQuery = PortCall::where('status', 'completed')
+            ->whereDoesntHave('invoice')
+            ->with(['vessel', 'agent', 'berth']);
 
         // 2. Generated Invoices
-        $invoices = Invoice::with(['portCall.vessel', 'organization'])
-            ->orderBy('created_at', 'desc')
-            ->paginate(10, ['*'], 'invoicePage');
+        $invoiceQuery = Invoice::with(['portCall.vessel', 'organization']);
+
+        // AGENT RESTRICTION: Filter by Organization
+        if (auth()->user()->role === 'agent') {
+            $orgId = auth()->user()->organization_id;
+            
+            // Only see port calls handled by this agent's org
+            $unbilledQuery->where('agent_id', $orgId);
+            
+            // Only see invoices billed to this agent's org
+            $invoiceQuery->where('organization_id', $orgId);
+        }
+
+        $unbilledCalls = $unbilledQuery->orderBy('atd', 'desc')->paginate(5, ['*'], 'unbilledPage');
+        $invoices = $invoiceQuery->orderBy('updated_at', 'desc')->paginate(10, ['*'], 'invoicePage');
 
         return view('livewire.billing.index', [
             'unbilledCalls' => $unbilledCalls,

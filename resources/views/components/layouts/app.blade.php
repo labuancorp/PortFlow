@@ -29,6 +29,7 @@
                         </a>
                     </li>
 
+                    @if(auth()->user()->role === 'admin')
                     <li>
                         <a href="{{ route('crew.terminal') }}" class="flex items-center px-3 py-2 rounded-lg group {{ request()->routeIs('crew.*') ? 'bg-slate-800 text-white' : 'text-slate-300 hover:bg-slate-800 hover:text-white' }}">
                             <span class="ml-3 text-indigo-400 font-bold">Crew Terminal</span>
@@ -39,7 +40,9 @@
                             <span class="ml-3 text-purple-400 font-bold">Analytics</span>
                         </a>
                     </li>
-                     <li>
+                    @endif
+
+                    <li>
                         <a href="{{ route('home') }}" class="flex items-center px-3 py-2 rounded-lg group {{ request()->routeIs('home') ? 'bg-slate-800 text-white' : 'text-slate-300 hover:bg-slate-800 hover:text-white' }}">
                             <span class="ml-3">Berth Planner</span>
                         </a>
@@ -68,17 +71,20 @@
                              <span class="ml-3 text-amber-400 font-bold">Cargo Logistics</span>
                          </a>
                     </li>
+                    
+                    @if(auth()->user()->role === 'admin')
                     <li>
                          <a href="{{ route('warehouse.map') }}" class="flex items-center px-3 py-2 rounded-lg group {{ request()->routeIs('warehouse.*') ? 'bg-slate-800 text-white' : 'text-slate-300 hover:bg-slate-800 hover:text-white' }}">
                              <span class="ml-3 text-amber-400 font-bold">Yard / Warehouse Map</span>
                          </a>
                     </li>
-
+ 
                     <li>
                         <a href="{{ route('gate.scanner') }}" class="flex items-center px-3 py-2 rounded-lg group {{ request()->routeIs('gate.scanner') ? 'bg-slate-800 text-white' : 'text-slate-300 hover:bg-slate-800 hover:text-white' }}">
                             <span class="ml-3 text-emerald-400 font-bold">Gate Security Scanner</span>
                         </a>
                     </li>
+                    @endif
 
                     <li>
                          <a href="{{ route('hse.permits.dashboard') }}" class="flex items-center px-3 py-2 rounded-lg group {{ request()->routeIs('hse.*') ? 'bg-slate-800 text-white' : 'text-slate-300 hover:bg-slate-800 hover:text-white' }}">

@@ -49,14 +49,24 @@ class MobileOps extends Component
             $service = new BillingService();
             $service->generateInvoice($booking);
         }
-        if ($status === 'completed' && !$booking->atd) {
-            $updates['atd'] = $now;
-            // Finalize Invoice
-            $service = new BillingService();
-            $service->generateInvoice($booking);
+        if ($status === 'completed') {
+            if (!$booking->atd) {
+                $updates['atd'] = $now;
+            }
+            // Fix: Backfill ATB if missing (Direct Completion)
+            if (!$booking->atb) {
+                $updates['atb'] = $booking->ata ?? $booking->eta ?? $now;
+            }
         }
 
         $booking->update($updates);
+
+        if ($status === 'alongside' || $status === 'completed') {
+             // Generate/Finalize Invoice AFTER timestamps are saved
+             $service = new BillingService();
+             $service->generateInvoice($booking->fresh());
+        }
+
         $this->dispatch('notify', message: 'Status updated to ' . strtoupper($status));
     }
 

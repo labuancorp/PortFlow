@@ -1,93 +1,149 @@
-<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+<div class="p-8">
     <div class="flex justify-between items-center mb-8">
         <div>
-            <h1 class="text-2xl font-bold text-slate-900">Port Analytics</h1>
-            <p class="text-slate-500">Key performance indicators and operational insights</p>
+            <h1 class="text-3xl font-black text-slate-900 tracking-tight">Executive Analytics</h1>
+            <p class="text-slate-500 mt-2">Real-time Tier-3 Port Performance Intelligence.</p>
         </div>
-        <div class="flex bg-white rounded-lg p-1 border border-slate-200">
-            <button wire:click="$set('dateRange', 'month')" class="px-3 py-1 text-sm font-medium rounded-md {{ $dateRange === 'month' ? 'bg-indigo-100 text-indigo-700' : 'text-slate-500 hover:text-slate-900' }}">30 Days</button>
-            <button wire:click="$set('dateRange', 'quarter')" class="px-3 py-1 text-sm font-medium rounded-md {{ $dateRange === 'quarter' ? 'bg-indigo-100 text-indigo-700' : 'text-slate-500 hover:text-slate-900' }}">Quarter</button>
-            <button wire:click="$set('dateRange', 'year')" class="px-3 py-1 text-sm font-medium rounded-md {{ $dateRange === 'year' ? 'bg-indigo-100 text-indigo-700' : 'text-slate-500 hover:text-slate-900' }}">Year</button>
-        </div>
-    </div>
-
-    <!-- Stats Grid -->
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-        <!-- Card 1 -->
-        <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
-            <p class="text-sm font-medium text-slate-500 uppercase tracking-wider">Total Port Calls</p>
-            <div class="mt-2 flex items-baseline gap-2">
-                <span class="text-3xl font-black text-slate-900">{{ $totalCalls }}</span>
-                <span class="text-sm font-bold {{ $callsGrowth >= 0 ? 'text-green-600' : 'text-red-600' }}">
-                    {{ $callsGrowth >= 0 ? '+' : '' }}{{ number_format($callsGrowth, 1) }}%
-                </span>
-            </div>
-        </div>
-
-        <!-- Card 2 -->
-        <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
-            <p class="text-sm font-medium text-slate-500 uppercase tracking-wider">Revenue (Est.)</p>
-            <div class="mt-2 flex items-baseline gap-2">
-                <span class="text-3xl font-black text-emerald-600">RM {{ number_format($revenue / 1000, 1) }}k</span>
-            </div>
-        </div>
-
-        <!-- Card 3 -->
-        <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
-            <p class="text-sm font-medium text-slate-500 uppercase tracking-wider">Avg Turnaround</p>
-            <div class="mt-2 flex items-baseline gap-2">
-                <span class="text-3xl font-black text-blue-600">{{ $avgTurnaround }}h</span>
-            </div>
-        </div>
-
-        <!-- Card 4 -->
-        <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
-            <p class="text-sm font-medium text-slate-500 uppercase tracking-wider">Active Berths</p>
-            <div class="mt-2 flex items-baseline gap-2">
-                <span class="text-3xl font-black text-purple-600">{{ $berthStats->count() }}</span>
-                <span class="text-sm text-slate-500">utilized</span>
-            </div>
+        <div class="flex gap-2">
+            <span class="px-3 py-1 bg-emerald-100 text-emerald-700 rounded-full text-xs font-bold uppercase tracking-wide flex items-center">
+                <span class="w-2 h-2 bg-emerald-500 rounded-full mr-2 animate-pulse"></span>
+                System Healthy
+            </span>
         </div>
     </div>
 
-    <!-- Charts Section -->
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <!-- Berth Utilization Chart -->
-        <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
-            <h3 class="font-bold text-slate-900 mb-6">Berth Utilization</h3>
-            <div class="space-y-4">
-                @foreach($berthStats as $stat)
-                <div>
-                    <div class="flex justify-between text-sm font-medium text-slate-700 mb-1">
-                        <span>{{ $stat->berth->name ?? 'Unknown' }}</span>
-                        <span>{{ $stat->total }} calls</span>
-                    </div>
-                    <div class="w-full bg-slate-100 rounded-full h-2.5">
-                        <div class="bg-indigo-600 h-2.5 rounded-full" style="width: {{ min(100, ($stat->total / max(1, $totalCalls)) * 100 * 2) }}%"></div>
-                    </div>
-                </div>
-                @endforeach
-                @if($berthStats->isEmpty())
-                <p class="text-center text-slate-500 py-4">No data available for this period.</p>
-                @endif
+    <!-- KPI Grid -->
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+        <!-- Revenue -->
+        <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+            <div class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">Total Revenue (YTD)</div>
+            <div class="text-2xl font-black text-slate-900">RM {{ number_format($totalRevenue, 2) }}</div>
+            <div class="mt-2 text-xs font-bold text-emerald-600 flex items-center">
+                <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 10l7-7m0 0l7 7m-7-7v18"></path></svg>
+                +12.5% vs Target
             </div>
         </div>
 
-        <!-- AI Insights -->
-        <div class="bg-gradient-to-br from-indigo-900 to-slate-900 rounded-xl shadow-lg p-6 text-white">
-            <h3 class="font-bold text-lg mb-4 flex items-center gap-2">
-                <span class="text-2xl">⚡</span> AI Operational Insights
+        <!-- Vessels -->
+        <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+            <div class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">Active Vessels</div>
+            <div class="text-2xl font-black text-indigo-600">{{ $activeVessels }}</div>
+            <div class="mt-2 text-xs font-medium text-slate-500">Currently Alongside</div>
+        </div>
+
+        <!-- Operations -->
+        <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+            <div class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">Yard Density</div>
+            <div class="text-2xl font-black text-blue-500">{{ number_format($yardUtilization, 1) }}%</div>
+            <div class="mt-2 w-full bg-slate-100 rounded-full h-1.5">
+                <div class="bg-blue-500 h-1.5 rounded-full" style="width: {{ $yardUtilization }}%"></div>
+            </div>
+        </div>
+
+        <!-- Safety -->
+        <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+            <div class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">Active HSE Permits</div>
+            <div class="text-2xl font-black text-amber-500">{{ $activePermits }}</div>
+            <div class="mt-2 text-xs font-medium text-slate-500">High Risk Operations</div>
+        </div>
+    </div>
+
+    <!-- Charts Row -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+        <!-- Revenue Trend -->
+        <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+            <h3 class="font-bold text-slate-900 mb-6">Revenue Trend (6 Months)</h3>
+            <div id="revenueChart" class="h-64"></div>
+        </div>
+
+        <!-- Vessel Traffic -->
+        <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+            <h3 class="font-bold text-slate-900 mb-6">Vessel Traffic Volume</h3>
+            <div id="vesselChart" class="h-64"></div>
+        </div>
+    </div>
+
+    <!-- AI Insights Box -->
+    <div class="bg-indigo-900 rounded-2xl p-8 text-white relative overflow-hidden">
+        <div class="absolute top-0 right-0 p-32 bg-white/5 rounded-full blur-3xl -mr-16 -mt-16"></div>
+        <div class="relative z-10">
+            <h3 class="text-xl font-bold mb-2 flex items-center gap-2">
+                <svg class="w-6 h-6 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                PortFlow AI Insights
             </h3>
-            <div class="space-y-4">
-                <div class="bg-white/10 rounded-lg p-4 backdrop-blur-sm border border-white/10">
-                    <p class="text-xs font-bold text-indigo-300 uppercase mb-1">Recommendation</p>
-                    <p class="text-sm font-medium">Berth utilization at <strong>Main Wharf 1</strong> is 20% higher than average. Consider routing smaller vessels to <strong>Alpha Jetty</strong> to reduce congestion.</p>
-                </div>
-                <div class="bg-white/10 rounded-lg p-4 backdrop-blur-sm border border-white/10">
-                    <p class="text-xs font-bold text-indigo-300 uppercase mb-1">Prediction</p>
-                    <p class="text-sm font-medium">Incoming vessel traffic represents a <strong>15% increase</strong> for next week. Schedule maintenance for low-traffic windows on Tuesday.</p>
-                </div>
-            </div>
+            <p class="text-indigo-200 mb-4 max-w-2xl">Based on current predictive models, Yard Density is expected to increase by 15% next week due to incoming heavy-lift vessels. Recommendation: Expedite manifest clearance for Zone A2.</p>
+            <button class="bg-white text-indigo-900 px-4 py-2 rounded-lg text-sm font-bold hover:bg-indigo-50 transition-colors">View Detailed Report</button>
         </div>
     </div>
 </div>
+
+<!-- ApexCharts via CDN -->
+<script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+
+<script>
+    document.addEventListener('livewire:initialized', () => {
+        // Revenue Chart
+        const revenueOptions = {
+            series: [{
+                name: 'Revenue (RM)',
+                data: @json($revenueData)
+            }],
+            chart: {
+                type: 'area',
+                height: 300,
+                toolbar: { show: false },
+                fontFamily: 'inherit'
+            },
+            stroke: { curve: 'smooth', width: 2 },
+            fill: {
+                type: 'gradient',
+                gradient: {
+                    shadeIntensity: 1,
+                    opacityFrom: 0.7,
+                    opacityTo: 0.1,
+                    stops: [0, 90, 100]
+                }
+            },
+            colors: ['#4f46e5'],
+            xaxis: {
+                categories: @json($chartLabels),
+                axisBorder: { show: false },
+                axisTicks: { show: false }
+            },
+            yaxis: { show: false },
+            grid: { borderColor: '#f1f5f9', strokeDashArray: 4 },
+            dataLabels: { enabled: false }
+        };
+
+        const revChart = new ApexCharts(document.querySelector("#revenueChart"), revenueOptions);
+        revChart.render();
+
+        // Vessel Chart
+        const vesselOptions = {
+            series: [{
+                name: 'Vessel Calls',
+                data: @json($vesselData)
+            }],
+            chart: {
+                type: 'bar',
+                height: 300,
+                toolbar: { show: false },
+                fontFamily: 'inherit'
+            },
+            colors: ['#0ea5e9'],
+            plotOptions: {
+                bar: { borderRadius: 4, columnWidth: '40%' }
+            },
+            xaxis: {
+                categories: @json($chartLabels),
+                axisBorder: { show: false },
+                axisTicks: { show: false }
+            },
+            grid: { borderColor: '#f1f5f9', strokeDashArray: 4 },
+            dataLabels: { enabled: false }
+        };
+
+        const vesChart = new ApexCharts(document.querySelector("#vesselChart"), vesselOptions);
+        vesChart.render();
+    });
+</script>

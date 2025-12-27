@@ -164,13 +164,18 @@
                     </div>
                      <div>
                         <label class="block text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-1">Owner / Principal</label>
-                        <select wire:model="vessel_form.organization_id" class="w-full bg-slate-50 border-slate-200 rounded-xl font-bold text-slate-900 focus:ring-indigo-500 focus:border-indigo-500 p-3">
-                            <option value="">Select Organization...</option>
-                             @foreach($organizations as $org)
-                                <option value="{{ $org->id }}">{{ $org->name }}</option>
-                            @endforeach
-                        </select>
-                        @error('vessel_form.organization_id') <span class="text-red-500 text-xs font-bold mt-1 block">{{ $message }}</span> @enderror
+                        @if(auth()->user()->role === 'agent')
+                            <input type="text" value="{{ auth()->user()->organization->name ?? 'Current Organization' }}" class="w-full bg-slate-100 border-slate-200 rounded-xl font-bold text-slate-500 cursor-not-allowed" disabled>
+                            <!-- Hidden input managed by backend logic, but we can verify display -->
+                        @else
+                            <select wire:model="vessel_form.organization_id" class="w-full bg-slate-50 border-slate-200 rounded-xl font-bold text-slate-900 focus:ring-indigo-500 focus:border-indigo-500 p-3">
+                                <option value="">Select Organization...</option>
+                                @foreach($organizations as $org)
+                                    <option value="{{ $org->id }}">{{ $org->name }}</option>
+                                @endforeach
+                            </select>
+                            @error('vessel_form.organization_id') <span class="text-red-500 text-xs font-bold mt-1 block">{{ $message }}</span> @enderror
+                        @endif
                     </div>
                 </div>
 

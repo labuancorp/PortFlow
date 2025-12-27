@@ -142,13 +142,15 @@
                     </div>
                 </div>
 
-                <!-- Right: Timeline Track -->
-                <div class="flex-1 relative bg-slate-50/10 group-hover:bg-slate-50/30 transition-colors"
+                     <div class="flex-1 relative bg-slate-50/10 group-hover:bg-slate-50/30 transition-colors"
                      :class="{ 'bg-indigo-50/30': draggingId !== null }"
+                     @if(auth()->user()->role !== 'agent')
                      @dragover.prevent="handleDragOver($event)"
                      @dragenter.prevent="$el.classList.add('bg-indigo-100/50')"
                      @dragleave="$el.classList.remove('bg-indigo-100/50')"
-                     @drop="handleDrop($event, {{ $berth->id }}); $el.classList.remove('bg-indigo-100/50')">
+                     @drop="handleDrop($event, {{ $berth->id }}); $el.classList.remove('bg-indigo-100/50')"
+                     @endif
+                     >
                     
                     <!-- Background Grid -->
                     <div class="absolute inset-0 flex pointer-events-none">
@@ -172,16 +174,19 @@
 
                     <!-- Bookings -->
                     @foreach($berth->portCalls as $call)
-                        <div class="absolute top-4 bottom-4 rounded-xl border p-1 shadow-sm hover:shadow-xl transition-all cursor-grab active:cursor-grabbing z-10 group/card overflow-hidden
+                        <div class="absolute top-4 bottom-4 rounded-xl border p-1 shadow-sm hover:shadow-xl transition-all z-10 group/card overflow-hidden
                             {{ $call->status === 'approved' ? 'bg-gradient-to-br from-indigo-500 to-blue-600 border-indigo-400/50 text-white' : 
                                ($call->status === 'alongside' ? 'bg-gradient-to-br from-green-500 to-teal-600 border-green-400/50 text-white' : 
                                ($call->status === 'completed' ? 'bg-slate-100 border-slate-200 text-slate-500' : 
-                               'bg-amber-100 border-amber-200 text-amber-800')) }}"
+                               'bg-amber-100 border-amber-200 text-amber-800')) }}
+                            {{ auth()->user()->role !== 'agent' ? 'cursor-grab active:cursor-grabbing' : 'cursor-default' }}"
                              style="{{ $this->calculateStyle($call) }}"
-                             draggable="true"
+                             draggable="{{ auth()->user()->role !== 'agent' ? 'true' : 'false' }}"
                              wire:key="call-{{ $call->id }}"
+                             @if(auth()->user()->role !== 'agent')
                              @dragstart="handleDragStart($event, {{ $call->id }})"
                              @dragend="handleDragEnd($event)"
+                             @endif
                              wire:click="viewBooking({{ $call->id }})">
                             
                             <!-- Card Content -->
@@ -191,12 +196,24 @@
                                 
                                 <div class="relative z-10">
                                     <div class="flex justify-between items-start">
-                                        <span class="font-bold text-xs truncate leading-tight">{{ $call->vessel->name }}</span>
+                                        <span class="font-bold text-xs truncate leading-tight">
+                                            @if(auth()->user()->role === 'agent' && $call->agent_id !== auth()->user()->organization_id)
+                                                Occupied Slot
+                                            @else
+                                                {{ $call->vessel->name }}
+                                            @endif
+                                        </span>
                                         @if($call->status === 'completed')
                                             <svg class="w-3 h-3 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
                                         @endif
                                     </div>
-                                    <p class="text-[10px] font-medium opacity-80 truncate mt-0.5">{{ $call->vessel->vessel_type }}</p>
+                                    <p class="text-[10px] font-medium opacity-80 truncate mt-0.5">
+                                        @if(auth()->user()->role === 'agent' && $call->agent_id !== auth()->user()->organization_id)
+                                            --
+                                        @else
+                                            {{ $call->vessel->vessel_type }}
+                                        @endif
+                                    </p>
                                 </div>
 
                                 <div class="relative z-10 flex justify-between items-end">

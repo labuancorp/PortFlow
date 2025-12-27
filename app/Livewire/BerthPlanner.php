@@ -10,7 +10,15 @@ use App\Services\ComplianceService;
 
 class BerthPlanner extends Component
 {
-    protected $listeners = ['close-booking-modal' => 'closeBooking'];
+    protected $listeners = [
+        'close-booking-modal' => 'closeBooking',
+        'booking-updated' => 'handleBookingUpdate'
+    ];
+    
+    public function handleBookingUpdate()
+    {
+        $this->clearScheduleCache();
+    }
 
     public $dateFilter;
     public $bookingToView = null; // ID of booking to view
@@ -51,6 +59,11 @@ class BerthPlanner extends Component
     public function openCreateModal()
     {
         $this->reset(['newVesselId', 'newAgentId', 'newBerthId', 'newEta', 'newEtd']);
+        
+        if (auth()->user()->role === 'agent') {
+            $this->newAgentId = auth()->user()->organization_id;
+        }
+
         $this->newEta = now()->format('Y-m-d\TH:i');
         $this->newEtd = now()->addHours(24)->format('Y-m-d\TH:i');
         $this->recommendedBerths = [];
@@ -120,12 +133,13 @@ class BerthPlanner extends Component
 
     public function clearScheduleCache()
     {
-        // Naive clearing: Clear current view's cache. 
-        // Ideally we use Cache Tags, but for File driver we might just rely on short TTL or clear specific keys.
-        $start = $this->getWindowStart();
-        $end = $this->getWindowEnd();
-        $cacheKey = "berth_schedule_{$this->viewMode}_{$start->format('Y-m-d')}_{$end->format('Y-m-d')}";
-        \Illuminate\Support\Facades\Cache::forget($cacheKey);
+        // Increment a global schedule version to invalidate ALL user caches instantly
+        \Illuminate\Support\Facades\Cache::increment('schedule_version');
+    }
+
+    public function getScheduleVersion()
+    {
+        return \Illuminate\Support\Facades\Cache::get('schedule_version', 1);
     }
 
     public function optimizeSchedule()
@@ -163,23 +177,41 @@ class BerthPlanner extends Component
         }
         
         // Fetch all berths with port calls that overlap with the window (Cached)
-        $cacheKey = "berth_schedule_{$this->viewMode}_{$start->format('Y-m-d')}_{$end->format('Y-m-d')}";
+        // Fetch all berths with port calls that overlap with the window (Cached)
+        // Unique Cache Key per User Role/Org to support private views AND Versioning
+        $version = $this->getScheduleVersion();
+        $roleKey = auth()->user()->role === 'agent' ? 'agent_'.auth()->user()->organization_id : 'admin';
+        $cacheKey = "berth_schedule_v{$version}_{$this->viewMode}_{$start->format('Y-m-d')}_{$end->format('Y-m-d')}_{$roleKey}";
         
         $berths = \Illuminate\Support\Facades\Cache::remember($cacheKey, 60, function() use ($start, $end) {
             return Berth::with(['portCalls' => function($query) use ($start, $end) {
                 $query->where(function($q) use ($start, $end) {
                     $q->where('eta', '<', $end)
                       ->where('etd', '>', $start);
-                })
-                ->with(['vessel', 'agent'])
-                ->orderBy('eta');
+                });
+
+                // Privacy Filter: If Agent, only show their own bookings
+                if (auth()->user()->role === 'agent') {
+                    $query->where('agent_id', auth()->user()->organization_id);
+                }
+
+                $query->with(['vessel', 'agent'])
+                      ->orderBy('eta');
             }])->get();
         });
 
+        if (auth()->user()->role === 'agent') {
+            $vessels = \App\Models\Vessel::where('organization_id', auth()->user()->organization_id)->orderBy('name')->get();
+            $agents = \App\Models\Organization::where('id', auth()->user()->organization_id)->get();
+        } else {
+            $vessels = \App\Models\Vessel::orderBy('name')->get();
+            $agents = \App\Models\Organization::where('type', 'agent')->orderBy('name')->get();
+        }
+
         return view('livewire.berth-planner', [
             'berths' => $berths,
-            'vessels' => \App\Models\Vessel::orderBy('name')->get(),
-            'agents' => \App\Models\Organization::where('type', 'agent')->orderBy('name')->get(),
+            'vessels' => $vessels,
+            'agents' => $agents,
             'windowStart' => $start,
             'windowEnd' => $end
         ]);
@@ -229,6 +261,12 @@ class BerthPlanner extends Component
 
     public function updateSchedule($portCallId, $newBerthId, $newTimePercentage)
     {
+        // Security: Agents cannot move bookings
+        if (auth()->user()->role === 'agent') {
+            $this->dispatch('schedule-error', message: 'Access Denied: Agents cannot modify the Master Schedule.');
+            return;
+        }
+
         $portCall = PortCall::find($portCallId);
         if (!$portCall) {
             $this->dispatch('schedule-error', message: 'Booking not found');
