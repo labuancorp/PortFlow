@@ -26,8 +26,10 @@ Route::middleware(['auth', '2fa'])->group(function () {
         Route::get('/cargo/manifests/create', App\Livewire\Cargo\ManifestCreate::class)->name('cargo.manifests.create');
         Route::get('/cargo/manifests/{manifest}', App\Livewire\Cargo\ManifestShow::class)->name('cargo.manifests.show');
         Route::get('/warehouse/map', App\Livewire\Warehouse\YardMap::class)->name('warehouse.map');
-        
-        // HSE / Safety
+    });
+
+    // HSE / Safety (Admin, Agent, HSE Role)
+    Route::middleware(['role:admin,agent,hse'])->group(function () {
         Route::get('/hse/permits', App\Livewire\HSE\PermitDashboard::class)->name('hse.permits.dashboard');
         Route::get('/hse/permits/create', App\Livewire\HSE\PermitCreate::class)->name('hse.permits.create');
     });

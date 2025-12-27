@@ -131,7 +131,7 @@ class DatabaseSeeder extends Seeder
             ['email' => 'hse@asb.com'],
             [
                 'name' => 'Ahmad Razak',
-                'role' => 'admin',
+                'role' => 'hse',
                 'organization_id' => $auth->id,
                 'password' => bcrypt('password'),
             ]

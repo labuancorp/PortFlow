@@ -61,7 +61,7 @@ class PermitDashboard extends Component
         }
 
         // 2. Role Check
-        if (auth()->user()->role !== 'admin') {
+        if (!in_array(auth()->user()->role, ['admin', 'hse'])) {
             $this->dispatch('notify', message: 'Unauthorized action. Only HSE Officers can approve permits.', type: 'error');
             return;
         }
@@ -95,7 +95,7 @@ class PermitDashboard extends Component
 
     public function reject($id)
     {
-        if (auth()->user()->role !== 'admin') {
+        if (!in_array(auth()->user()->role, ['admin', 'hse'])) {
             $this->dispatch('notify', message: 'Unauthorized action.', type: 'error');
             return;
         }
@@ -110,7 +110,7 @@ class PermitDashboard extends Component
 
     public function close($id)
     {
-        if (auth()->user()->role !== 'admin') {
+        if (!in_array(auth()->user()->role, ['admin', 'hse'])) {
             $this->dispatch('notify', message: 'Unauthorized action.', type: 'error');
             return;
         }

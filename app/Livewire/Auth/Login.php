@@ -26,8 +26,10 @@ class Login extends Component
 
             if ($user->role === 'agent') {
                 return redirect()->route('agent.portal');
+            } elseif ($user->role === 'hse') {
+                return redirect()->route('hse.permits.dashboard');
             } elseif ($user->role === 'admin' || $user->role === 'officer') {
-                return redirect()->route('dashboard'); // Assuming dashboard route exists
+                return redirect()->route('dashboard'); 
             } else {
                  return redirect()->intended('/');
             }

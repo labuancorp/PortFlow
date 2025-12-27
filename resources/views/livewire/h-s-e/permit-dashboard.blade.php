@@ -96,7 +96,7 @@
                         </div>
                     </td>
                     <td class="px-6 py-4 text-right">
-                        @if(auth()->user()->role === 'admin')
+                        @if(in_array(auth()->user()->role, ['admin', 'hse']))
                             <button wire:click="openReview({{ $permit->id }})" class="bg-slate-900 text-white px-3 py-1.5 rounded-lg text-xs font-bold hover:bg-slate-800 transition-all">Review</button>
                         @else
                             <button wire:click="openReview({{ $permit->id }})" class="bg-indigo-50 text-indigo-600 border border-indigo-100 px-3 py-1.5 rounded-lg text-xs font-bold hover:bg-indigo-100 transition-all">View Details</button>
@@ -176,7 +176,7 @@
                 <div class="flex gap-3 pt-6 border-t border-slate-100">
                     <button wire:click="closeReviewModal" class="px-6 py-2.5 rounded-xl border border-slate-200 font-bold text-slate-500 hover:bg-slate-50 transition-colors text-sm">Close</button>
                     
-                    @if(auth()->user()->role === 'admin')
+                    @if(in_array(auth()->user()->role, ['admin', 'hse']))
                         @if($selectedPermit->status === 'requested')
                             <div class="flex-1 flex gap-2">
                                 <button wire:click="reject({{ $selectedPermit->id }})" class="flex-1 px-6 py-2.5 bg-red-100 text-red-700 hover:bg-red-200 rounded-xl font-bold uppercase tracking-widest text-xs transition-all">Reject Permit</button>

@@ -18,12 +18,14 @@
             </div>
             <nav class="flex-1 overflow-y-auto py-4">
                 <ul class="space-y-1 px-3">
+                    @if(auth()->user()->role !== 'hse')
                     <li>
                         <a href="{{ route('dashboard') }}" class="flex items-center px-3 py-2 rounded-lg group {{ request()->routeIs('dashboard') ? 'bg-slate-800 text-white' : 'text-slate-300 hover:bg-slate-800 hover:text-white' }}">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg>
                             <span class="ml-3">Command Center</span>
                         </a>
                     </li>
+                    @endif
                     @if(auth()->user()->role === 'admin')
                     <li>
                         <a href="{{ route('map.index') }}" class="flex items-center px-3 py-2 rounded-lg group {{ request()->routeIs('map.*') ? 'bg-slate-800 text-white' : 'text-slate-300 hover:bg-slate-800 hover:text-white' }}">
@@ -48,6 +50,7 @@
                     </li>
                     @endif
 
+                    @if(auth()->user()->role !== 'hse')
                     <li>
                         <a href="{{ route('home') }}" class="flex items-center px-3 py-2 rounded-lg group {{ request()->routeIs('home') ? 'bg-slate-800 text-white' : 'text-slate-300 hover:bg-slate-800 hover:text-white' }}">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
@@ -60,6 +63,7 @@
                             <span class="ml-3">Vessels</span>
                         </a>
                     </li>
+                    @endif
                     
                     @if(auth()->user()->role === 'admin')
                     <li>
@@ -76,12 +80,14 @@
                     </li>
                     @endif
                     
+                    @if(auth()->user()->role !== 'hse')
                     <li>
                          <a href="{{ route('cargo.manifests.index') }}" class="flex items-center px-3 py-2 rounded-lg group {{ request()->routeIs('cargo.*') ? 'bg-slate-800 text-white' : 'text-slate-300 hover:bg-slate-800 hover:text-white' }}">
                              <svg class="w-5 h-5 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path></svg>
                              <span class="ml-3 text-amber-400 font-bold">Cargo Logistics</span>
                          </a>
                     </li>
+                    @endif
                     
                     @if(auth()->user()->role === 'admin' || (auth()->user()->role === 'agent' && auth()->user()->organization->warehouse_subscribed))
                     <li>
@@ -117,12 +123,14 @@
                          </a>
                     </li>
                     
+                    @if(auth()->user()->role !== 'hse')
                     <li>
                         <a href="{{ route('billing.index') }}" class="flex items-center px-3 py-2 rounded-lg group {{ request()->routeIs('billing.*') ? 'bg-slate-800 text-white' : 'text-slate-300 hover:bg-slate-800 hover:text-white' }}">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"></path></svg>
                             <span class="ml-3">Billing</span>
                         </a>
                     </li>
+                    @endif
                     
                     @if(auth()->user()->role === 'admin')
                     <li class="mt-8 border-t border-slate-800 pt-4">
@@ -147,12 +155,14 @@
                     </li>
                     @endif
 
+                    @if(auth()->user()->role !== 'hse')
                     <li class="mt-4 border-t border-slate-800 pt-4">
                         <a href="{{ route('gate.request') }}" target="_blank" class="flex items-center px-3 py-2 rounded-lg text-indigo-400 hover:bg-slate-800 hover:text-indigo-300">
                              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
                             <span class="ml-3 font-bold">Vendor Request Portal</span>
                         </a>
                     </li>
+                    @endif
                 </ul>
             </nav>
             <div class="p-4 border-t border-slate-800">
