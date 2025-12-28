@@ -202,6 +202,7 @@
                         <div class="px-3 text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2">Assets & Facilities</div>
                         <ul class="space-y-1">
                             @if(in_array(auth()->user()->role, ['admin', 'hse', 'asset_manager']))
+                            {{-- Temporarily hidden
                             <li>
                                 <a href="{{ route('assets.inventory') }}" class="flex items-center justify-between px-3 py-2 rounded-lg group {{ request()->routeIs('assets.inventory') ? 'bg-slate-800 text-white' : 'text-slate-300 hover:bg-slate-800 hover:text-white' }}">
                                     <div class="flex items-center">
@@ -213,6 +214,7 @@
                                     @endif
                                 </a>
                             </li>
+                            --}}
                             <li>
                                 <a href="{{ route('warehouse.spatial.index') }}" class="flex items-center px-3 py-2 rounded-lg group {{ request()->routeIs('warehouse.spatial.*') ? 'bg-slate-800 text-white' : 'text-slate-300 hover:bg-slate-800 hover:text-white' }}">
                                     <svg class="w-5 h-5 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"></path></svg>

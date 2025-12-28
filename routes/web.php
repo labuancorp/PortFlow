@@ -37,8 +37,8 @@ Route::middleware(['auth', '2fa'])->group(function () {
         // Tank Farm Management (Phase 8.1)
         Route::get('/tank-farm', App\Livewire\TankFarm\Dashboard::class)->name('tank-farm.dashboard');
         
-        // MHE Fleet Management (Phase 8.2)
-        Route::get('/mhe/fleet', App\Livewire\Mhe\FleetDashboard::class)->name('mhe.fleet');
+        // Unified Fleet & Asset Management (Phase 8.2 - Merged with Assets)
+        Route::get('/mhe/fleet', App\Livewire\Assets\UnifiedFleetManagement::class)->name('mhe.fleet');
         
         // DG Compliance (Phase 8.3)
         Route::get('/dg/compliance', App\Livewire\Dg\ComplianceDashboard::class)->name('dg.compliance');
@@ -53,9 +53,9 @@ Route::middleware(['auth', '2fa'])->group(function () {
         Route::get('/hse/incidents', App\Livewire\HSE\IncidentReporting::class)->name('hse.incidents.index');
     });
 
-    // Facility & Asset Rental
+    // Facility & Asset Rental (Now unified with MHE Fleet)
     Route::middleware(['role:admin,hse'])->group(function () {
-        Route::get('/assets/inventory', App\Livewire\Assets\Inventory::class)->name('assets.inventory');
+        // Route::get('/assets/inventory', App\Livewire\Assets\UnifiedFleetManagement::class)->name('assets.inventory'); // Hidden temporarily
         Route::get('/warehouse/spatial', App\Livewire\Warehouse\SpatialLeaseManager::class)->name('warehouse.spatial.index');
     });
     Route::get('/assets/marketplace', App\Livewire\Assets\Booking::class)->name('assets.booking');

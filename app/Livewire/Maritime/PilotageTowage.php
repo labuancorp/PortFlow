@@ -254,6 +254,134 @@ class PilotageTowage extends Component
         $this->modalType = '';
     }
 
+    // Pilot CRUD Methods
+    public function openPilotModal($id = null)
+    {
+        $this->resetValidation();
+        $this->modalType = 'pilot';
+        
+        if ($id) {
+            $pilot = Pilot::findOrFail($id);
+            $this->pilotId = $pilot->id;
+            $this->pilot_name = $pilot->name;
+            $this->pilot_license_number = $pilot->license_number;
+            $this->pilot_phone = $pilot->phone;
+            $this->pilot_email = $pilot->email;
+            $this->pilot_certifications = $pilot->certifications ?? [];
+            $this->pilot_license_expiry = $pilot->license_expiry?->format('Y-m-d');
+            $this->pilot_rate_per_hour = $pilot->rate_per_hour;
+        } else {
+            $this->reset(['pilotId', 'pilot_name', 'pilot_license_number', 'pilot_phone', 'pilot_email', 'pilot_certifications', 'pilot_license_expiry', 'pilot_rate_per_hour']);
+            $this->pilot_rate_per_hour = 500;
+            $this->pilot_certifications = [];
+        }
+        
+        $this->showModal = true;
+    }
+
+    public function savePilot()
+    {
+        $this->validate([
+            'pilot_name' => 'required|string|max:255',
+            'pilot_license_number' => 'required|string|max:100|unique:pilots,license_number,' . ($this->pilotId ?? 'NULL'),
+            'pilot_phone' => 'nullable|string|max:50',
+            'pilot_email' => 'nullable|email|max:255',
+            'pilot_license_expiry' => 'required|date',
+            'pilot_rate_per_hour' => 'required|numeric|min:0',
+        ]);
+
+        $data = [
+            'name' => $this->pilot_name,
+            'license_number' => $this->pilot_license_number,
+            'phone' => $this->pilot_phone,
+            'email' => $this->pilot_email,
+            'certifications' => $this->pilot_certifications,
+            'license_expiry' => $this->pilot_license_expiry,
+            'rate_per_hour' => $this->pilot_rate_per_hour,
+            'status' => 'available',
+        ];
+
+        if ($this->pilotId) {
+            Pilot::findOrFail($this->pilotId)->update($data);
+            session()->flash('success', 'Pilot updated successfully.');
+        } else {
+            Pilot::create($data);
+            session()->flash('success', 'Pilot added successfully.');
+        }
+
+        $this->showModal = false;
+    }
+
+    public function deletePilot($id)
+    {
+        Pilot::findOrFail($id)->delete();
+        session()->flash('success', 'Pilot deleted successfully.');
+    }
+
+    // Tugboat CRUD Methods
+    public function openTugboatModal($id = null)
+    {
+        $this->resetValidation();
+        $this->modalType = 'tugboat';
+        
+        if ($id) {
+            $tugboat = Tugboat::findOrFail($id);
+            $this->tugboatId = $tugboat->id;
+            $this->tugboat_name = $tugboat->name;
+            $this->tugboat_registration_number = $tugboat->registration_number;
+            $this->tugboat_bollard_pull_tons = $tugboat->bollard_pull_tons;
+            $this->tugboat_rate_per_hour = $tugboat->rate_per_hour;
+            $this->tugboat_certificate_expiry = $tugboat->certificate_expiry?->format('Y-m-d');
+            $this->tugboat_captain_name = $tugboat->captain_name;
+            $this->tugboat_captain_phone = $tugboat->captain_phone;
+        } else {
+            $this->reset(['tugboatId', 'tugboat_name', 'tugboat_registration_number', 'tugboat_bollard_pull_tons', 'tugboat_rate_per_hour', 'tugboat_certificate_expiry', 'tugboat_captain_name', 'tugboat_captain_phone']);
+            $this->tugboat_rate_per_hour = 1500;
+        }
+        
+        $this->showModal = true;
+    }
+
+    public function saveTugboat()
+    {
+        $this->validate([
+            'tugboat_name' => 'required|string|max:255',
+            'tugboat_registration_number' => 'required|string|max:100|unique:tugboats,registration_number,' . ($this->tugboatId ?? 'NULL'),
+            'tugboat_bollard_pull_tons' => 'required|numeric|min:0',
+            'tugboat_rate_per_hour' => 'required|numeric|min:0',
+            'tugboat_certificate_expiry' => 'nullable|date',
+            'tugboat_captain_name' => 'nullable|string|max:255',
+            'tugboat_captain_phone' => 'nullable|string|max:50',
+        ]);
+
+        $data = [
+            'name' => $this->tugboat_name,
+            'registration_number' => $this->tugboat_registration_number,
+            'bollard_pull_tons' => $this->tugboat_bollard_pull_tons,
+            'rate_per_hour' => $this->tugboat_rate_per_hour,
+            'certificate_expiry' => $this->tugboat_certificate_expiry,
+            'captain_name' => $this->tugboat_captain_name,
+            'captain_phone' => $this->tugboat_captain_phone,
+            'status' => 'available',
+        ];
+
+        if ($this->tugboatId) {
+            Tugboat::findOrFail($this->tugboatId)->update($data);
+            session()->flash('success', 'Tugboat updated successfully.');
+        } else {
+            Tugboat::create($data);
+            session()->flash('success', 'Tugboat added successfully.');
+        }
+
+        $this->showModal = false;
+    }
+
+    public function deleteTugboat($id)
+    {
+        Tugboat::findOrFail($id)->delete();
+        session()->flash('success', 'Tugboat deleted successfully.');
+    }
+
     public function render()
     {
         $data = [];
