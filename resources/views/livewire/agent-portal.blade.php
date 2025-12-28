@@ -53,7 +53,7 @@
                 <p class="text-indigo-200 text-sm font-bold uppercase tracking-widest mb-1">Live Vessels</p>
                 <div class="flex items-end gap-2">
                     <span class="text-5xl font-black">{{ $liveVessels->count() }}</span>
-                    <span class="text-indigo-200 font-medium mb-1">Alongisde</span>
+                    <span class="text-indigo-200 font-medium mb-1">Alongside</span>
                 </div>
             </div>
 
@@ -88,6 +88,10 @@
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path></svg>
                 Register New Vessel
             </button>
+             <a href="{{ route('cargo.manifests.create') }}" class="text-sm font-bold text-amber-600 hover:text-amber-500 flex items-center gap-2">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                Add Manifest
+            </a>
         </div>
         @endif
 
@@ -383,7 +387,7 @@
                                     </td>
                                     <td class="px-6 py-3">{{ $item->zone->zone_name ?? 'General' }}</td>
                                     <td class="px-6 py-3 text-center">{{ $item->volume_m3 }} m³</td>
-                                    <td class="px-6 py-3 text-center">{{ $item->received_at->format('d M H:i') }}</td>
+                                    <td class="px-6 py-3 text-center">{{ $item->received_at ? $item->received_at->format('d M H:i') : 'N/A' }}</td>
                                 </tr>
                                 @endforeach
                             </tbody>

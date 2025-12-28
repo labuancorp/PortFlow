@@ -17,7 +17,14 @@ class CargoItem extends Model
         'volume_m3',
         'dg_class',
         'status',
-        'current_location'
+        'current_location',
+        'received_at',
+        'discharged_at'
+    ];
+
+    protected $casts = [
+        'received_at' => 'datetime',
+        'discharged_at' => 'datetime',
     ];
 
     public function manifest()
@@ -28,5 +35,13 @@ class CargoItem extends Model
     public function zone()
     {
         return $this->belongsTo(WarehouseZone::class, 'warehouse_zone_id');
+    }
+
+    /**
+     * Accessor to check if cargo is dangerous goods
+     */
+    public function getIsDgCargoAttribute()
+    {
+        return !empty($this->dg_class);
     }
 }
