@@ -51,4 +51,25 @@ class PortCall extends Model
     {
         return $this->hasOne(Invoice::class);
     }
+
+    // Phase 6: Advanced Maritime Services
+    public function pilotageRequests()
+    {
+        return $this->hasMany(PilotageRequest::class);
+    }
+
+    public function towageRequests()
+    {
+        return $this->hasMany(TowageRequest::class);
+    }
+
+    public function bunkerRequests()
+    {
+        return $this->hasMany(BunkerRequest::class);
+    }
+
+    public function mooringServices()
+    {
+        return $this->hasMany(MooringService::class);
+    }
 }
