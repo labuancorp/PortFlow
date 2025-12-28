@@ -11,6 +11,27 @@
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     @livewireStyles
     @stack('styles')
+    <style>
+        /* Custom Scrollbar for Sidebar */
+        .sidebar-scroll::-webkit-scrollbar {
+            width: 4px; /* Very thin */
+        }
+        .sidebar-scroll::-webkit-scrollbar-track {
+            background: transparent; /* Transparent track */
+        }
+        .sidebar-scroll::-webkit-scrollbar-thumb {
+            background-color: rgba(255, 255, 255, 0.05); /* Extremely subtle white */
+            border-radius: 20px;
+        }
+        .sidebar-scroll::-webkit-scrollbar-thumb:hover {
+            background-color: rgba(255, 255, 255, 0.1); /* Slightly more visible on hover */
+        }
+        /* Firefox */
+        .sidebar-scroll {
+            scrollbar-width: thin;
+            scrollbar-color: rgba(255, 255, 255, 0.05) transparent;
+        }
+    </style>
 </head>
 <body class="bg-slate-50 font-sans antialiased">
     <div class="flex h-screen overflow-hidden">
@@ -26,7 +47,7 @@
                     @endif
                 </a>
             </div>
-            <nav class="flex-1 overflow-y-auto py-4">
+            <nav class="flex-1 overflow-y-auto py-4 sidebar-scroll">
                 <ul class="space-y-6 px-3">
                     
                     <!-- Core Operations -->
