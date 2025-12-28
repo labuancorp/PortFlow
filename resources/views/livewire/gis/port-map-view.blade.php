@@ -1,9 +1,15 @@
-<div class="p-8 bg-slate-50 min-h-screen">
+<div class="p-8 bg-slate-50 min-h-screen" wire:poll.5s="updateMapPositions">
     {{-- Header --}}
     <div class="mb-6">
         <h1 class="text-3xl font-bold text-slate-900">Port Map</h1>
         <p class="text-slate-500 mt-1">Interactive berth allocation and vessel tracking</p>
     </div>
+
+    @if(request()->has('debug'))
+    <div class="bg-gray-100 p-4 mb-4 rounded border font-mono text-xs overflow-auto max-h-48">
+        <strong>DEBUG DATA:</strong> {{ json_encode($berthsData) }}
+    </div>
+    @endif
     
     <div class="grid grid-cols-12 gap-6">
         <!-- Map Container -->
@@ -33,14 +39,27 @@
         </div>
         
         <!-- Sidebar -->
-        <div class="col-span-3">
+        <div class="col-span-3" x-data="{ tab: 'berths' }">
             <div class="bg-white rounded-xl shadow-sm p-4 h-[700px] flex flex-col border border-slate-200">
-                <h3 class="text-lg font-bold text-slate-900 mb-4 flex items-center gap-2 px-2">
-                    <svg class="w-5 h-5 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
-                    Berths & Vessels
-                </h3>
+                <!-- Sidebar Tabs -->
+                <div class="flex gap-2 p-1 bg-slate-100 rounded-lg mb-4">
+                    <button @click="tab = 'berths'" 
+                            :class="{ 'bg-white text-slate-900 shadow-sm': tab === 'berths', 'text-slate-500 hover:text-slate-700': tab !== 'berths' }"
+                            class="flex-1 py-1.5 px-3 text-sm font-medium rounded-md transition-all">
+                        Berths
+                    </button>
+                    <button @click="tab = 'queue'" 
+                            :class="{ 'bg-white text-slate-900 shadow-sm': tab === 'queue', 'text-slate-500 hover:text-slate-700': tab !== 'queue' }"
+                            class="flex-1 py-1.5 px-3 text-sm font-medium rounded-md transition-all flex items-center justify-center gap-2">
+                        Queue
+                        @if($waitingVessels->count() > 0)
+                        <span class="bg-blue-100 text-blue-700 text-xs px-1.5 py-0.5 rounded-full">{{ $waitingVessels->count() }}</span>
+                        @endif
+                    </button>
+                </div>
                 
-                <div class="space-y-3 overflow-y-auto flex-1 pr-2 custom-scrollbar">
+                <!-- Berths Tab -->
+                <div x-show="tab === 'berths'" class="space-y-3 overflow-y-auto flex-1 pr-2 custom-scrollbar">
                     @forelse($berthsData as $berth)
                     <div wire:click="selectBerth({{ $berth['id'] }})"
                          class="p-4 rounded-xl border transition-all cursor-pointer group relative overflow-hidden
@@ -89,6 +108,53 @@
                         </div>
                     @endforelse
                 </div>
+
+                <!-- Queue Tab -->
+                <div x-show="tab === 'queue'" style="display: none;" class="space-y-3 overflow-y-auto flex-1 pr-2 custom-scrollbar">
+                    <p class="text-xs text-slate-500 mb-2 px-1">Drag vessels to available berths on map.</p>
+                    
+                    @forelse($waitingVessels as $portCall)
+                    <div draggable="true"
+                         ondragstart="window.currentDragVessel = {id: '{{ $portCall->vessel->id }}', loa: {{ $portCall->vessel->loa_meters }}, draft: {{ $portCall->vessel->draft_meters }} }; event.dataTransfer.setData('vessel_data', JSON.stringify(window.currentDragVessel))"
+                         ondragend="window.currentDragVessel = null"
+                         class="p-4 rounded-xl border border-slate-200 bg-white hover:border-blue-300 hover:shadow-md transition-all cursor-move group">
+                        
+                        <div class="flex items-center justify-between mb-2">
+                            <div class="flex items-center gap-2">
+                                <div class="bg-blue-100 p-1.5 rounded text-blue-600">
+                                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 5l7 7-7 7M5 5l7 7-7 7"/></svg>
+                                </div>
+                                <span class="font-bold text-slate-800">{{ $portCall->vessel->name }}</span>
+                            </div>
+                            <span class="text-[10px] uppercase font-bold px-2 py-0.5 rounded bg-slate-100 text-slate-600 border border-slate-200">{{ $portCall->status }}</span>
+                        </div>
+                        
+                        <div class="grid grid-cols-2 gap-2 text-xs text-slate-500 mt-2 bg-slate-50 p-2 rounded-lg">
+                            <div>
+                                <span class="block text-slate-400 text-[10px]">LOA</span>
+                                <span class="font-medium text-slate-700">{{ $portCall->vessel->loa_meters }}m</span>
+                            </div>
+                            <div>
+                                <span class="block text-slate-400 text-[10px]">Draft</span>
+                                <span class="font-medium text-slate-700">{{ $portCall->vessel->draft_meters }}m</span>
+                            </div>
+                            <div>
+                                <span class="block text-slate-400 text-[10px]">Type</span>
+                                <span class="font-medium text-slate-700">{{ ucfirst($portCall->vessel->vessel_type) }}</span>
+                            </div>
+                            <div>
+                                <span class="block text-slate-400 text-[10px]">IMO</span>
+                                <span class="font-medium text-slate-700">{{ $portCall->vessel->imo_number }}</span>
+                            </div>
+                        </div>
+                    </div>
+                    @empty
+                        <div class="text-center py-12 flex flex-col items-center justify-center text-slate-400">
+                            <svg class="w-12 h-12 mb-3 text-slate-300" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                            <p>No waiting vessels.</p>
+                        </div>
+                    @endforelse
+                </div>
             </div>
         </div>
     </div>
@@ -105,6 +171,48 @@
         });
 
         // Listen for berth selection from Livewire
+        // Listen for berth drop (drag and drop)
+        window.addEventListener('berth-drop', event => {
+             const detail = event.detail;
+             let vesselId = detail.vesselId;
+             
+             // If we passed complex data, extract ID
+             if (!vesselId && detail.vesselData) {
+                 try {
+                     const data = typeof detail.vesselData === 'string' ? JSON.parse(detail.vesselData) : detail.vesselData;
+                     vesselId = data.id;
+                 } catch(e) { console.error('Error parsing vessel data', e); }
+             }
+
+             if (vesselId && detail.berthId) {
+                 console.log('Dispatching assignVessel', vesselId, detail.berthId);
+                 @this.assignVessel(vesselId, detail.berthId);
+             }
+        });
+
+        window.addEventListener('anchorage-drop', event => {
+             const detail = event.detail;
+             let vesselId = null;
+             
+             if (detail.vesselData) {
+                 try {
+                     const data = typeof detail.vesselData === 'string' ? JSON.parse(detail.vesselData) : detail.vesselData;
+                     vesselId = data.id;
+                 } catch(e) { console.error('Error parsing vessel data', e); }
+             }
+
+             if (vesselId && detail.zoneId) {
+                 @this.assignToAnchorage(vesselId, detail.zoneId);
+             }
+        });
+
+        window.addEventListener('update-vessel-positions', event => {
+             const positions = Array.isArray(event.detail) ? event.detail[0] : event.detail;
+             if (window.portMapInstance && positions) {
+                 window.portMapInstance.updateVesselPositions(positions);
+             }
+        });
+
         // Listen for berth selection from Livewire
         document.addEventListener('berth-selected', event => {
             console.log('Event received:', event.detail);
@@ -138,6 +246,17 @@
                 console.warn('Map instance or coordinates missing');
             }
         });
+        
+        // Listen for alerts from PHP (e.g. invalid drop)
+        window.addEventListener('alert', event => {
+            const detail = Array.isArray(event.detail) ? event.detail[0] : event.detail;
+            // You can use a library like SweetAlert here or a custom toast
+            if (typeof renderToast === 'function') { // If renderToast exists globally
+                 renderToast({title: detail.type.toUpperCase(), message: detail.message, type: detail.type});
+            } else {
+                alert(`${detail.type.toUpperCase()}: ${detail.message}`);
+            }
+        });
 
         function initMap() {
             const mapId = 'port-map';
@@ -161,6 +280,9 @@
                  
                  // Load berths data from PHP
                  const berthsData = @json($berthsData);
+                 const anchoragesData = @json($anchorageData ?? []);
+                 console.log('Initializing Map with Berths:', berthsData);
+                 console.log('Initializing Anchorages:', anchoragesData);
                  
                  const bounds = [];
                  berthsData.forEach(berth => {
@@ -169,14 +291,62 @@
                          bounds.push([berth.lat, berth.lng]);
                      }
                  });
+
+                 // Add Anchorages
+                 anchoragesData.forEach(zone => {
+                     if (zone.coordinates) {
+                         portMap.addAnchorage(zone);
+                         // Add to bounds so we see them
+                         zone.coordinates.forEach(coord => bounds.push([coord.lat, coord.lng]));
+                     }
+                 });
                  
                  // Fit map
                  if (bounds.length > 0) {
                      portMap.fitBounds(bounds);
+                     // portMap.map.fitBounds(bounds, { padding: [50, 50] }); // Add padding if needed
                  }
                  
                  window.portMapInstance = portMap;
             }
         }
     </script>
+    <style>
+        .berth-marker .berth-icon {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            border: 2px solid white;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+            transition: transform 0.2s;
+        }
+
+        .berth-marker:hover .berth-icon {
+            transform: scale(1.1);
+        }
+
+        .anchorage-label {
+            background: rgba(255, 255, 255, 0.9);
+            border: 1px solid #94a3b8;
+            border-radius: 4px;
+            padding: 2px 6px;
+            font-size: 11px;
+            font-weight: bold;
+            color: #475569;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+
+        .drag-hover-valid {
+            filter: drop-shadow(0 0 10px rgba(16, 185, 129, 0.8));
+            transform: scale(1.5);
+            z-index: 1000 !important;
+        }
+        .drag-hover-invalid {
+            filter: drop-shadow(0 0 10px rgba(239, 68, 68, 0.8));
+            transform: scale(1.5);
+            z-index: 1000 !important;
+            cursor: not-allowed;
+        }
+    </style>
 </div>

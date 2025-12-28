@@ -10,42 +10,41 @@ class BerthCoordinatesSeeder extends Seeder
 {
     public function run(): void
     {
-        // Sample berth coordinates for Labuan Port (Approximate)
+        // Precise coordinates for Labuan Liberty Wharf (Jetties)
         $berthCoordinates = [
-            'Berth 1' => ['lat' => 5.2750, 'lng' => 115.2400],
-            'Berth 2' => ['lat' => 5.2755, 'lng' => 115.2405],
-            'Berth 3' => ['lat' => 5.2760, 'lng' => 115.2410],
-            'Berth 4' => ['lat' => 5.2765, 'lng' => 115.2415],
-            'Berth 5' => ['lat' => 5.2770, 'lng' => 115.2420],
-            'Liqud Bulk Terminal' => ['lat' => 5.2780, 'lng' => 115.2430], // Example name
-            'LBT 1' => ['lat' => 5.2780, 'lng' => 115.2430], 
-            'LBT 2' => ['lat' => 5.2785, 'lng' => 115.2435],
+            // Adjusted to be ON the jetty/water
+            'Main Wharf 1' => ['lat' => 5.2758, 'lng' => 115.2410, 'loa' => 80, 'draft' => 5], // SMALL BERTH
+            'Main Wharf 2' => ['lat' => 5.2763, 'lng' => 115.2413, 'loa' => 200, 'draft' => 12], // LARGE BERTH
+            'Main Wharf 3' => ['lat' => 5.2768, 'lng' => 115.2416, 'loa' => 200, 'draft' => 12],
+            'Alpha Jetty' => ['lat' => 5.2773, 'lng' => 115.2419, 'loa' => 200, 'draft' => 12],
+            'Bravo Jetty' => ['lat' => 5.2778, 'lng' => 115.2422, 'loa' => 200, 'draft' => 12],
         ];
         
-        // Also update generic names if they exist like "Alpha", "Beta" depending on user data
-        // For now, I'll fetch all berths and assign coordinates incrementally if names don't match
-        
         $berths = Berth::all();
-        $baseLat = 5.2750;
-        $baseLng = 115.2400;
         
-        foreach ($berths as $index => $berth) {
-            $coords = $berthCoordinates[$berth->name] ?? null;
+        foreach ($berths as $berth) {
+            // Fuzzy match name
+            $coords = null;
+            foreach ($berthCoordinates as $name => $data) {
+                if (stripos($berth->name, $name) !== false || stripos($name, $berth->name) !== false) {
+                     $coords = $data;
+                     break;
+                }
+            }
             
+            // Default if not matched
             if (!$coords) {
-                // Assign incremental coordinates for demo
-                $coords = [
-                    'lat' => $baseLat + ($index * 0.0005),
-                    'lng' => $baseLng + ($index * 0.0005)
-                ];
+                continue;
             }
             
             $berth->update([
                 'latitude' => $coords['lat'],
-                'longitude' => $coords['lng']
+                'longitude' => $coords['lng'],
+                'max_loa' => $coords['loa'],
+                'max_draft' => $coords['draft']
             ]);
             
-            $this->command->info("Updated {$berth->name} with coordinates: {$coords['lat']}, {$coords['lng']}");
+            $this->command->info("Updated {$berth->name}: {$coords['lat']}, {$coords['lng']} (LOA: {$coords['loa']})");
         }
     }
 }

@@ -16,7 +16,9 @@ class PortCall extends Model
         'atb',
         'atd',
         'assigned_berth_id',
-        'reference_no'
+        'reference_no',
+        'anchorage_zone_id',
+        'anchored_at'
     ];
 
     protected $casts = [
@@ -25,6 +27,7 @@ class PortCall extends Model
         'ata' => 'datetime',
         'atb' => 'datetime',
         'atd' => 'datetime',
+        'anchored_at' => 'datetime',
     ];
 
     public function vessel()
@@ -40,6 +43,11 @@ class PortCall extends Model
     public function berth()
     {
         return $this->belongsTo(Berth::class, 'assigned_berth_id');
+    }
+
+    public function anchorageZone()
+    {
+        return $this->belongsTo(AnchorageZone::class);
     }
 
     public function serviceRequests()
