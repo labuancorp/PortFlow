@@ -427,6 +427,19 @@ class DatabaseSeeder extends Seeder
             );
 
             foreach ($m['items'] as $item) {
+                // Set received_at based on status
+                $receivedAt = null;
+                if (in_array($item['status'], ['gated_in', 'at_wharf', 'loaded'])) {
+                    // For items that are in the yard, set received_at
+                    if ($m['ref'] === 'MF-2024-050') {
+                        // Old cargo - 95 days ago
+                        $receivedAt = $today->copy()->subDays(95);
+                    } else {
+                        // Recent cargo - use manifest ETA
+                        $receivedAt = $m['eta'];
+                    }
+                }
+
                 CargoItem::updateOrCreate(
                     ['tracking_number' => 'TRK-' . $m['ref'] . '-' . substr(md5($item['desc']), 0, 6)],
                     [
@@ -437,7 +450,8 @@ class DatabaseSeeder extends Seeder
                         'dg_class' => $item['dg'],
                         'status' => $item['status'],
                         'current_location' => $zoneModels[$item['zone']]->name ?? 'In Transit',
-                        'warehouse_zone_id' => $zoneModels[$item['zone']]->id ?? null
+                        'warehouse_zone_id' => $zoneModels[$item['zone']]->id ?? null,
+                        'received_at' => $receivedAt
                     ]
                 );
             }

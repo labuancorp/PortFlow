@@ -155,17 +155,19 @@
                                 @endif
                             </td>
                              <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-2">
-                                @if($inv->erp_status === 'synced')
-                                    <button wire:click="downloadErpPayload({{ $inv->id }})" class="text-slate-400 hover:text-slate-600 text-[10px] uppercase font-bold" title="Download Payload XML">XML</button>
-                                    <span class="text-slate-300">|</span>
-                                @else
-                                    <button wire:click="syncToErp({{ $inv->id }})" class="text-blue-600 hover:text-blue-900 text-[10px] uppercase font-bold">Sync SAP</button>
-                                    <span class="text-slate-300">|</span>
-                                @endif
+                                @if(auth()->user()->role === 'admin')
+                                    @if($inv->erp_status === 'synced')
+                                        <button wire:click="downloadErpPayload({{ $inv->id }})" class="text-slate-400 hover:text-slate-600 text-[10px] uppercase font-bold" title="Download Payload XML">XML</button>
+                                        <span class="text-slate-300">|</span>
+                                    @else
+                                        <button wire:click="syncToErp({{ $inv->id }})" class="text-blue-600 hover:text-blue-900 text-[10px] uppercase font-bold">Sync SAP</button>
+                                        <span class="text-slate-300">|</span>
+                                    @endif
 
-                                @if($inv->status !== 'paid')
-                                <button wire:click="markAsPaid({{ $inv->id }})" class="text-green-600 hover:text-green-900 text-[10px] uppercase tracking-wide font-bold">Mark Paid</button>
-                                <span class="text-slate-300">|</span>
+                                    @if($inv->status !== 'paid')
+                                    <button wire:click="markAsPaid({{ $inv->id }})" class="text-green-600 hover:text-green-900 text-[10px] uppercase tracking-wide font-bold">Mark Paid</button>
+                                    <span class="text-slate-300">|</span>
+                                    @endif
                                 @endif
                                 <button wire:click="viewInvoice({{ $inv->id }})" class="text-teal-600 hover:text-teal-900 font-semibold cursor-pointer">View</button>
                             </td>
