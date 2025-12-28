@@ -206,6 +206,9 @@ class WarehouseBillingService
         $hours = max(1, $end->floatDiffInHours($start));
         $days = max(1, $end->floatDiffInDays($start));
 
+        $dailyCost = ceil($days) * $booking->asset->rate_per_day;
+        $hourlyCost = $hours * $booking->asset->rate_per_hour;
+
         $cost = 0;
         $description = "";
 

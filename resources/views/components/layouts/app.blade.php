@@ -1,3 +1,7 @@
+@inject('notificationService', 'App\Services\NotificationService')
+@php
+    $pendingTasks = $notificationService::getPendingCounts();
+@endphp
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 <head>
@@ -31,9 +35,14 @@
                                 </a>
                             </li>
                             <li>
-                                <a href="{{ route('home') }}" class="flex items-center px-3 py-2 rounded-lg group {{ request()->routeIs('home') ? 'bg-slate-800 text-white' : 'text-slate-300 hover:bg-slate-800 hover:text-white' }}">
-                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
-                                    <span class="ml-3">Berth Planner</span>
+                                <a href="{{ route('home') }}" class="flex items-center justify-between px-3 py-2 rounded-lg group {{ request()->routeIs('home') ? 'bg-slate-800 text-white' : 'text-slate-300 hover:bg-slate-800 hover:text-white' }}">
+                                    <div class="flex items-center">
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                                        <span class="ml-3">Berth Planner</span>
+                                    </div>
+                                    @if($pendingTasks['berth_planner'] > 0)
+                                    <span class="bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full">{{ $pendingTasks['berth_planner'] }}</span>
+                                    @endif
                                 </a>
                             </li>
                             @endif
@@ -60,9 +69,14 @@
                                 </a>
                             </li>
                             <li>
-                                <a href="{{ route('cargo.manifests.index') }}" class="flex items-center px-3 py-2 rounded-lg group {{ request()->routeIs('cargo.*') ? 'bg-slate-800 text-white' : 'text-slate-300 hover:bg-slate-800 hover:text-white' }}">
-                                    <svg class="w-5 h-5 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path></svg>
-                                    <span class="ml-3">Cargo Logistics</span>
+                                <a href="{{ route('cargo.manifests.index') }}" class="flex items-center justify-between px-3 py-2 rounded-lg group {{ request()->routeIs('cargo.*') ? 'bg-slate-800 text-white' : 'text-slate-300 hover:bg-slate-800 hover:text-white' }}">
+                                    <div class="flex items-center">
+                                        <svg class="w-5 h-5 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path></svg>
+                                        <span class="ml-3">Cargo Logistics</span>
+                                    </div>
+                                    @if($pendingTasks['cargo_manifests'] > 0)
+                                    <span class="bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full">{{ $pendingTasks['cargo_manifests'] }}</span>
+                                    @endif
                                 </a>
                             </li>
                             @endif
@@ -114,9 +128,14 @@
                         <ul class="space-y-1">
                             @if(in_array(auth()->user()->role, ['admin', 'hse']))
                             <li>
-                                <a href="{{ route('assets.inventory') }}" class="flex items-center px-3 py-2 rounded-lg group {{ request()->routeIs('assets.inventory') ? 'bg-slate-800 text-white' : 'text-slate-300 hover:bg-slate-800 hover:text-white' }}">
-                                    <svg class="w-5 h-5 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17V7m0 10a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h2a2 2 0 012 2m0 10a2 2 0 002 2h2a2 2 0 002-2V7a2 2 0 00-2-2h-2a2 2 0 00-2 2"></path></svg>
-                                    <span class="ml-3">Asset Inventory</span>
+                                <a href="{{ route('assets.inventory') }}" class="flex items-center justify-between px-3 py-2 rounded-lg group {{ request()->routeIs('assets.inventory') ? 'bg-slate-800 text-white' : 'text-slate-300 hover:bg-slate-800 hover:text-white' }}">
+                                    <div class="flex items-center">
+                                        <svg class="w-5 h-5 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17V7m0 10a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h2a2 2 0 012 2m0 10a2 2 0 002 2h2a2 2 0 002-2V7a2 2 0 00-2-2h-2a2 2 0 00-2 2"></path></svg>
+                                        <span class="ml-3">Asset Inventory</span>
+                                    </div>
+                                    @if($pendingTasks['asset_inventory'] > 0)
+                                    <span class="bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full">{{ $pendingTasks['asset_inventory'] }}</span>
+                                    @endif
                                 </a>
                             </li>
                             <li>
@@ -156,9 +175,14 @@
                                 </a>
                             </li>
                             <li>
-                                <a href="{{ route('hse.incidents.index') }}" class="flex items-center px-3 py-2 rounded-lg group {{ request()->routeIs('hse.incidents.*') ? 'bg-slate-800 text-white' : 'text-slate-300 hover:bg-slate-800 hover:text-white' }}">
-                                    <svg class="w-5 h-5 text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
-                                    <span class="ml-3">Safety Intel</span>
+                                <a href="{{ route('hse.incidents.index') }}" class="flex items-center justify-between px-3 py-2 rounded-lg group {{ request()->routeIs('hse.incidents.*') ? 'bg-slate-800 text-white' : 'text-slate-300 hover:bg-slate-800 hover:text-white' }}">
+                                    <div class="flex items-center">
+                                        <svg class="w-5 h-5 text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
+                                        <span class="ml-3">Safety Intel</span>
+                                    </div>
+                                    @if($pendingTasks['hse_incidents'] > 0)
+                                    <span class="bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full">{{ $pendingTasks['hse_incidents'] }}</span>
+                                    @endif
                                 </a>
                             </li>
                         </ul>
@@ -170,9 +194,14 @@
                          <ul class="space-y-1">
                             @if(auth()->user()->role !== 'hse')
                             <li>
-                                <a href="{{ route('billing.index') }}" class="flex items-center px-3 py-2 rounded-lg group {{ request()->routeIs('billing.*') ? 'bg-slate-800 text-white' : 'text-slate-300 hover:bg-slate-800 hover:text-white' }}">
-                                    <svg class="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"></path></svg>
-                                    <span class="ml-3">Billing & Invoices</span>
+                                <a href="{{ route('billing.index') }}" class="flex items-center justify-between px-3 py-2 rounded-lg group {{ request()->routeIs('billing.*') ? 'bg-slate-800 text-white' : 'text-slate-300 hover:bg-slate-800 hover:text-white' }}">
+                                    <div class="flex items-center">
+                                        <svg class="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"></path></svg>
+                                        <span class="ml-3">Billing & Invoices</span>
+                                    </div>
+                                    @if($pendingTasks['billing'] > 0)
+                                    <span class="bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full">{{ $pendingTasks['billing'] }}</span>
+                                    @endif
                                 </a>
                             </li>
                             @endif
