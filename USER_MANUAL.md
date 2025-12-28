@@ -64,74 +64,93 @@ PortFlow offers a flexible pricing model tailored for single-port operators or l
 
 ---
 
-### �️ 3. HSE GUARDIAN SUITE (End-to-End Safety)
-PortFlow treats safety as a **Revenue Protector**, not just a cost center.
+### 🛠️ Resource & Lifecycle Operations (Phase 3)
+Designed for ground crew and maintenance teams to protect asset value.
 
-#### � **PTW Safety Console (Permit-to-Work)**
-*   **Usage:** Central hub for high-risk activity management (Hot Work, Cold Work, Confined Space).
-*   **Logic:** The system utilizes **Clash Detection**. It will alert you if a maintenance permit overlaps with a vessel refueling operation at the same location.
-*   **Review Process:** HSE Officers must verify JSAs (Job Safety Analysis) and PPE requirements digitally before "Issuing" the permit.
+#### 🔧 **Digital Maintenance Logs**
+*   **Purpose:** Prevent breakdowns and track lifecycle costs.
+*   **Usage:** Click the "Wrench" icon on any asset in the Inventory.
+*   **Features:**
+    *   **Unified History:** Browse a searchable timeline of every repair, routine service, and safety inspection.
+    *   **Smart Scheduling:** Automatically tracks "Next Service Due".
+    *   **Audit Ready:** Logs cost, vendor details, and technical notes for every intervention.
 
-#### � **Safety Intelligence (Incident & Near-Miss Reporter)**
-*   **Usage:** A proactive hazard identification tool.
-*   **Reporting:** Anyone on the port can snap a photo of a hazard and report it via mobile.
-*   **Investigation:** HSE Officers use the **Investigation Dossier** to log Root Cause Analysis and define "Corrective Actions."
-*   **Status Tracking:** Reports move through "Open" -> "Investigating" -> "Resolved" -> "Closed" with full timestamps.
+#### 📱 **Mobile Handover Protocol (Ground Ops)**
+*   **Purpose:** Digitize the "Chain of Custody" for heavy equipment.
+*   **Workflow:**
+    1.  **Check-Out:** Ground crew scans the Asset QR Code or selects task from "Assets" tab in Mobile Ops.
+    2.  **Evidence:** Crew uploads a photo of the asset's condition (mandatory).
+    3.  **Timer:** Confirming check-out starts the automated **Billing Clock**.
+    4.  **Check-In:** Returning the asset stops the clock and finalizes the rental invoice.
+
+#### 🛑 **Safety Interlocks**
+*   **Purpose:** Automated compliance enforcement.
+*   **Logic:** The system **blocks** any attempt to book an asset if:
+    *   Its **Safety Certificate** has expired.
+    *   Its status is marked as **Under Maintenance**.
+*   **Visuals:** Expired assets display a pulsing red **"CERT. EXPIRED"** badge in the inventory.
+
+#### � **QR Code Integration**
+*   **Purpose:** Instant field access to asset data.
+*   **Feature:** Every asset has a unique QR tag generated in its "Edit" modal.
+*   **Action:** Scanning the tag redirects authorized personnel directly to the **Mobile Ops** asset control view.
 
 ---
 
-### ⚓ 4. AGENT PORTAL (The Partner Interface)
-Designed to reduce the administrative burden on port partners.
-
-#### 💻 **Management Console**
-*   **Dashboard:** Real-time view of the agent's fleet and active cargo. 
-*   **Self-Service:** Agents can add new vessels and register manifests without calling the port office.
-
-#### 🆘 **Permit Requests**
-*   **Workflow:** Agents apply for permits for their crews. They receive **Live Status Notifications** (Approved/Rejected/More Info) directly on their mobile devices.
+### 💵 5. Billing & Financial Engine
+*   **Purpose:** Automated, consolidated invoicing for all port services.
+*   **Consolidation:** Generates a single invoice covering:
+    *   **Marine:** Berthing & Wharfage fees.
+    *   **Yard:** Warehouse storage leases.
+    *   **Assets:** Equipment rental hours (calculated from Check-In/Out times).
+*   **Agent Portal:** Agents see a live "Financial Dashboard" with outstanding dues and aging analysis.
 
 ---
 
-## 🏗️ 5. Engineering Design & Documentation (URS / SRS)
+## 🏗️ 6. Engineering Design & Documentation (URS / SRS)
 This section outlines the rigorous technical and functional framework used to build PortFlow for the **Asian Supply Base (ASB)**.
 
-### 📋 5.1 User Requirement Specification (URS)
+### 📋 6.1 User Requirement Specification (URS)
 *What the business needs to achieve.*
 1.  **Requirement 101:** The system must provide a real-time visual "Digital Twin" of the wharf to eliminate berthing overlaps.
 2.  **Requirement 102:** The system must detect safety "clashes" between cargo operations and maintenance work.
 3.  **Requirement 103:** Automation of the billing clock based on Actual Time of Berthing (ATB) and Actual Time of Unberthing (ATU).
 4.  **Requirement 104:** Role-based access control (RBAC) specifically separating Port Authority, Safety, and Third-party Agents.
 5.  **Requirement 105:** Automated metered billing for heavy equipment (Cranes/Forklifts) and specialized facilities.
+6.  **Requirement 106:** (New) Mobile-first "Scan-to-Verify" workflow for asset handover and maintenance logging.
 
-### ⚙️ 5.2 Software Requirement Specification (SRS)
+### ⚙️ 6.2 Software Requirement Specification (SRS)
 *How the software delivers the URS.*
 *   **Architectural Stack:** TALL Stack (Tailwind CSS, Alpine.js, Laravel, Livewire) for high-reactivity without page reloads.
 *   **Security Layer:** Middleware-based RBAC & Rate Limiting (6 req/min) to prevent brute-force attacks.
 *   **Database Engine:** Transactional-safe SQL for financial billing integrity.
 *   **Edge Capability:** Mobile-responsive layout for field ops with image-compression for low-bandwidth zones.
+*   **Offline Resilience:** Native QR Code generation (SVG) ensures functionality without external API dependencies.
 
-### 📖 5.3 User Stories (The Human Perspective)
+### 📖 6.3 User Stories (The Human Perspective)
 *   **As a Port Admin,** I want to see a thermal map of berth occupancy so I can maximize wharf revenue and reduce idle time.
-*   **As an HSE Officer,** I want to receive instant photo-evidence of hazards so I can investigate and close safety gaps within 4 hours.
+*   **As an HSE Officer,** I want the system to auto-block equipment bookings if the safety cert is expired, preventing human error.
+*   **As a Ground Crew,** I want to scan a QR code to quickly "Check-Out" a crane without filling paper forms.
 *   **As a Shipping Agent,** I want to book a 250T Crane autonomously so I can proceed with urgent offshore tubular loading without manual paperwork.
 
 ---
 
-## 💡 6. Problem vs. Solution Matrix
+## 💡 7. Problem vs. Solution Matrix
 *The core operational challenges PortFlow solves for ASB.*
 
 | The Problem | PortFlow’s Digital Solution |
 | :--- | :--- |
-| **"Phantom Billing"**: Berthing time is rounded off manually, leading to thousands in lost income. | **Automatic Timers**: Invoices are generated based on exact server-logged berthing timestamps. |
+| **"Phantom Billing"**: Berthing time is rounded off manually, leading to thousands in lost income. | **Automatic Timers**: Invoices are generated based on exact server-logged berthing/asset timestamps. |
 | **"Communication Black-holes"**: Agents use paper manifests that get lost or misfiled. | **Digital Manifest Portal**: One-click upload with instant QR tracking for every single cargo item. |
 | **"Reactive Safety"**: Safety officers only find out about hazards *after* an accident occurs. | **Safety Intelligence**: Real-time reporting of "Hazard Observations" to enable preventative action. |
 | **"Berth Clashes"**: Two vessels scheduled for one slot due to spreadsheet errors. | **Visual GIS Grid**: Collision detection system prevents overlapping bookings in the scheduler. |
 | **"Equipment Under-utilization"**: Cranes and forklifts sitting idle or used without billing. | **Resource Marketplace**: Digital metered booking ensures every asset hour is captured and billed. |
 | **"Audit Pain"**: Spent weeks compiling records for Petronas/Shell safety audits. | **One-Click Compliance**: A complete, unalterable Audit Trail is exported in seconds. |
+| **"Paper Trail Handover"**: Disputes over equipment damage responsible. | **Mobile Handover**: Mandatory photo evidence at Check-Out/In creates visual proof of condition. |
 
 ---
 
-## 💰 7. Return on Investment (ROI) Analysis
+## 💰 8. Return on Investment (ROI) Analysis
 *Investing in PortFlow isn't a cost; it's a strategic capital optimization.*
 
 ### 📈 ROI Factors:
@@ -146,21 +165,22 @@ This section outlines the rigorous technical and functional framework used to bu
 
 ---
 
-## 🚀 8. Future HSE Roadmap (What's Next?)
+## 🚀 9. Future HSE Roadmap (Status Update)
 We are committed to making PortFlow the most advanced HSE OS in the world.
 
-*   **Phase 2: Digital Induction Portal:** Automated safety videos and quizzes for contractors before gate access is granted.
-*   **Phase 3: AI-PPE Monitoring:** Integration with existing CCTV to automatically detect personnel not wearing hard-hats or high-vis vests.
-*   **Phase 4: HSE Contractor Scorecard:** A ranking system that rewards safe agents with "Priority Berth Access" and penalizes repeat offenders.
-*   **Phase 5: Drone Integration:** Automated aerial inspections for warehouse roof integrity and perimeter security.
+*   **Phase 1 (Completed):** Core Operations, Berth Planning, Cargo Logistics.
+*   **Phase 2 (Completed):** Billing Generation, Agent Portal, Financial Dashboard.
+*   **Phase 3 (Completed):** Asset Lifecycle, Mobile Handover, Safety Interlocks, QR Integration.
+*   **Phase 4 (Next):** **AI-PPE Monitoring:** Integration with CCTV to detect hard-hat non-compliance.
+*   **Phase 5:** **Drone Integration:** Automated aerial inspections for warehouse roof integrity.
 
 ---
 
-## ⚡ 9. Technology Architecture (The Engine)
+## ⚡ 10. Technology Architecture (The Engine)
 PortFlow is engineered using the **TALL Stack**, a high-performance modern web architecture designed for real-time reactivity and mission-critical reliability.
 
 ### 🛠️ Core Technology Stack:
-*   **Backend (Laravel 11):** The world's most robust PHP framework, providing Enterprise-grade routing, ORM (Eloquent), and deep security layers.
+*   **Backend (Laravel 12):** The world's most robust PHP framework, providing Enterprise-grade routing, ORM (Eloquent), and deep security layers.
 *   **Reactivity (Livewire 3):** Allows the system to update UI components (like the Berth Planner or Safety Dashboard) in real-time without refreshing the page.
 *   **Interactivity (Alpine.js):** Lightweight JavaScript for fluid client-side interactions (like the Password Eye toggle).
 *   **Design System (Tailwind CSS):** A utility-first CSS framework that ensures a stunning, responsive, and mobile-first experience for field operators.
@@ -172,20 +192,21 @@ PortFlow is engineered using the **TALL Stack**, a high-performance modern web a
 
 ---
 
-## 🛡️ 10. Cybersecurity & Data Hardening
+## 🛡️ 11. Cybersecurity & Data Hardening
 We have implemented a **"Hard as Rock"** security posture to protect ASB's operational data and financial integrity.
 
-### 🔐 10.1 Perimeter Defense:
+### 🔐 11.1 Perimeter Defense:
 *   **CSP (Content Security Policy):** Strict browser-level instructions that block unauthorized scripts and data-injection attacks (XSS).
 *   **HSTS & SSL:** All traffic is forced through 256-bit encrypted tunnels.
 *   **Harden Headers:** Enforced `X-Frame-Options: DENY` and `X-Content-Type: nosniff` to prevent clickjacking and MIME-type sniffing.
 
-### 👤 10.2 Identity & Auth Security:
+### 👤 11.2 Identity & Auth Security:
 *   **2FA (Multi-Factor Authentication):** Critical actions require a secondary verification code, protecting against stolen credentials.
 *   **Password Entropy:** Enforced high-complexity password rules and leak-detection (checking against known breached passwords).
 *   **Route Throttling:** Intelligent rate-limiting (e.g., 6 req/min on login) to neutralize brute-force automation.
+*   **Safety Interlocks:** Automated system checks prevent unsafe actions (e.g., booking expired equipment).
 
-### 🗒️ 10.3 Immutable Audit Trails:
+### 🗒️ 11.3 Immutable Audit Trails:
 *   Every change in the system—from permit approvals to invoice adjustments—is logged with a **User ID, IP Address, and Timestamp**. 
 *   These logs are immutable and serve as the "Black Box" for port safety investigations and financial audits.
 
