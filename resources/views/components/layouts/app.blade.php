@@ -51,6 +51,7 @@
                                     @endif
                                 </a>
                             </li>
+                            <!-- GIS MAP ADDITION -->
                             <li>
                                 <a href="{{ route('gis.port-map') }}" class="flex items-center px-3 py-2 rounded-lg group {{ request()->routeIs('gis.port-map') ? 'bg-slate-800 text-white' : 'text-slate-300 hover:bg-slate-800 hover:text-white' }}">
                                     <svg class="w-5 h-5 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
@@ -139,7 +140,7 @@
                                 </a>
                             </li>
                             @endif
-
+                            
                             @if(auth()->user()->role === 'admin')
                             <li>
                                 <a href="{{ route('ops.mobile') }}" class="flex items-center px-3 py-2 rounded-lg group {{ request()->routeIs('ops.*') ? 'bg-slate-800 text-white' : 'text-slate-300 hover:bg-slate-800 hover:text-white' }}">
@@ -198,44 +199,36 @@
                         <div class="px-3 text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2">Safety & Compliance</div>
                         <ul class="space-y-1">
                             <li>
-                                <a href="{{ route('hse.permits.dashboard') }}" class="flex items-center px-3 py-2 rounded-lg group {{ request()->routeIs('hse.permits.*') ? 'bg-slate-800 text-white' : 'text-slate-300 hover:bg-slate-800 hover:text-white' }}">
-                                    <svg class="w-5 h-5 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
-                                    <span class="ml-3">Permit to Work</span>
+                                <a href="{{ route('hse.permits.dashboard') }}" class="flex items-center justify-between px-3 py-2 rounded-lg group {{ request()->routeIs('hse.permits.*') ? 'bg-slate-800 text-white' : 'text-slate-300 hover:bg-slate-800 hover:text-white' }}">
+                                    <div class="flex items-center">
+                                        <svg class="w-5 h-5 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                        <span class="ml-3">HSE Dashboard</span>
+                                    </div>
+                                    @if(($pendingTasks['permits'] ?? 0) > 0)
+                                    <span class="bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full">{{ $pendingTasks['permits'] ?? 0 }}</span>
+                                    @endif
                                 </a>
                             </li>
                             <li>
-                                <a href="{{ route('hse.incidents.index') }}" class="flex items-center justify-between px-3 py-2 rounded-lg group {{ request()->routeIs('hse.incidents.*') ? 'bg-slate-800 text-white' : 'text-slate-300 hover:bg-slate-800 hover:text-white' }}">
-                                    <div class="flex items-center">
-                                        <svg class="w-5 h-5 text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
-                                        <span class="ml-3">Safety Intel</span>
-                                    </div>
-                                    @if($pendingTasks['hse_incidents'] > 0)
-                                    <span class="bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full">{{ $pendingTasks['hse_incidents'] }}</span>
-                                    @endif
+                                <a href="{{ route('hse.incidents.index') }}" class="flex items-center px-3 py-2 rounded-lg group {{ request()->routeIs('hse.incidents.*') ? 'bg-slate-800 text-white' : 'text-slate-300 hover:bg-slate-800 hover:text-white' }}">
+                                    <svg class="w-5 h-5 text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+                                    <span class="ml-3">Incidents</span>
                                 </a>
                             </li>
                         </ul>
                     </li>
 
-                    <!-- System & Admin -->
+                    <!-- Administration -->
                     <li>
-                         <div class="px-3 text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2">System & Admin</div>
-                         <ul class="space-y-1">
-                            @if(!in_array(auth()->user()->role, ['hse', 'asset_manager']))
+                        <div class="px-3 text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2">Administration</div>
+                        <ul class="space-y-1">
+                             @if(auth()->user()->role === 'admin')
                             <li>
-                                <a href="{{ route('billing.index') }}" class="flex items-center justify-between px-3 py-2 rounded-lg group {{ request()->routeIs('billing.*') ? 'bg-slate-800 text-white' : 'text-slate-300 hover:bg-slate-800 hover:text-white' }}">
-                                    <div class="flex items-center">
-                                        <svg class="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"></path></svg>
-                                        <span class="ml-3">Billing & Invoices</span>
-                                    </div>
-                                    @if($pendingTasks['billing'] > 0)
-                                    <span class="bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full">{{ $pendingTasks['billing'] }}</span>
-                                    @endif
+                                <a href="{{ route('billing.index') }}" class="flex items-center px-3 py-2 rounded-lg group {{ request()->routeIs('billing.*') ? 'bg-slate-800 text-white' : 'text-slate-300 hover:bg-slate-800 hover:text-white' }}">
+                                    <svg class="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                    <span class="ml-3">Finance & Billing</span>
                                 </a>
                             </li>
-                            @endif
-
-                            @if(auth()->user()->role === 'admin')
                             <li>
                                 <a href="{{ route('agents.index') }}" class="flex items-center px-3 py-2 rounded-lg group {{ request()->routeIs('agents.*') ? 'bg-slate-800 text-white' : 'text-slate-300 hover:bg-slate-800 hover:text-white' }}">
                                     <svg class="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
@@ -280,9 +273,6 @@
                             </li>
                             @endif
                          </ul>
-                    </li>
-
-                </ul>
             </nav>
             <div class="p-4 border-t border-slate-800">
                 <div class="flex items-center justify-between">
