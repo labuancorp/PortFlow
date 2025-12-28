@@ -30,6 +30,9 @@ Route::middleware(['auth', '2fa'])->group(function () {
         
         // Maritime Services (Phase 6)
         Route::get('/maritime/pilotage-towage', App\Livewire\Maritime\PilotageTowage::class)->name('maritime.pilotage-towage');
+        
+        // GIS Port Management (Phase 7)
+        Route::get('/gis/port-map', App\Livewire\GIS\PortMapView::class)->name('gis.port-map');
     });
 
     Route::middleware(['role:admin,agent,hse'])->group(function () {

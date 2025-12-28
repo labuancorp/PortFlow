@@ -12,4 +12,9 @@ class Berth extends Model
     {
         return $this->hasMany(PortCall::class, 'assigned_berth_id');
     }
+
+    public function currentPortCall()
+    {
+        return $this->hasOne(PortCall::class, 'assigned_berth_id')->where('status', 'alongside')->latest();
+    }
 }
