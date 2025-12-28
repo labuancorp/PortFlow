@@ -13,18 +13,26 @@
 8. ✅ `sts_operations` - Ship-to-Ship transfer management
 
 ### **Models Created:**
-1. ✅ Pilot
-2. ✅ Tugboat
-3. ✅ PilotageRequest
-4. ✅ TowageRequest
-5. ✅ BunkerRequest
-6. ✅ FuelInventory
-7. ✅ MooringService
-8. ✅ StsOperation
+1. ✅ Pilot - Configured with certifications, availability checks, license validation
+2. ✅ Tugboat - Configured with bollard pull calculations, certificate validation
+3. ✅ PilotageRequest - Configured with fee calculation (night/weather surcharges)
+4. ✅ TowageRequest - Configured with fee calculation (night/weather/escort surcharges)
+5. ✅ BunkerRequest - Configured with cost calculation, inventory integration
+6. ✅ FuelInventory - Configured with low-stock alerts, restock methods
+7. ✅ MooringService - Configured with fee calculation (night/weekend/line boat surcharges)
+8. ✅ StsOperation - Configured with safety checks, vessel compatibility, permit workflow
+
+### **Relationships Configured:**
+✅ PortCall → pilotageRequests, towageRequests, bunkerRequests, mooringServices
+✅ PilotageRequest → portCall, pilot
+✅ TowageRequest → portCall, tugboat
+✅ BunkerRequest → portCall
+✅ MooringService → portCall
+✅ StsOperation → sourceVessel, receivingVessel, agent
 
 ---
 
-## 🔄 Next Steps (Step 2: Model Configuration)
+## ✅ Completed (Step 2: Model Configuration) - 35% COMPLETE
 
 ### **To Do:**
 1. Configure model fillable fields and casts
