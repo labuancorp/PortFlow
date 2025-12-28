@@ -142,6 +142,14 @@
                                 </a>
                             </li>
 
+                            <!-- CCU & Container Tracking (Phase 8.4) -->
+                            <li>
+                                <a href="{{ route('ccu.overview') }}" class="flex items-center px-3 py-2 rounded-lg group {{ request()->routeIs('ccu.*') ? 'bg-slate-800 text-white' : 'text-slate-300 hover:bg-slate-800 hover:text-white' }}">
+                                    <svg class="w-5 h-5 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path></svg>
+                                    <span class="ml-3">CCU Tracker</span>
+                                </a>
+                            </li>
+
                             @if(auth()->user()->role === 'admin' || (auth()->user()->role === 'agent' && auth()->user()->organization->warehouse_subscribed))
                             <li>
                                 <a href="{{ route('warehouse.map') }}" class="flex items-center px-3 py-2 rounded-lg group {{ request()->routeIs('warehouse.*') ? 'bg-slate-800 text-white' : 'text-slate-300 hover:bg-slate-800 hover:text-white' }}">
@@ -250,6 +258,13 @@
                                 <a href="{{ route('hse.incidents.index') }}" class="flex items-center px-3 py-2 rounded-lg group {{ request()->routeIs('hse.incidents.*') ? 'bg-slate-800 text-white' : 'text-slate-300 hover:bg-slate-800 hover:text-white' }}">
                                     <svg class="w-5 h-5 text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
                                     <span class="ml-3">Incidents</span>
+                                </a>
+                            </li>
+                            <!-- DG Compliance (Phase 8.3) -->
+                            <li>
+                                <a href="{{ route('dg.compliance') }}" class="flex items-center px-3 py-2 rounded-lg group {{ request()->routeIs('dg.*') ? 'bg-slate-800 text-white' : 'text-slate-300 hover:bg-slate-800 hover:text-white' }}">
+                                     <svg class="w-5 h-5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 18.657A8 8 0 016.343 7.343S7 9 9 10c0-2 .5-5 2.986-7C14 5 16.09 5.777 17.656 7.343A7.975 7.975 0 0120 13a7.975 7.975 0 01-2.343 5.657z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.879 16.121A3 3 0 1012.015 11L11 14H9c0 .768.293 1.536.879 2.121z"></path></svg>
+                                    <span class="ml-3">DG Check & Bunker</span>
                                 </a>
                             </li>
                         </ul>

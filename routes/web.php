@@ -39,6 +39,12 @@ Route::middleware(['auth', '2fa'])->group(function () {
         
         // MHE Fleet Management (Phase 8.2)
         Route::get('/mhe/fleet', App\Livewire\Mhe\FleetDashboard::class)->name('mhe.fleet');
+        
+        // DG Compliance (Phase 8.3)
+        Route::get('/dg/compliance', App\Livewire\Dg\ComplianceDashboard::class)->name('dg.compliance');
+        
+        // CCU & Container Tracking (Phase 8.4)
+        Route::get('/ccu/overview', App\Livewire\Ccu\Overview::class)->name('ccu.overview');
     });
 
     Route::middleware(['role:admin,agent,hse'])->group(function () {
