@@ -64,7 +64,12 @@
                             </td>
                             <td class="px-6 py-5">
                                 <p class="text-xs font-bold text-slate-700">{{ $asset->identifier }}</p>
-                                <p class="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-0.5">{{ $asset->type }}</p>
+                                <div class="flex flex-col gap-0.5 mt-1">
+                                    <p class="text-[9px] text-slate-400 font-bold uppercase tracking-widest">{{ $asset->type }}</p>
+                                    @if($asset->next_maintenance_date)
+                                        <p class="text-[9px] font-bold text-indigo-500 uppercase">Next Svc: {{ $asset->next_maintenance_date->format('d M') }}</p>
+                                    @endif
+                                </div>
                             </td>
                             <td class="px-6 py-5">
                                 @if($asset->currentBooking)
@@ -75,7 +80,12 @@
                                         <p class="text-[10px] font-black text-slate-700 uppercase">{{ $asset->currentBooking->organization->name }}</p>
                                     </div>
                                 @else
-                                    <span class="text-[10px] font-bold text-slate-300 uppercase tracking-widest">Unassigned</span>
+                                    <div class="space-y-1">
+                                        <span class="text-[10px] font-bold text-slate-300 uppercase tracking-widest">Unassigned</span>
+                                        @if($asset->last_maintenance_date)
+                                            <p class="text-[9px] text-slate-400">Last Svc: {{ $asset->last_maintenance_date->format('d M Y') }}</p>
+                                        @endif
+                                    </div>
                                 @endif
                             </td>
                             <td class="px-6 py-5">
@@ -85,12 +95,19 @@
                                 </div>
                             </td>
                             <td class="px-6 py-5">
-                                <span class="px-2 py-0.5 rounded text-[10px] font-black uppercase border
-                                    {{ $asset->status === 'available' ? 'bg-emerald-50 text-emerald-600 border-emerald-100' : 
-                                       ($asset->status === 'occupied' ? 'bg-amber-50 text-amber-600 border-amber-100' : 
-                                       'bg-red-50 text-red-600 border-red-100') }}">
-                                    {{ $asset->status }}
-                                </span>
+                                <div class="flex flex-col items-start gap-1">
+                                    <span class="px-2 py-0.5 rounded text-[10px] font-black uppercase border
+                                        {{ $asset->status === 'available' ? 'bg-emerald-50 text-emerald-600 border-emerald-100' : 
+                                        ($asset->status === 'occupied' ? 'bg-amber-50 text-amber-600 border-amber-100' : 
+                                        'bg-red-50 text-red-600 border-red-100') }}">
+                                        {{ $asset->status }}
+                                    </span>
+                                    @if($asset->safety_cert_expiry && $asset->safety_cert_expiry->isPast())
+                                        <span class="px-2 py-0.5 rounded text-[9px] font-black uppercase bg-red-600 text-white border border-red-700 animate-pulse">
+                                            CERT. EXPIRED
+                                        </span>
+                                    @endif
+                                </div>
                             </td>
                             <td class="px-6 py-5 text-right flex justify-end gap-2">
                                 <button wire:click="openMaintenanceModal({{ $asset->id }})" class="p-2 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-all" title="Maintenance Log">
@@ -208,6 +225,15 @@
                          <h3 class="text-2xl font-black text-slate-900 tracking-tight">{{ $assetId ? 'Edit Resource' : 'Register New Resource' }}</h3>
                          <p class="text-sm text-slate-500 mt-1">Configure technical IDs and commercial rates.</p>
                     </div>
+                    @if($assetId)
+                    <div class="hidden sm:block text-center group">
+                        <!-- Local QR Code Generation -->
+                        <div class="bg-white p-2 border border-slate-200 rounded-lg group-hover:scale-110 transition-transform cursor-pointer shadow-sm">
+                            {!! SimpleSoftwareIO\QrCode\Facades\QrCode::size(80)->generate(url('/asset/scan/' . $identifier)) !!}
+                        </div>
+                        <p class="text-[9px] font-bold text-slate-400 mt-1">SCAN TAG</p>
+                    </div>
+                    @endif
                     <button wire:click="$set('showAssetModal', false)" class="text-slate-400 hover:text-slate-600">
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
                     </button>
@@ -246,6 +272,11 @@
                             <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 block">Rate Per Day (RM)</label>
                             <input type="number" wire:model="rate_per_day" step="0.01" class="w-full bg-slate-50 border-slate-200 rounded-xl font-bold text-slate-900 text-sm p-3 focus:ring-slate-500 focus:border-slate-500 transition-all">
                         </div>
+                    </div>
+
+                    <div>
+                        <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 block">Safety Certificate Expiry</label>
+                        <input type="date" wire:model="safety_cert_expiry" class="w-full bg-slate-50 border-slate-200 rounded-xl font-bold text-slate-900 text-sm p-3 focus:ring-slate-500 focus:border-slate-500 transition-all">
                     </div>
 
                     <div>

@@ -16,12 +16,15 @@ class AssetMaintenanceLog extends Model
         'performed_at',
         'next_service_due',
         'cost',
-        'technician_name'
+        'technician_name',
+        'status',
+        'attachments'
     ];
 
     protected $casts = [
         'performed_at' => 'datetime',
         'next_service_due' => 'datetime',
+        'attachments' => 'array',
     ];
 
     public function asset()

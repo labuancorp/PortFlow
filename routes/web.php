@@ -73,3 +73,8 @@ Route::get('/logout', function () {
 
 Route::get('/track/{tracking_number}', App\Livewire\Cargo\TrackItem::class)->name('cargo.track');
 Route::get('/gate/request', App\Livewire\Gate\PreRegister::class)->name('gate.request');
+
+// QR Code Scan Route
+Route::get('/asset/scan/{identifier}', function ($identifier) {
+    return redirect()->route('ops.mobile', ['tab' => 'assets', 'scan' => $identifier]);
+})->middleware('auth');

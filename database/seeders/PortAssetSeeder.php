@@ -34,6 +34,9 @@ class PortAssetSeeder extends Seeder
                 'rate_per_day' => 8500.00,
                 'status' => 'available',
                 'description' => 'Heavy duty crawler crane for offshore tubular loading.',
+                'last_maintenance_date' => $today->copy()->subMonths(3),
+                'next_maintenance_date' => $today->copy()->addMonths(3),
+                'safety_cert_expiry' => $today->copy()->addMonths(9),
             ]
         );
 
@@ -46,6 +49,9 @@ class PortAssetSeeder extends Seeder
                 'rate_per_day' => 3200.00,
                 'status' => 'occupied', // Currently in use
                 'description' => 'Versatile mobile crane for yard operations.',
+                'last_maintenance_date' => $today->copy()->subMonths(1),
+                'next_maintenance_date' => $today->copy()->addMonths(5),
+                'safety_cert_expiry' => $today->copy()->addMonths(11),
             ]
         );
 
@@ -58,6 +64,9 @@ class PortAssetSeeder extends Seeder
                 'rate_per_day' => 1800.00,
                 'status' => 'occupied', // Currently in use
                 'description' => 'High capacity forklift for pipe handling.',
+                'last_maintenance_date' => $today->copy()->subWeeks(2),
+                'next_maintenance_date' => $today->copy()->addMonths(6),
+                'safety_cert_expiry' => $today->copy()->subDays(5), // EXPIRED! Interlock Test
             ]
         );
 
@@ -82,6 +91,34 @@ class PortAssetSeeder extends Seeder
                 'rate_per_day' => 2500.00,
                 'status' => 'available',
                 'description' => 'Container reach stacker for yard operations.',
+                'last_maintenance_date' => $today->copy()->subMonths(5),
+                'next_maintenance_date' => $today->copy()->addWeeks(1), // Due Soon
+                'safety_cert_expiry' => $today->copy()->addMonths(1),
+            ]
+        );
+
+        // Add Maintenance Logs
+        \App\Models\AssetMaintenanceLog::firstOrCreate(
+            ['port_asset_id' => $crane250->id, 'performed_at' => $today->copy()->subMonths(3)],
+            [
+                'type' => 'routine',
+                'description' => 'Quarterly hydraulic system inspection and fluid top-up.',
+                'next_service_due' => $today->copy()->addMonths(3),
+                'cost' => 1200.00,
+                'technician_name' => 'HeavyMach Services Sdn Bhd',
+                'status' => 'completed'
+            ]
+        );
+
+        \App\Models\AssetMaintenanceLog::firstOrCreate(
+            ['port_asset_id' => $forklift->id, 'performed_at' => $today->copy()->subWeeks(2)],
+            [
+                'type' => 'repair',
+                'description' => 'Replaced worn rear tires and adjusted braking system.',
+                'next_service_due' => $today->copy()->addMonths(6),
+                'cost' => 4500.00,
+                'technician_name' => 'Port Workshop Team',
+                'status' => 'completed'
             ]
         );
 
@@ -96,7 +133,9 @@ class PortAssetSeeder extends Seeder
                     'start_time' => $today->copy()->subHours(6),
                     'end_time' => null, // Still ongoing
                     'status' => 'active',
-                    'notes' => 'Pipe loading operations for MV Nautica Gamble. Contact: John Tan (+60-12-345-6789)'
+                    'notes' => 'Pipe loading operations for MV Nautica Gamble. Contact: John Tan (+60-12-345-6789)',
+                    'check_out_time' => $today->copy()->subHours(6), // Checked out when started
+                    'check_out_notes' => 'Asset in good condition. Fuel level 100%.',
                 ]
             );
 

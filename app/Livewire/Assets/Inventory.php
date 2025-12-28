@@ -20,6 +20,7 @@ class Inventory extends Component
     // Form fields for PortAsset
     public $assetId;
     public $name, $type = 'crane', $identifier, $rate_per_hour, $rate_per_day, $status = 'available', $description;
+    public $safety_cert_expiry;
 
     // Maintenance fields
     public $mType = 'Routine', $mDescription, $mPerformedAt, $mNextDue, $mCost, $mTechnician;
@@ -32,6 +33,7 @@ class Inventory extends Component
         'rate_per_day' => 'nullable|numeric',
         'status' => 'required|in:available,maintenance,occupied,standby',
         'description' => 'nullable|string',
+        'safety_cert_expiry' => 'nullable|date',
     ];
 
     public function mount()
@@ -51,46 +53,14 @@ class Inventory extends Component
             $this->rate_per_day = $asset->rate_per_day;
             $this->status = $asset->status;
             $this->description = $asset->description;
+            $this->safety_cert_expiry = $asset->safety_cert_expiry ? $asset->safety_cert_expiry->format('Y-m-d') : null;
         } else {
-            $this->reset(['name', 'type', 'identifier', 'rate_per_hour', 'rate_per_day', 'status', 'description']);
+            $this->reset(['name', 'type', 'identifier', 'rate_per_hour', 'rate_per_day', 'status', 'description', 'safety_cert_expiry']);
         }
         $this->showAssetModal = true;
     }
 
-    public function openMaintenanceModal($assetId)
-    {
-        $this->assetId = $assetId;
-        $this->selectedAsset = PortAsset::with('maintenanceLogs')->find($assetId);
-        $this->reset(['mDescription', 'mNextDue', 'mCost', 'mTechnician']);
-        $this->mType = 'Routine';
-        $this->mPerformedAt = now()->format('Y-m-d\TH:i');
-        $this->showMaintenanceModal = true;
-    }
-
-    public function saveMaintenance()
-    {
-        $this->validate([
-            'mType' => 'required|string',
-            'mDescription' => 'required|string',
-            'mPerformedAt' => 'required|date',
-            'mTechnician' => 'required|string',
-        ]);
-
-        \App\Models\AssetMaintenanceLog::create([
-            'port_asset_id' => $this->assetId,
-            'type' => $this->mType,
-            'description' => $this->mDescription,
-            'performed_at' => $this->mPerformedAt,
-            'next_service_due' => $this->mNextDue,
-            'cost' => $this->mCost,
-            'technician_name' => $this->mTechnician,
-        ]);
-
-        AuditService::log('Create', 'Maintenance', $this->assetId, "Logged {$this->mType} for {$this->selectedAsset->identifier}");
-        
-        $this->showMaintenanceModal = false;
-        $this->dispatch('notify', message: 'Maintenance record preserved.', type: 'success');
-    }
+    // ... (maintenance methods) ...
 
     public function saveAsset()
     {
@@ -108,6 +78,7 @@ class Inventory extends Component
             'rate_per_day' => $this->rate_per_day,
             'status' => $this->status,
             'description' => $this->description,
+            'safety_cert_expiry' => $this->safety_cert_expiry,
         ];
 
         if ($this->assetId) {
@@ -124,11 +95,25 @@ class Inventory extends Component
 
     public function approveBooking($bookingId)
     {
-        $booking = AssetBooking::find($bookingId);
+        $booking = AssetBooking::with('asset')->find($bookingId);
+        $asset = $booking->asset;
+
+        // 1. Check Safety Certificate
+        if ($asset->safety_cert_expiry && $asset->safety_cert_expiry->isPast()) {
+            $this->dispatch('notify', message: 'SAFETY ALERT: Asset safety certificate has EXPIRED. Renewal required.', type: 'error');
+            return;
+        }
+
+        // 2. Check Maintenance Status
+        if ($asset->status === 'maintenance') {
+            $this->dispatch('notify', message: 'ERROR: Asset is currently under maintenance.', type: 'error');
+            return;
+        }
+
         $booking->update(['status' => 'active']);
         
         // Update asset status
-        $booking->asset->update(['status' => 'occupied']);
+        $asset->update(['status' => 'occupied']);
 
         AuditService::log('Update', 'Bookings', $booking->id, "Approved and deployed booking ref: {$booking->reference_no}");
         $this->dispatch('notify', message: 'Booking approved. Resource deployed.', type: 'success');

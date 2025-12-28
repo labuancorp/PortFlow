@@ -16,7 +16,16 @@ class PortAsset extends Model
         'rate_per_hour',
         'rate_per_day',
         'status',
-        'description'
+        'description',
+        'last_maintenance_date',
+        'next_maintenance_date',
+        'safety_cert_expiry'
+    ];
+
+    protected $casts = [
+        'last_maintenance_date' => 'date',
+        'next_maintenance_date' => 'date',
+        'safety_cert_expiry' => 'date',
     ];
 
     public function bookings()

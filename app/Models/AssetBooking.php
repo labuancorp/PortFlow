@@ -18,12 +18,22 @@ class AssetBooking extends Model
         'total_cost',
         'status',
         'reference_no',
-        'notes'
+        'notes',
+        'check_out_time',
+        'check_in_time',
+        'check_out_notes',
+        'check_in_notes',
+        'check_out_media',
+        'check_in_media'
     ];
 
     protected $casts = [
         'start_time' => 'datetime',
         'end_time' => 'datetime',
+        'check_out_time' => 'datetime',
+        'check_in_time' => 'datetime',
+        'check_out_media' => 'array',
+        'check_in_media' => 'array',
     ];
 
     public function organization()
