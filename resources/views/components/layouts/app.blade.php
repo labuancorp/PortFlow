@@ -17,8 +17,14 @@
         @if(auth()->user()->role !== 'client')
         <!-- Sidebar (Hidden for Clients) -->
         <aside class="w-64 bg-slate-900 text-white flex flex-col transition-all duration-300">
-            <div class="p-6 border-b border-slate-800">
+            <div class="p-6 border-b border-slate-800 flex items-center justify-between">
                 <span class="text-xl font-bold tracking-tight text-teal-400">PortFlow</span>
+                <a href="{{ route('notifications') }}" class="relative p-2 hover:bg-slate-800 rounded-lg transition-colors group" title="Notifications">
+                    <svg class="w-6 h-6 text-slate-400 group-hover:text-white transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path></svg>
+                    @if($pendingTasks['notifications'] > 0)
+                    <span class="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full min-w-[18px] text-center">{{ $pendingTasks['notifications'] }}</span>
+                    @endif
+                </a>
             </div>
             <nav class="flex-1 overflow-y-auto py-4">
                 <ul class="space-y-6 px-3">
@@ -27,7 +33,7 @@
                     <li>
                         <div class="px-3 text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2">Core Operations</div>
                         <ul class="space-y-1">
-                            @if(auth()->user()->role !== 'hse')
+                            @if(!in_array(auth()->user()->role, ['hse', 'asset_manager']))
                             <li>
                                 <a href="{{ route('dashboard') }}" class="flex items-center px-3 py-2 rounded-lg group {{ request()->routeIs('dashboard') ? 'bg-slate-800 text-white' : 'text-slate-300 hover:bg-slate-800 hover:text-white' }}">
                                     <svg class="w-5 h-5 text-teal-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg>
@@ -54,6 +60,17 @@
                                 </a>
                             </li>
                             @endif
+                            <li>
+                                <a href="{{ route('notifications') }}" class="flex items-center justify-between px-3 py-2 rounded-lg group {{ request()->routeIs('notifications') ? 'bg-slate-800 text-white' : 'text-slate-300 hover:bg-slate-800 hover:text-white' }}">
+                                    <div class="flex items-center">
+                                        <svg class="w-5 h-5 text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path></svg>
+                                        <span class="ml-3">Notifications</span>
+                                    </div>
+                                    @if($pendingTasks['notifications'] > 0)
+                                    <span class="bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full">{{ $pendingTasks['notifications'] }}</span>
+                                    @endif
+                                </a>
+                            </li>
                         </ul>
                     </li>
 
@@ -61,7 +78,7 @@
                     <li>
                         <div class="px-3 text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2">Marine & Logistics</div>
                         <ul class="space-y-1">
-                            @if(auth()->user()->role !== 'hse')
+                            @if(!in_array(auth()->user()->role, ['hse', 'asset_manager']))
                             <li>
                                 <a href="{{ route('vessels.index') }}" class="flex items-center px-3 py-2 rounded-lg group {{ request()->routeIs('vessels.*') ? 'bg-slate-800 text-white' : 'text-slate-300 hover:bg-slate-800 hover:text-white' }}">
                                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
@@ -126,7 +143,7 @@
                     <li>
                         <div class="px-3 text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2">Assets & Facilities</div>
                         <ul class="space-y-1">
-                            @if(in_array(auth()->user()->role, ['admin', 'hse']))
+                            @if(in_array(auth()->user()->role, ['admin', 'hse', 'asset_manager']))
                             <li>
                                 <a href="{{ route('assets.inventory') }}" class="flex items-center justify-between px-3 py-2 rounded-lg group {{ request()->routeIs('assets.inventory') ? 'bg-slate-800 text-white' : 'text-slate-300 hover:bg-slate-800 hover:text-white' }}">
                                     <div class="flex items-center">
@@ -192,7 +209,7 @@
                     <li>
                          <div class="px-3 text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2">System & Admin</div>
                          <ul class="space-y-1">
-                            @if(auth()->user()->role !== 'hse')
+                            @if(!in_array(auth()->user()->role, ['hse', 'asset_manager']))
                             <li>
                                 <a href="{{ route('billing.index') }}" class="flex items-center justify-between px-3 py-2 rounded-lg group {{ request()->routeIs('billing.*') ? 'bg-slate-800 text-white' : 'text-slate-300 hover:bg-slate-800 hover:text-white' }}">
                                     <div class="flex items-center">
@@ -225,6 +242,12 @@
                                     <span class="ml-3">Audit Trail</span>
                                 </a>
                             </li>
+                            <li>
+                                <a href="{{ route('admin.users') }}" class="flex items-center px-3 py-2 rounded-lg group {{ request()->routeIs('admin.users') ? 'bg-slate-800 text-white' : 'text-slate-300 hover:bg-slate-800 hover:text-white' }}">
+                                    <svg class="w-5 h-5 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
+                                    <span class="ml-3">User Management</span>
+                                </a>
+                            </li>
                             @endif
 
                             @if(auth()->user()->role === 'agent')
@@ -236,7 +259,7 @@
                             </li>
                             @endif
 
-                            @if(auth()->user()->role !== 'hse')
+                            @if(!in_array(auth()->user()->role, ['hse', 'asset_manager']))
                             <li>
                                 <a href="{{ route('gate.request') }}" target="_blank" class="flex items-center px-3 py-2 rounded-lg text-indigo-400 hover:bg-slate-800 hover:text-indigo-300">
                                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>

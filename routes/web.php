@@ -7,6 +7,7 @@ Route::middleware(['auth', '2fa'])->group(function () {
     // Accessible by All Roles (Client, Agent, Admin)
     Route::get('/settings', App\Livewire\Settings\Profile::class)->name('settings');
     Route::get('/portal', App\Livewire\AgentPortal::class)->name('agent.portal');
+    Route::get('/notifications', App\Livewire\NotificationCentre::class)->name('notifications');
 
     // Admin & Agent Only
     Route::middleware(['role:admin,agent'])->group(function () {
@@ -47,6 +48,7 @@ Route::middleware(['auth', '2fa'])->group(function () {
         Route::get('/wharfs', App\Livewire\Wharfs\Index::class)->name('wharfs.index');
         Route::get('/admin/health', App\Livewire\Admin\SystemHealth::class)->name('admin.health');
         Route::get('/admin/audit', App\Livewire\Admin\AuditTrail::class)->name('admin.audit');
+        Route::get('/admin/users', App\Livewire\Admin\UserManagement::class)->name('admin.users');
         // Print Route (No Composer dependency for speed)
     Route::get('/invoice/{invoice}/print', function (App\Models\Invoice $invoice) {
         $invoice->load(['organization', 'portCall.vessel', 'invoiceItems']);

@@ -307,25 +307,28 @@ class Dashboard extends Component
         }
         
         $liveBilling = [
-            'berthing_charges' => 0,
-            'warehouse_charges' => $warehouseBilling['total_charges'] ?? 0,
-            'assets_charges' => $assetCharges,
-            'total_charges' => 0,
-            'berthing_vessels' => 0
-        ];
+        'berthing_charges' => 0,
+        'warehouse_charges' => $warehouseBilling['total_charges'] ?? 0,
+        'assets_charges' => $assetCharges,
+        'total_charges' => 0,
+        'berthing_vessels' => 0
+    ];
 
-        $myActiveVessels = PortCall::where('agent_id', $orgId)
-            ->whereIn('status', ['anchored', 'alongside'])
-            ->with(['berth', 'vessel'])
-            ->get();
+    $myActiveVessels = PortCall::where('agent_id', $orgId)
+        ->whereIn('status', ['anchored', 'alongside'])
+        ->with(['berth', 'vessel'])
+        ->get();
 
-        foreach ($myActiveVessels as $vessel) {
-            if ($vessel->berth && $vessel->eta) {
-                $days = max(1, now()->diffInDays($vessel->eta));
-                $liveBilling['berthing_charges'] += $days * ($vessel->berth->rate_per_day ?? 500);
-                $liveBilling['berthing_vessels']++;
-            }
+    // Use BillingService for accurate real-time charges (same as Agent Portal)
+    $billingService = new \App\Services\BillingService();
+    foreach ($myActiveVessels as $vessel) {
+        if ($vessel->berth && $vessel->eta) {
+            // Generate/update invoice to get current charges
+            $invoice = $billingService->generateInvoice($vessel);
+            $liveBilling['berthing_charges'] += $invoice->total_amount;
+            $liveBilling['berthing_vessels']++;
         }
+    }
         $liveBilling['total_charges'] = $liveBilling['berthing_charges'] + 
                                       $liveBilling['warehouse_charges'] + 
                                       $liveBilling['assets_charges'];
