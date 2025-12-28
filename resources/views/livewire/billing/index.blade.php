@@ -10,9 +10,23 @@
         <div class="bg-white p-1 rounded-lg border border-slate-200 inline-flex shadow-sm">
             <button wire:click="$set('activeTab', 'unbilled')" 
                 class="px-4 py-2 text-sm font-medium rounded-md transition-colors {{ $activeTab === 'unbilled' ? 'bg-slate-900 text-white shadow-sm' : 'text-slate-500 hover:text-slate-900 hover:bg-slate-50' }}">
-                Pending Billing
+                Port Calls
                 @if($unbilledCalls->total() > 0)
                 <span class="ml-2 bg-amber-400 text-slate-900 text-xs px-1.5 py-0.5 rounded-full font-bold">{{ $unbilledCalls->total() }}</span>
+                @endif
+            </button>
+            <button wire:click="$set('activeTab', 'warehouse')" 
+                class="px-4 py-2 text-sm font-medium rounded-md transition-colors {{ $activeTab === 'warehouse' ? 'bg-slate-900 text-white shadow-sm' : 'text-slate-500 hover:text-slate-900 hover:bg-slate-50' }}">
+                Warehouse
+                @if($warehouseItems->count() > 0)
+                <span class="ml-2 bg-amber-400 text-slate-900 text-xs px-1.5 py-0.5 rounded-full font-bold">{{ $warehouseItems->count() }}</span>
+                @endif
+            </button>
+            <button wire:click="$set('activeTab', 'assets')" 
+                class="px-4 py-2 text-sm font-medium rounded-md transition-colors {{ $activeTab === 'assets' ? 'bg-slate-900 text-white shadow-sm' : 'text-slate-500 hover:text-slate-900 hover:bg-slate-50' }}">
+                Asset Rentals
+                @if($assetBookings->count() > 0)
+                <span class="ml-2 bg-amber-400 text-slate-900 text-xs px-1.5 py-0.5 rounded-full font-bold">{{ $assetBookings->count() }}</span>
                 @endif
             </button>
             <button wire:click="$set('activeTab', 'invoices')" 
@@ -96,6 +110,113 @@
                 @endif
             </div>
 
+        @elseif($activeTab === 'warehouse')
+            <!-- Warehouse Storage Billing -->
+            <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+                <table class="min-w-full divide-y divide-slate-200">
+                    <thead class="bg-slate-50">
+                        <tr>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Tracking No</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Agent</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Received</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Days Stored</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Pending Charges</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-slate-200">
+                        @forelse($warehouseItems as $item)
+                        <tr class="hover:bg-slate-50 transition-colors">
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-mono font-bold text-slate-700">
+                                {{ $item->tracking_number }}
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-600">
+                                {{ $item->agent_name }}
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-900">
+                                -
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-slate-900">
+                                {{ $item->storage_days }} days
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-emerald-600">
+                                RM {{ number_format($item->pending_charges, 2) }}
+                            </td>
+                        </tr>
+                        @empty
+                        <tr>
+                            <td colspan="5" class="px-6 py-12 text-center text-slate-500">
+                                <p>No warehouse storage charges pending.</p>
+                            </td>
+                        </tr>
+                        @endforelse
+                    </tbody>
+                </table>
+                @if($warehouseSummary['total_charges'] > 0)
+                <div class="px-6 py-4 bg-slate-50 border-t border-slate-200">
+                    <div class="flex justify-between items-center">
+                        <span class="text-sm font-bold text-slate-700">Total Warehouse Charges:</span>
+                        <span class="text-lg font-black text-emerald-600">RM {{ number_format($warehouseSummary['total_charges'], 2) }}</span>
+                    </div>
+                </div>
+                @endif
+            </div>
+
+        @elseif($activeTab === 'assets')
+            <!-- Asset Rentals Billing -->
+            <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+                <table class="min-w-full divide-y divide-slate-200">
+                    <thead class="bg-slate-50">
+                        <tr>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Asset</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Rented By</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Start Time</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Hours</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Rate</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Pending Charges</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-slate-200">
+                        @forelse($assetBookings as $booking)
+                        <tr class="hover:bg-slate-50 transition-colors">
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="font-bold text-slate-900">{{ $booking->asset->name }}</div>
+                                <div class="text-xs text-slate-500">{{ $booking->asset->type }}</div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-600">
+                                {{ $booking->organization->name ?? 'N/A' }}
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-900">
+                                {{ $booking->start_time->format('d M Y H:i') }}
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-slate-900">
+                                {{ $booking->rental_hours }} hrs
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-600">
+                                RM {{ number_format($booking->asset->rate_per_hour, 2) }}/hr
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-emerald-600">
+                                RM {{ number_format($booking->pending_charges, 2) }}
+                            </td>
+                        </tr>
+                        @empty
+                        <tr>
+                            <td colspan="6" class="px-6 py-12 text-center text-slate-500">
+                                <p>No active asset rentals.</p>
+                            </td>
+                        </tr>
+                        @endforelse
+                    </tbody>
+                </table>
+                @if($assetBookings->sum('pending_charges') > 0)
+                <div class="px-6 py-4 bg-slate-50 border-t border-slate-200">
+                    <div class="flex justify-between items-center">
+                        <span class="text-sm font-bold text-slate-700">Total Asset Rental Charges:</span>
+                        <span class="text-lg font-black text-emerald-600">RM {{ number_format($assetBookings->sum('pending_charges'), 2) }}</span>
+                    </div>
+                </div>
+                @endif
+            </div>
+
         @else
             <!-- Invoice List -->
             <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
@@ -103,6 +224,7 @@
                     <thead class="bg-slate-50">
                         <tr>
                             <th class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Invoice No</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Date</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Billed To</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Vessel</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Amount</th>
@@ -116,6 +238,10 @@
                         <tr class="hover:bg-slate-50 transition-colors">
                             <td class="px-6 py-4 whitespace-nowrap text-sm font-mono font-bold text-slate-700">
                                 {{ $inv->invoice_no }}
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="text-sm text-slate-900">{{ $inv->issued_date->format('d M Y') }}</div>
+                                <div class="text-xs text-slate-500">Due: {{ $inv->due_date->format('d M Y') }}</div>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-600">
                                 {{ $inv->organization->name ?? '-' }}

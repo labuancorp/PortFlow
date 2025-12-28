@@ -27,6 +27,9 @@ Route::middleware(['auth', '2fa'])->group(function () {
         Route::get('/cargo/manifests/create', App\Livewire\Cargo\ManifestCreate::class)->name('cargo.manifests.create');
         Route::get('/cargo/manifests/{manifest}', App\Livewire\Cargo\ManifestShow::class)->name('cargo.manifests.show');
         Route::get('/warehouse/map', App\Livewire\Warehouse\YardMap::class)->name('warehouse.map');
+        
+        // Maritime Services (Phase 6)
+        Route::get('/maritime/pilotage-towage', App\Livewire\Maritime\PilotageTowage::class)->name('maritime.pilotage-towage');
     });
 
     Route::middleware(['role:admin,agent,hse'])->group(function () {

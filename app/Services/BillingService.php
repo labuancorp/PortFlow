@@ -25,7 +25,13 @@ class BillingService
      */
     public function generateInvoice(PortCall $portCall)
     {
-        $portCall->loadMissing(['vessel', 'invoice', 'serviceRequests.portCall']);
+        $portCall->loadMissing([
+            'vessel', 
+            'invoice', 
+            'serviceRequests.portCall',
+            'pilotageRequests.pilot',
+            'towageRequests.tugboat'
+        ]);
         // 1. Ensure Invoice Exists
         $invoice = $portCall->invoice ?? Invoice::create([
             'port_call_id' => $portCall->id,
@@ -36,7 +42,13 @@ class BillingService
             'due_date' => now()->addDays(30),
         ]);
 
-        // 2. Clear existing items (for recalculation - in production we might soft delete or version)
+        // IMPORTANT: Don't recalculate paid or issued invoices
+        if ($invoice->exists && in_array($invoice->status, ['paid', 'issued'])) {
+            // Invoice is already finalized, return as-is without recalculation
+            return $invoice;
+        }
+
+        // 2. Clear existing items (for recalculation - only for draft invoices)
         $invoice->invoiceItems()->delete();
 
         $totalAmount = 0;
@@ -117,7 +129,49 @@ class BillingService
             }
         }
 
-        // 5. Update Invoice Totals
+        // 6. Add Maritime Services (Phase 6: Pilotage & Towage)
+        // Load pilotage requests
+        $pilotageRequests = $portCall->pilotageRequests()->where('status', 'completed')->with('pilot')->get();
+        foreach ($pilotageRequests as $pilotage) {
+            if ($pilotage->calculated_fee > 0) {
+                $pilotName = $pilotage->pilot ? $pilotage->pilot->name : 'N/A';
+                $serviceType = ucfirst($pilotage->service_type);
+                $duration = $pilotage->actual_end->diffInHours($pilotage->actual_start);
+                
+                InvoiceItem::create([
+                    'invoice_id' => $invoice->id,
+                    'description' => "Pilotage Service - {$serviceType} ({$pilotName}, {$duration} hrs)",
+                    'quantity' => 1,
+                    'unit_price' => $pilotage->calculated_fee,
+                    'total_price' => $pilotage->calculated_fee
+                ]);
+
+                $totalAmount += $pilotage->calculated_fee;
+            }
+        }
+
+        // Load towage requests
+        $towageRequests = $portCall->towageRequests()->where('status', 'completed')->with('tugboat')->get();
+        foreach ($towageRequests as $towage) {
+            if ($towage->calculated_fee > 0) {
+                $tugboatName = $towage->tugboat ? $towage->tugboat->name : 'N/A';
+                $serviceType = ucfirst($towage->service_type);
+                $tugsRequired = $towage->tugboats_required;
+                $duration = $towage->actual_end->diffInHours($towage->actual_start);
+                
+                InvoiceItem::create([
+                    'invoice_id' => $invoice->id,
+                    'description' => "Towage Service - {$serviceType} ({$tugboatName}, {$tugsRequired} tug(s), {$duration} hrs)",
+                    'quantity' => 1,
+                    'unit_price' => $towage->calculated_fee,
+                    'total_price' => $towage->calculated_fee
+                ]);
+
+                $totalAmount += $towage->calculated_fee;
+            }
+        }
+
+        // 7. Update Invoice Totals
         $invoice->update([
             'total_amount' => $totalAmount,
             // If vessel has departed (ATD), we can consider issuing the invoice

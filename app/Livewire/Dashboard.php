@@ -192,24 +192,33 @@ class Dashboard extends Component
             'count' => 0
         ];
 
-        // 1. Calculate berthing charges for all active vessels
-        $activePortCallIds = PortCall::whereIn('status', ['anchored', 'alongside'])->pluck('id');
-        $activePortCalls = PortCall::whereIn('id', $activePortCallIds)->with(['berth', 'vessel'])->get();
+
+        // 1. Calculate berthing charges for COMPLETED port calls WITHOUT invoices
+        // This matches the billing page logic (status = 'completed' AND no invoice)
+        $unbilledPortCalls = PortCall::where('status', 'completed')
+            ->whereDoesntHave('invoice')
+            ->with(['berth', 'vessel'])
+            ->get();
         
-        foreach ($activePortCalls as $portCall) {
-            if ($portCall->berth && $portCall->eta) {
-                // Approximate calculation (Actual calculation happens in BillingService)
-                $daysAlongside = max(1, now()->diffInDays($portCall->atb ?? $portCall->eta));
-                $berthRate = $portCall->berth->rate_per_day ?? 500;
-                $pendingBilling['berthing_pending'] += $daysAlongside * $berthRate;
-                $pendingBilling['count']++;
-            }
+        $portCallBillingService = new \App\Services\BillingService();
+        
+        foreach ($unbilledPortCalls as $portCall) {
+            // Use the actual billing service to calculate accurate charges
+            // This ensures dashboard matches what will be invoiced
+            $tempInvoice = $portCallBillingService->generateInvoice($portCall);
+            $pendingBilling['berthing_pending'] += $tempInvoice->total_amount;
+            $pendingBilling['count']++;
+            
+            // Delete the temporary invoice (we're just calculating)
+            $tempInvoice->invoiceItems()->delete();
+            $tempInvoice->delete();
         }
 
+
         // 2. Warehouse Revenue Summary
-        $billingService = new WarehouseBillingService();
-        $warehouseSummary = $billingService->getOrganizationSummary();
-        $pendingBilling['warehouse_pending'] = $warehouseSummary['total_charges'] ?? 0;
+        $warehouseBillingService = new WarehouseBillingService();
+        $warehouseData = $warehouseBillingService->calculateLiveCharges();
+        $pendingBilling['warehouse_pending'] = $warehouseData['total_charges'] ?? 0;
         
         // 3. Asset Rentals Revenue Summary
         $activeAssetBookings = \App\Models\AssetBooking::with('asset')
@@ -221,6 +230,7 @@ class Dashboard extends Component
             $pendingBilling['assets_pending'] += $hours * ($booking->asset->rate_per_hour ?? 0);
         }
 
+        // Include ALL billing types in total
         $pendingBilling['total_pending'] = $pendingBilling['berthing_pending'] + 
                                          $pendingBilling['warehouse_pending'] + 
                                          $pendingBilling['assets_pending'];
@@ -263,7 +273,7 @@ class Dashboard extends Component
                 'count' => $unpaidCount
             ],
             'activeServiceRequests' => $activeServiceRequests,
-            'warehouseSummary' => $warehouseSummary,
+            'warehouseSummary' => $warehouseData,
             'recentActivity' => $recentActivity,
             'topAgents' => $topAgents,
             'pendingRequests' => PortCall::where('status', 'requested')->with(['vessel', 'agent'])->get(),
@@ -325,8 +335,12 @@ class Dashboard extends Component
         if ($vessel->berth && $vessel->eta) {
             // Generate/update invoice to get current charges
             $invoice = $billingService->generateInvoice($vessel);
-            $liveBilling['berthing_charges'] += $invoice->total_amount;
-            $liveBilling['berthing_vessels']++;
+            
+            // Only include unpaid invoices in live billing
+            if ($invoice->status !== 'paid') {
+                $liveBilling['berthing_charges'] += $invoice->total_amount;
+                $liveBilling['berthing_vessels']++;
+            }
         }
     }
         $liveBilling['total_charges'] = $liveBilling['berthing_charges'] + 

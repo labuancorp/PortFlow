@@ -14,7 +14,7 @@ class Index extends Component
 {
     use WithPagination;
 
-    public $activeTab = 'unbilled'; // unbilled, invoices
+    public $activeTab = 'unbilled'; // unbilled, invoices, warehouse, assets
     public $viewingInvoice = null;
 
     // Pricing Config (Mock)
@@ -55,9 +55,42 @@ class Index extends Component
         $unbilledCalls = $unbilledQuery->orderBy('atd', 'desc')->paginate(5, ['*'], 'unbilledPage');
         $invoices = $invoiceQuery->orderBy('updated_at', 'desc')->paginate(10, ['*'], 'invoicePage');
 
+        // 3. Warehouse Billing (Pending Storage Charges)
+        $warehouseBillingService = new \App\Services\WarehouseBillingService();
+        $warehouseData = $warehouseBillingService->calculateLiveCharges();
+        $warehouseSummary = [
+            'total_charges' => $warehouseData['total_charges'],
+            'items_count' => $warehouseData['items_count']
+        ];
+        
+        // Convert breakdown to collection with proper attributes
+        $warehouseItems = collect($warehouseData['items_breakdown'])->map(function($item) {
+            return (object)[
+                'tracking_number' => $item['tracking_number'],
+                'description' => $item['description'],
+                'agent_name' => $item['agent'],
+                'storage_days' => $item['days_stored'],
+                'pending_charges' => $item['total'],
+            ];
+        });
+
+        // 4. Asset Rentals (Active Bookings)
+        $assetBookings = \App\Models\AssetBooking::where('status', 'active')
+            ->with(['asset', 'organization'])
+            ->get()
+            ->map(function($booking) {
+                $hours = max(1, now()->diffInHours($booking->start_time));
+                $booking->pending_charges = $hours * ($booking->asset->rate_per_hour ?? 0);
+                $booking->rental_hours = $hours;
+                return $booking;
+            });
+
         return view('livewire.billing.index', [
             'unbilledCalls' => $unbilledCalls,
-            'invoices' => $invoices
+            'invoices' => $invoices,
+            'warehouseItems' => $warehouseItems,
+            'warehouseSummary' => $warehouseSummary,
+            'assetBookings' => $assetBookings,
         ]);
     }
 

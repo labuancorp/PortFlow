@@ -7,6 +7,9 @@ use App\Models\PortCall;
 use App\Models\CargoItem;
 use App\Models\AssetBooking;
 use App\Models\User;
+use App\Models\Pilot;
+use App\Models\Tugboat;
+use App\Models\FuelInventory;
 use Carbon\Carbon;
 
 class NotificationManager
@@ -19,6 +22,7 @@ class NotificationManager
         $this->checkMarineOperations();
         $this->checkYardStorage();
         $this->checkAssetRentals();
+        $this->checkMaritimeServices(); // Phase 6
     }
 
     /**
@@ -151,6 +155,74 @@ class NotificationManager
     }
 
     /**
+     * Check Maritime Services (Phase 6: Pilotage, Towage, Fuel)
+     */
+    private function checkMaritimeServices()
+    {
+        // Check Pilot Availability
+        $totalPilots = Pilot::count();
+        $availablePilots = Pilot::where('status', 'available')->count();
+        
+        if ($totalPilots > 0 && $availablePilots == 0) {
+            // All pilots are on duty - notify admin
+            $this->createSystemNotification(
+                'maritime',
+                'All Pilots On Duty',
+                "All {$totalPilots} pilots are currently on duty. No pilots available for new assignments."
+            );
+        } elseif ($totalPilots > 0 && $availablePilots <= 1) {
+            // Only 1 pilot available - warning
+            $this->createSystemNotification(
+                'maritime',
+                'Low Pilot Availability',
+                "Only {$availablePilots} pilot(s) available out of {$totalPilots}. Consider scheduling carefully."
+            );
+        }
+
+        // Check Tugboat Availability
+        $totalTugboats = Tugboat::count();
+        $availableTugboats = Tugboat::where('status', 'available')->count();
+        
+        if ($totalTugboats > 0 && $availableTugboats == 0) {
+            // All tugboats in service - notify admin
+            $this->createSystemNotification(
+                'maritime',
+                'All Tugboats In Service',
+                "All {$totalTugboats} tugboats are currently in service. No tugboats available for new assignments."
+            );
+        } elseif ($totalTugboats > 0 && $availableTugboats <= 1) {
+            // Only 1 tugboat available - warning
+            $this->createSystemNotification(
+                'maritime',
+                'Low Tugboat Availability',
+                "Only {$availableTugboats} tugboat(s) available out of {$totalTugboats}. Consider scheduling carefully."
+            );
+        }
+
+        // Check Fuel Inventory Levels
+        $lowStockItems = FuelInventory::lowStock()->get();
+        foreach ($lowStockItems as $fuel) {
+            $percentage = $fuel->getStockPercentage();
+            $this->createSystemNotification(
+                'maritime',
+                "Low Fuel Stock: " . strtoupper($fuel->fuel_type),
+                "Fuel inventory for {$fuel->fuel_type} is low ({$fuel->current_stock} {$fuel->unit}, {$percentage}% capacity). Current stock: {$fuel->current_stock} {$fuel->unit}. Minimum threshold: {$fuel->minimum_threshold} {$fuel->unit}."
+            );
+        }
+
+        // Check Critical Fuel Levels
+        $criticalStockItems = FuelInventory::criticalStock()->get();
+        foreach ($criticalStockItems as $fuel) {
+            $percentage = $fuel->getStockPercentage();
+            $this->createSystemNotification(
+                'maritime',
+                "CRITICAL: " . strtoupper($fuel->fuel_type) . " Stock",
+                "URGENT: Fuel inventory for {$fuel->fuel_type} is critically low ({$percentage}% capacity). Immediate restocking required! Current: {$fuel->current_stock} {$fuel->unit}."
+            );
+        }
+    }
+
+    /**
      * Create a warning notification (30-min before deadline)
      */
     private function createWarningNotification($orgId, $category, $title, $message, $reference, $deadline)
@@ -228,6 +300,33 @@ class NotificationManager
                 'message' => $message,
                 'reference_type' => get_class($reference),
                 'reference_id' => $reference->id,
+            ]);
+        }
+    }
+
+    /**
+     * Create a system notification (admin-only, for maritime services)
+     */
+    private function createSystemNotification($category, $title, $message)
+    {
+        $admins = User::where('role', 'admin')->get();
+
+        foreach ($admins as $admin) {
+            // Check if notification already exists in last hour (prevent spam)
+            $exists = Notification::where('user_id', $admin->id)
+                ->where('category', $category)
+                ->where('title', $title)
+                ->where('created_at', '>=', now()->subHours(1))
+                ->exists();
+
+            if ($exists) continue;
+
+            Notification::create([
+                'user_id' => $admin->id,
+                'type' => 'info',
+                'category' => $category,
+                'title' => $title,
+                'message' => $message,
             ]);
         }
     }
