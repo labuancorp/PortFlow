@@ -261,6 +261,19 @@
                             <input type="text" wire:model="identifier" placeholder="e.g. CN-001" class="w-full bg-slate-50 border-slate-200 rounded-xl font-bold text-slate-900 text-sm p-3 focus:ring-slate-500 focus:border-slate-500 transition-all">
                             @error('identifier') <span class="text-red-500 text-[10px] font-bold mt-1 block uppercase">{{ $message }}</span> @enderror
                         </div>
+                        
+                        <!-- Phase 4: IoT & Telemetry -->
+                        <div>
+                            <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 block">IoT Billing Mode</label>
+                            <select wire:model="billing_mode" class="w-full bg-slate-50 border-slate-200 rounded-xl font-bold text-slate-700 text-sm p-3 focus:ring-slate-500 focus:border-slate-500 transition-all">
+                                <option value="duration">Time-Based (Standard)</option>
+                                <option value="telemetry">Telemetry (Engine Hours)</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 block">Current Telemetry (Hrs)</label>
+                            <input type="number" wire:model="current_engine_hours" step="0.1" class="w-full bg-slate-50 border-slate-200 rounded-xl font-bold text-slate-900 text-sm p-3 focus:ring-slate-500 focus:border-slate-500 transition-all">
+                        </div>
                     </div>
 
                     <div class="grid grid-cols-2 gap-4">

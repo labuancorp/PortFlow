@@ -209,10 +209,17 @@ class WarehouseBillingService
         $cost = 0;
         $description = "";
 
-        $hourlyCost = $hours * ($booking->asset->rate_per_hour ?? 0);
-        $dailyCost = ceil($days) * ($booking->asset->rate_per_day ?? 0);
-
-        if ($booking->asset->rate_per_day > 0 && ($dailyCost < $hourlyCost || $hourlyCost == 0)) {
+        // Phase 4: IoT Telemetry Billing Logic
+        if ($booking->asset->billing_mode === 'telemetry' && $booking->final_engine_hours && $booking->initial_engine_hours) {
+            $engineUsage = max(0, $booking->final_engine_hours - $booking->initial_engine_hours);
+            $qty = $engineUsage;
+            $unit = 'engine_hours';
+            $unitPrice = $booking->asset->rate_per_hour; // Use hourly rate for engine hours
+            $cost = $qty * $unitPrice;
+            $description = "IoT Billing: {$booking->asset->name} - ({$qty} Engine Hours)";
+        } 
+        // Standard Time-Based Billing
+        elseif ($booking->asset->rate_per_day > 0 && ($dailyCost < $hourlyCost || $hourlyCost == 0)) {
             $cost = $dailyCost;
             $qty = ceil($days);
             $unit = 'days';

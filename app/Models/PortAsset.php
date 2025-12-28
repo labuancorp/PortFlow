@@ -19,7 +19,10 @@ class PortAsset extends Model
         'description',
         'last_maintenance_date',
         'next_maintenance_date',
-        'safety_cert_expiry'
+        'safety_cert_expiry',
+        'telemetry_id',
+        'current_engine_hours',
+        'billing_mode'
     ];
 
     protected $casts = [

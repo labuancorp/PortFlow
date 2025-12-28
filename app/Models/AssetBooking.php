@@ -24,7 +24,9 @@ class AssetBooking extends Model
         'check_out_notes',
         'check_in_notes',
         'check_out_media',
-        'check_in_media'
+        'check_in_media',
+        'initial_engine_hours',
+        'final_engine_hours'
     ];
 
     protected $casts = [

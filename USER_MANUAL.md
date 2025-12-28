@@ -90,10 +90,38 @@ Designed for ground crew and maintenance teams to protect asset value.
     *   Its status is marked as **Under Maintenance**.
 *   **Visuals:** Expired assets display a pulsing red **"CERT. EXPIRED"** badge in the inventory.
 
-#### � **QR Code Integration**
+#### 📲 **QR Code Integration**
 *   **Purpose:** Instant field access to asset data.
 *   **Feature:** Every asset has a unique QR tag generated in its "Edit" modal.
 *   **Action:** Scanning the tag redirects authorized personnel directly to the **Mobile Ops** asset control view.
+
+---
+
+### 🔮 Advanced Optimization & IoT Telemetry (Phase 4)
+Leveraging AI and Data to drive operational efficiency.
+
+#### 🧠 **Predictive Demand AI**
+*   **Purpose:** Forecast future asset requirements to prevent shortages.
+*   **Logic:** Analyzes incoming vessel schedules and types (e.g., Tanker vs Supply) to predict crane, forklift, and water needs for the next 7 days.
+*   **Output:** Generates **Critical Alerts** (e.g., "High Crane Demand") on the main Analytics Dashboard.
+
+#### 📡 **IoT Telemetry Billing**
+*   **Purpose:** Fair, precise billing based on actual usage, not just possession time.
+*   **Mechanism:** Assets can be configured for "Telemetry Mode".
+*   **Workflow:** Billing is calculated based on **Engine Hours** (Start Hour - End Hour) rather than simple hourly/daily duration, ensuring clients pay only for active work.
+
+#### 🔥 **Utilization Heatmaps**
+*   **Purpose:** Visual analytics for yard space optimization.
+*   **Visuals:** The Yard Map dynamically recolors zones:
+    *   **Red:** Congested (>80% utilization).
+    *   **Gray:** Dead Zones (<10% utilization).
+    *   **Green:** Optimal.
+*   **Benefit:** Allows the Operations Manager to rebalance cargo distribution instantly.
+
+#### 📦 **Smart Procurement**
+*   **Purpose:** Prevent stockouts of critical consumables (Fuel, PPE).
+*   **Action:** The system monitors inventory levels against a defined "Min Threshold".
+*   **Alerting:** Automatically triggers "Low Stock" alerts to the dashboard when supplies run low.
 
 ---
 
@@ -147,6 +175,8 @@ This section outlines the rigorous technical and functional framework used to bu
 | **"Equipment Under-utilization"**: Cranes and forklifts sitting idle or used without billing. | **Resource Marketplace**: Digital metered booking ensures every asset hour is captured and billed. |
 | **"Audit Pain"**: Spent weeks compiling records for Petronas/Shell safety audits. | **One-Click Compliance**: A complete, unalterable Audit Trail is exported in seconds. |
 | **"Paper Trail Handover"**: Disputes over equipment damage responsible. | **Mobile Handover**: Mandatory photo evidence at Check-Out/In creates visual proof of condition. |
+| **"Unfair Duration Billing"**: Clients charged for full days when crane used for 2 hours. | **IoT Telemetry Billing**: Billing engine calculates cost based on actual engine run-hours from sensor data. |
+| **"Consumable Stockouts"**: Operations halted because diesel or PPE ran out unexpectedly. | **Smart Procurement AI**: Predictive analysis alerts procurement teams before stock hits critical levels. |
 
 ---
 
@@ -171,8 +201,8 @@ We are committed to making PortFlow the most advanced HSE OS in the world.
 *   **Phase 1 (Completed):** Core Operations, Berth Planning, Cargo Logistics.
 *   **Phase 2 (Completed):** Billing Generation, Agent Portal, Financial Dashboard.
 *   **Phase 3 (Completed):** Asset Lifecycle, Mobile Handover, Safety Interlocks, QR Integration.
-*   **Phase 4 (Next):** **AI-PPE Monitoring:** Integration with CCTV to detect hard-hat non-compliance.
-*   **Phase 5:** **Drone Integration:** Automated aerial inspections for warehouse roof integrity.
+*   **Phase 4 (Completed):** AI-PPE Monitoring, Predictive Demand AI, IoT Telemetry, Utilization Heatmaps.
+*   **Phase 5 (Next):** **Drone Integration:** Automated aerial inspections for warehouse roof integrity.
 
 ---
 

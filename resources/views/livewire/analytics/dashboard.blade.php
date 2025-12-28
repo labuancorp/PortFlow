@@ -67,12 +67,31 @@
     <div class="bg-indigo-900 rounded-2xl p-8 text-white relative overflow-hidden">
         <div class="absolute top-0 right-0 p-32 bg-white/5 rounded-full blur-3xl -mr-16 -mt-16"></div>
         <div class="relative z-10">
-            <h3 class="text-xl font-bold mb-2 flex items-center gap-2">
+            <h3 class="text-xl font-bold mb-4 flex items-center gap-2">
                 <svg class="w-6 h-6 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
-                PortFlow AI Insights
+                PortFlow AI Predicitons
             </h3>
-            <p class="text-indigo-200 mb-4 max-w-2xl">Based on current predictive models, Yard Density is expected to increase by 15% next week due to incoming heavy-lift vessels. Recommendation: Expedite manifest clearance for Zone A2.</p>
-            <button class="bg-white text-indigo-900 px-4 py-2 rounded-lg text-sm font-bold hover:bg-indigo-50 transition-colors">View Detailed Report</button>
+            
+            <div class="space-y-4">
+                @forelse($aiInsights as $insight)
+                <div class="flex items-start gap-3 p-3 rounded-lg border border-indigo-700 bg-indigo-800/50">
+                    <span class="mt-0.5">
+                        @if($insight['type'] === 'critical')
+                            <svg class="w-5 h-5 text-red-400 animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+                        @elseif($insight['type'] === 'warning')
+                            <svg class="w-5 h-5 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                        @else
+                            <svg class="w-5 h-5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                        @endif
+                    </span>
+                    <div>
+                        <p class="text-sm font-medium text-indigo-100">{{ $insight['message'] }}</p>
+                    </div>
+                </div>
+                @empty
+                <p class="text-indigo-300 italic text-sm">No critical anomalies detected in the forecast model.</p>
+                @endforelse
+            </div>
         </div>
     </div>
 </div>

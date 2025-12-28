@@ -10,6 +10,8 @@ use App\Models\WarehouseZone;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
 
+use App\Services\PredictiveAnalyticsService;
+
 class Dashboard extends Component
 {
     public function render()
@@ -22,12 +24,16 @@ class Dashboard extends Component
             
         // 2. Operational Metrics
         $activeVessels = PortCall::where('status', 'alongside')->count();
-        $yardUtilization = WarehouseZone::avg('current_utilization_m3') ?? 0; // Simple average for demo
+        $yardUtilization = WarehouseZone::avg('current_utilization_m3') ?? 0; 
         
         // 3. Safety Metrics
         $activePermits = WorkPermit::where('status', 'active')->count();
 
-        // 4. Chart Data Preparation (Last 6 Months)
+        // 4. AI Predictions
+        $aiService = new PredictiveAnalyticsService();
+        $insights = $aiService->getDemandForecast();
+
+        // 5. Chart Data Preparation (Last 6 Months)
         $months = collect([]);
         $revenueData = collect([]);
         $vesselData = collect([]);
@@ -59,7 +65,8 @@ class Dashboard extends Component
             'activePermits' => $activePermits,
             'chartLabels' => $months,
             'revenueData' => $revenueData,
-            'vesselData' => $vesselData
+            'vesselData' => $vesselData,
+            'aiInsights' => $insights
         ]);
     }
 }

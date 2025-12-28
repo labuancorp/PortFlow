@@ -237,17 +237,41 @@
             @foreach($warehouses as $w)
                 @foreach($w->zones as $z)
                     if(zones['{{ $z->code }}']) {
+                        // Heatmap Logic
+                        const utilPct = {{ $z->capacity_limit_m3 > 0 ? ($z->current_utilization_m3 / $z->capacity_limit_m3) * 100 : 0 }};
+                        let heatColor = zones['{{ $z->code }}'].color;
+                        let heatOpacity = 0.2;
+                        let statusText = 'Normal';
+
+                        if (utilPct > 80) {
+                            heatColor = '#ef4444'; // Red (Congested)
+                            heatOpacity = 0.6;
+                            statusText = 'Congested';
+                        } else if (utilPct < 10 && {{ $z->capacity_limit_m3 }} > 0) {
+                            heatColor = '#94a3b8'; // Gray (Dead Zone)
+                            heatOpacity = 0.1;
+                            statusText = 'Dead Zone (Under-utilized)';
+                        } else if (utilPct > 50) {
+                             heatOpacity = 0.4;
+                        }
+
                         const poly = L.polygon(zones['{{ $z->code }}'].coords, {
-                            color: zones['{{ $z->code }}'].color,
-                            fillColor: zones['{{ $z->code }}'].color,
-                            fillOpacity: 0.2,
+                            color: zones['{{ $z->code }}'].color, // Keeping border color constant for identity
+                            fillColor: heatColor,
+                            fillOpacity: heatOpacity,
                             weight: 2
                         }).addTo(map);
 
-                        poly.bindTooltip(`<b>{{ $z->name }}</b><br>Util: {{ $z->current_utilization_m3 }}m³`, { 
+                        poly.bindTooltip(`
+                            <div class="text-xs font-sans">
+                                <b>{{ $z->name }}</b>
+                                <div class="mt-1">Util: {{ $z->current_utilization_m3 }}m³ (${utilPct.toFixed(0)}%)</div>
+                                <div class="text-[9px] uppercase font-bold text-slate-500 mt-1">${statusText}</div>
+                            </div>
+                        `, { 
                             permanent: true, 
                             direction: "center", 
-                            className: "bg-white/80 border-0 text-xs font-bold shadow-sm" 
+                            className: "bg-white/90 border-0 shadow-lg rounded-lg p-1" 
                         });
                         
                         @foreach($z->items as $item)

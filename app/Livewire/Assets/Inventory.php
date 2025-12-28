@@ -21,6 +21,7 @@ class Inventory extends Component
     public $assetId;
     public $name, $type = 'crane', $identifier, $rate_per_hour, $rate_per_day, $status = 'available', $description;
     public $safety_cert_expiry;
+    public $billing_mode = 'duration', $current_engine_hours = 0;
 
     // Maintenance fields
     public $mType = 'Routine', $mDescription, $mPerformedAt, $mNextDue, $mCost, $mTechnician;
@@ -34,6 +35,8 @@ class Inventory extends Component
         'status' => 'required|in:available,maintenance,occupied,standby',
         'description' => 'nullable|string',
         'safety_cert_expiry' => 'nullable|date',
+        'billing_mode' => 'required|in:duration,telemetry',
+        'current_engine_hours' => 'nullable|numeric|min:0',
     ];
 
     public function mount()
@@ -54,8 +57,10 @@ class Inventory extends Component
             $this->status = $asset->status;
             $this->description = $asset->description;
             $this->safety_cert_expiry = $asset->safety_cert_expiry ? $asset->safety_cert_expiry->format('Y-m-d') : null;
+            $this->billing_mode = $asset->billing_mode ?? 'duration';
+            $this->current_engine_hours = $asset->current_engine_hours ?? 0;
         } else {
-            $this->reset(['name', 'type', 'identifier', 'rate_per_hour', 'rate_per_day', 'status', 'description', 'safety_cert_expiry']);
+            $this->reset(['name', 'type', 'identifier', 'rate_per_hour', 'rate_per_day', 'status', 'description', 'safety_cert_expiry', 'billing_mode', 'current_engine_hours']);
         }
         $this->showAssetModal = true;
     }
@@ -79,6 +84,8 @@ class Inventory extends Component
             'status' => $this->status,
             'description' => $this->description,
             'safety_cert_expiry' => $this->safety_cert_expiry,
+            'billing_mode' => $this->billing_mode,
+            'current_engine_hours' => $this->current_engine_hours,
         ];
 
         if ($this->assetId) {
