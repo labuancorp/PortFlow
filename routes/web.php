@@ -33,6 +33,9 @@ Route::middleware(['auth', '2fa'])->group(function () {
         
         // GIS Port Management (Phase 7)
         Route::get('/gis/port-map', App\Livewire\GIS\PortMapView::class)->name('gis.port-map');
+        
+        // Tank Farm Management (Phase 8)
+        Route::get('/tank-farm', App\Livewire\TankFarm\Dashboard::class)->name('tank-farm.dashboard');
     });
 
     Route::middleware(['role:admin,agent,hse'])->group(function () {
