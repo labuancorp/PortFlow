@@ -184,11 +184,36 @@ class PortMapView extends Component
                 ];
             });
 
+        // Warehouses
+        $warehouses = \App\Models\WarehouseZone::whereNotNull('map_coordinates')->get()->map(function($zone) {
+             return [
+                 'id' => $zone->id,
+                 'name' => $zone->name,
+                 'coordinates' => $zone->map_coordinates
+             ];
+        });
+
+        // Demo Cargo Flows
+        $flows = [];
+        $occupiedBerths = collect($this->getBerthsData())->where('status', 'occupied');
+        if ($warehouses->isNotEmpty()) {
+            foreach ($occupiedBerths as $berth) {
+                 $targetWarehouse = $warehouses->random();
+                 $flows[] = [
+                     'from' => ['lat' => $berth['lat'], 'lng' => $berth['lng']],
+                     'to' => $targetWarehouse['coordinates'][0], // target corner
+                     'type' => 'import'
+                 ];
+            }
+        }
+
         return view('livewire.gis.port-map-view', [
             'berthsData' => $this->getBerthsData(),
             'waitingVessels' => $this->getWaitingVessels(),
             'anchorageData' => $anchorages,
-            'vesselPositions' => $vesselPositions
+            'vesselPositions' => $vesselPositions,
+            'warehouseData' => $warehouses,
+            'cargoFlows' => $flows
         ])->layout('components.layouts.app'); 
     }
 }

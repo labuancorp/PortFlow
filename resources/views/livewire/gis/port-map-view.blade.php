@@ -300,6 +300,16 @@
                          zone.coordinates.forEach(coord => bounds.push([coord.lat, coord.lng]));
                      }
                  });
+
+                 // Add Warehouses
+                 const warehouseData = @json($warehouseData ?? []);
+                 warehouseData.forEach(zone => {
+                     portMap.addWarehouse(zone);
+                 });
+                 
+                 // Draw Flows
+                 const flowData = @json($cargoFlows ?? []);
+                 portMap.drawCargoFlows(flowData);
                  
                  // Fit map
                  if (bounds.length > 0) {
@@ -335,6 +345,15 @@
             color: #475569;
             box-shadow: 0 1px 2px rgba(0,0,0,0.1);
             text-align: center;
+        }
+        
+        @keyframes dash {
+          to {
+            stroke-dashoffset: -20;
+          }
+        }
+        .cargo-flow-line {
+          animation: dash 1s linear infinite;
         }
 
         .drag-hover-valid {

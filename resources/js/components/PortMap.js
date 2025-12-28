@@ -292,6 +292,39 @@ export default class PortMap {
         return polygon;
     }
 
+    addWarehouse(zone) {
+        if (!zone.coordinates) return;
+
+        L.polygon(zone.coordinates, {
+            color: '#475569',
+            weight: 2,
+            fillColor: '#cbd5e1',
+            fillOpacity: 0.5,
+            className: 'warehouse-polygon'
+        })
+            .bindTooltip(`Warehouse: ${zone.name}`, { direction: 'center', permanent: false })
+            .addTo(this.map);
+    }
+
+    drawCargoFlows(flows) {
+        if (!flows) return;
+
+        // Clear existing flows if any? (Ideally keep reference in this.layers)
+        // For now simple adding
+
+        flows.forEach(flow => {
+            const line = L.polyline([flow.from, flow.to], {
+                color: '#6366f1', // Indigo
+                weight: 5,
+                dashArray: '10, 10',
+                className: 'cargo-flow-line',
+                opacity: 0.8
+            }).addTo(this.map);
+
+            // Simple animation via CSS class 'cargo-flow-line' (defined in blade)
+        });
+    }
+
     updateVesselPositions(positions) {
         if (!positions || !Array.isArray(positions)) return;
 
