@@ -128,13 +128,12 @@ class AgentPortal extends Component
 
         Vessel::create([
             'name' => $this->new_vessel_name,
-            'organization_id' => null, // Deprecated
-            'agent_id' => $this->agentId,
+            'organization_id' => $this->agentId,
             'vessel_type' => $this->new_vessel_type,
             'imo_number' => $this->new_vessel_imo,
             'loa_meters' => $this->new_vessel_loa,
             'draft_meters' => $this->new_vessel_draft,
-            'status' => 'active'
+            'flag_country' => 'Malaysia' // Default
         ]);
 
         $this->showVesselModal = false;
@@ -389,7 +388,7 @@ class AgentPortal extends Component
         }
 
         $params['agent'] = Organization::find($this->agentId);
-        $params['myVessels'] = Vessel::where('agent_id', $this->agentId)->get();
+        $params['myVessels'] = Vessel::where('organization_id', $this->agentId)->get();
 
         return view('livewire.agent-portal', $params)->layout('components.layouts.client');
     }
