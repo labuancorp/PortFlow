@@ -79,7 +79,7 @@
                             <td class="px-6 py-4 text-center">
                                 <div class="text-center">
                                     <div class="bg-white p-2 rounded-lg inline-block border border-slate-100 shadow-sm">
-                                        {!! QrCode::size(80)->generate(route('cargo.track', $item->tracking_number)) !!}
+                                        {!! \SimpleSoftwareIO\QrCode\Facades\QrCode::size(80)->generate(route('cargo.track', $item->tracking_number)) !!}
                                     </div>
                                     <div class="text-[10px] font-mono font-bold text-slate-400 mt-1">{{ $item->tracking_number }}</div>
                                 </div>

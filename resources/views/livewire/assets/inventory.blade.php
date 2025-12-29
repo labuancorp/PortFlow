@@ -229,7 +229,7 @@
                     <div class="hidden sm:block text-center group">
                         <!-- Local QR Code Generation -->
                         <div class="bg-white p-2 border border-slate-200 rounded-lg group-hover:scale-110 transition-transform cursor-pointer shadow-sm">
-                            {!! SimpleSoftwareIO\QrCode\Facades\QrCode::size(80)->generate(url('/asset/scan/' . $identifier)) !!}
+                            {!! \SimpleSoftwareIO\QrCode\Facades\QrCode::size(80)->generate(url('/asset/scan/' . $identifier)) !!}
                         </div>
                         <p class="text-[9px] font-bold text-slate-400 mt-1">SCAN TAG</p>
                     </div>
