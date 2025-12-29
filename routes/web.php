@@ -67,12 +67,18 @@ Route::middleware(['auth', '2fa'])->group(function () {
         Route::get('/admin/health', App\Livewire\Admin\SystemHealth::class)->name('admin.health');
         Route::get('/admin/audit', App\Livewire\Admin\AuditTrail::class)->name('admin.audit');
         Route::get('/admin/users', App\Livewire\Admin\UserManagement::class)->name('admin.users');
-        // Print Route (No Composer dependency for speed)
+    });
+
+    // Invoice Print (Admin & Agent - with authorization)
     Route::get('/invoice/{invoice}/print', function (App\Models\Invoice $invoice) {
+        // Authorization: Agents can only print their own invoices
+        if (auth()->user()->role === 'agent' && $invoice->organization_id !== auth()->user()->organization_id) {
+            abort(403, 'Unauthorized action.');
+        }
+        
         $invoice->load(['organization', 'portCall.vessel', 'invoiceItems']);
         return view('pdf.invoice', ['invoice' => $invoice]);
     })->name('invoice.print');
-});
 });
 
 // Auth Routes (Rate Limited)

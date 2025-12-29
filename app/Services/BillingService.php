@@ -27,6 +27,7 @@ class BillingService
     {
         $portCall->loadMissing([
             'vessel', 
+            'berth',
             'invoice', 
             'serviceRequests.portCall',
             'pilotageRequests.pilot',

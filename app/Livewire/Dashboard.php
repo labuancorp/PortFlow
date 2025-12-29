@@ -97,7 +97,7 @@ class Dashboard extends Component
 
     public function openReviewModal($bookingId)
     {
-        $this->selectedBooking = PortCall::with(['vessel', 'agent'])->find($bookingId);
+        $this->selectedBooking = PortCall::with(['vessel', 'agent', 'berth'])->find($bookingId);
         $this->showReviewModal = true;
     }
 
@@ -276,7 +276,7 @@ class Dashboard extends Component
             'warehouseSummary' => $warehouseData,
             'recentActivity' => $recentActivity,
             'topAgents' => $topAgents,
-            'pendingRequests' => PortCall::where('status', 'requested')->with(['vessel', 'agent'])->get(),
+            'pendingRequests' => PortCall::where('status', 'requested')->with(['vessel', 'agent', 'berth'])->get(),
             'activeBerths' => $activeBerths,
         ];
     }
