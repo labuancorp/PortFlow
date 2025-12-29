@@ -1,4 +1,4 @@
-<div class="p-8 bg-slate-50 min-h-screen font-sans">
+<div class="p-8 bg-slate-50 min-h-screen font-sans" wire:poll.30s>
     <!-- Header -->
     <div class="flex justify-between items-end mb-8">
         <div>

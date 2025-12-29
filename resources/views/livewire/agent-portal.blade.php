@@ -1,4 +1,4 @@
-<div class="min-h-screen bg-slate-50 font-sans">
+<div class="min-h-screen bg-slate-50 font-sans" wire:poll.30s>
     <!-- Top Navigation (Client View) -->
     <div class="bg-white border-b border-slate-200 sticky top-0 z-30">
         <div class="max-w-5xl mx-auto px-6 h-16 flex items-center justify-between">

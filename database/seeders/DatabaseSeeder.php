@@ -252,17 +252,17 @@ class DatabaseSeeder extends Seeder
 
     private function seedBilling()
     {
-        $pc = PortCall::first();
+        $pc = PortCall::where('reference_no', 'PC-DEMO-003')->first(); // Use the requested vessel instead
         $org = Organization::first();
         if ($pc && $org) {
+            // Create a completed/paid invoice for a different port call (not the live ones)
             Invoice::updateOrCreate(['invoice_no' => 'INV-DEMO-001'], [
                 'port_call_id' => $pc->id,
                 'organization_id' => $org->id,
                 'total_amount' => 5000.00,
-                'status' => 'paid',
+                'status' => 'draft', // Changed from 'paid' to allow live billing
                 'issued_date' => now()->subDays(1),
                 'due_date' => now()->addDays(30),
-                'erp_status' => 'synced',
             ]);
         }
     }

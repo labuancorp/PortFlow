@@ -121,7 +121,6 @@ class BillingService
             ]);
             \Log::info('BillingService: Created line handling item', ['item_id' => $item3->id]);
             $totalAmount += self::RATES['line_handling'];
-            $totalAmount += self::RATES['line_handling'];
         } else {
             \Log::warning('BillingService: ATB is NULL, skipping item creation');
         }

@@ -129,6 +129,7 @@
                             </li>
                             @endif
                             
+                            @if(auth()->user()->role === 'admin')
                             <!-- Tank Farm (Phase 8.1) -->
                             <li>
                                 <a href="{{ route('tank-farm.dashboard') }}" class="flex items-center px-3 py-2 rounded-lg group {{ request()->routeIs('tank-farm.*') ? 'bg-slate-800 text-white' : 'text-slate-300 hover:bg-slate-800 hover:text-white' }}">
@@ -136,7 +137,9 @@
                                     <span class="ml-3">Tank Farm</span>
                                 </a>
                             </li>
+                            @endif
 
+                            @if(auth()->user()->role === 'admin')
                             <!-- MHE Fleet (Phase 8.2) -->
                             <li>
                                 <a href="{{ route('mhe.fleet') }}" class="flex items-center px-3 py-2 rounded-lg group {{ request()->routeIs('mhe.*') ? 'bg-slate-800 text-white' : 'text-slate-300 hover:bg-slate-800 hover:text-white' }}">
@@ -144,7 +147,9 @@
                                     <span class="ml-3">MHE Fleet</span>
                                 </a>
                             </li>
+                            @endif
 
+                            @if(auth()->user()->role === 'admin')
                             <!-- CCU & Container Tracking (Phase 8.4) -->
                             <li>
                                 <a href="{{ route('ccu.overview') }}" class="flex items-center px-3 py-2 rounded-lg group {{ request()->routeIs('ccu.*') ? 'bg-slate-800 text-white' : 'text-slate-300 hover:bg-slate-800 hover:text-white' }}">
@@ -152,6 +157,7 @@
                                     <span class="ml-3">CCU Tracker</span>
                                 </a>
                             </li>
+                            @endif
 
                             @if(auth()->user()->role === 'admin' || (auth()->user()->role === 'agent' && auth()->user()->organization->warehouse_subscribed))
                             <li>
