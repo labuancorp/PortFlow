@@ -167,22 +167,55 @@ class DatabaseSeeder extends Seeder
 
     private function seedPortCalls()
     {
-        $vessels = Vessel::all();
         $berths = Berth::all();
         $agent = Organization::where('type', 'agent')->first();
         $today = Carbon::today();
 
-        if ($vessels->count() > 0 && $berths->count() > 0) {
-            PortCall::updateOrCreate(['reference_no' => 'PC-DEMO-001'], [
-                'vessel_id' => $vessels->first()->id,
-                'agent_id' => $agent->id,
-                'assigned_berth_id' => $berths->first()->id,
-                'status' => 'alongside',
-                'eta' => $today->copy()->subHours(2),
-                'etd' => $today->copy()->addHours(18),
-                'ata' => $today->copy()->subHours(2)->addMinutes(15),
-                'atb' => $today->copy()->subHours(1)->addMinutes(30),
-            ]);
+        // Get specific vessels by IMO
+        $nautica = Vessel::where('imo_number', '9123456')->first(); // MV Nautica Gamble
+        $barge = Vessel::where('imo_number', '9234567')->first();   // Barge Alpha One
+        $explorer = Vessel::where('imo_number', '9345678')->first(); // OSV Explorer
+
+        if ($berths->count() > 0) {
+            // 1. MV Nautica Gamble - Alongside with active billing (3 hours)
+            if ($nautica && $berths->count() > 0) {
+                PortCall::updateOrCreate(['reference_no' => 'PC-DEMO-001'], [
+                    'vessel_id' => $nautica->id,
+                    'agent_id' => $agent->id,
+                    'assigned_berth_id' => $berths->first()->id,
+                    'status' => 'alongside',
+                    'eta' => $today->copy()->subHours(4),
+                    'etd' => $today->copy()->addHours(20),
+                    'ata' => $today->copy()->subHours(3)->addMinutes(15),
+                    'atb' => $today->copy()->subHours(3)->addMinutes(45), // Line secured 3 hours ago
+                ]);
+            }
+
+            // 2. Barge Alpha One - Alongside with active billing (8 hours - more charges)
+            if ($barge && $berths->count() > 1) {
+                PortCall::updateOrCreate(['reference_no' => 'PC-DEMO-002'], [
+                    'vessel_id' => $barge->id,
+                    'agent_id' => $agent->id,
+                    'assigned_berth_id' => $berths->get(1)->id,
+                    'status' => 'alongside',
+                    'eta' => $today->copy()->subHours(10),
+                    'etd' => $today->copy()->addHours(14),
+                    'ata' => $today->copy()->subHours(9),
+                    'atb' => $today->copy()->subHours(8), // Line secured 8 hours ago
+                ]);
+            }
+
+            // 3. OSV Explorer - Requested (pending approval)
+            if ($explorer) {
+                PortCall::updateOrCreate(['reference_no' => 'PC-DEMO-003'], [
+                    'vessel_id' => $explorer->id,
+                    'agent_id' => $agent->id,
+                    'assigned_berth_id' => null,
+                    'status' => 'requested',
+                    'eta' => $today->copy()->addHours(6),
+                    'etd' => $today->copy()->addHours(30),
+                ]);
+            }
         }
     }
 

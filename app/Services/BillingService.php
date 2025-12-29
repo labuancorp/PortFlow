@@ -45,12 +45,24 @@ class BillingService
 
         // IMPORTANT: Don't recalculate paid or issued invoices
         if ($invoice->exists && in_array($invoice->status, ['paid', 'issued'])) {
+            \Log::info('BillingService: Skipping recalculation - invoice already finalized', [
+                'invoice_id' => $invoice->id,
+                'status' => $invoice->status
+            ]);
             // Invoice is already finalized, return as-is without recalculation
             return $invoice;
         }
 
+        \Log::info('BillingService: Starting invoice calculation', [
+            'invoice_id' => $invoice->id,
+            'status' => $invoice->status,
+            'atb' => $portCall->atb,
+            'loa' => $portCall->vessel->loa_meters ?? 'NULL'
+        ]);
+
         // 2. Clear existing items (for recalculation - only for draft invoices)
-        $invoice->invoiceItems()->delete();
+        $deletedCount = $invoice->invoiceItems()->delete();
+        \Log::info('BillingService: Deleted existing items', ['count' => $deletedCount]);
 
         $totalAmount = 0;
 
@@ -64,43 +76,54 @@ class BillingService
             // Calculate duration in hours (rounded up)
             $hours = max(1, $start->diffInHours($end)); // Minimum 1 hour
             
+            \Log::info('BillingService: Calculating dockage', [
+                'hours' => $hours,
+                'start' => $start->format('Y-m-d H:i:s'),
+                'end' => $end->format('Y-m-d H:i:s')
+            ]);
+            
             // Calculate Item Cost
             // Cost = Rate * LOA * Hours
             $loa = $portCall->vessel->loa_meters;
             $rate = self::RATES['dockage_per_meter_hour'];
             $dockageCost = $rate * $loa * $hours;
 
-            InvoiceItem::create([
+            $item1 = InvoiceItem::create([
                 'invoice_id' => $invoice->id,
                 'description' => "Dockage Fees ({$loa}m x {$hours} hrs @ RM {$rate}/m/hr)",
                 'quantity' => $hours,
                 'unit_price' => $rate * $loa,
                 'total_price' => $dockageCost
             ]);
+            \Log::info('BillingService: Created dockage item', ['item_id' => $item1->id]);
 
             $totalAmount += $dockageCost;
 
             // 4. Fixed Charges
             // Wharfage (Apply if ATB exists)
-            InvoiceItem::create([
+            $item2 = InvoiceItem::create([
                 'invoice_id' => $invoice->id,
                 'description' => "Wharfage Fee (Fixed)",
                 'quantity' => 1,
                 'unit_price' => self::RATES['wharfage_fixed'],
                 'total_price' => self::RATES['wharfage_fixed']
             ]);
+            \Log::info('BillingService: Created wharfage item', ['item_id' => $item2->id]);
             $totalAmount += self::RATES['wharfage_fixed'];
 
             // Line Handling (Apply if ATB exists)
-            InvoiceItem::create([
+            $item3 = InvoiceItem::create([
                 'invoice_id' => $invoice->id,
                 'description' => "Line Handling Services",
                 'quantity' => 1,
                 'unit_price' => self::RATES['line_handling'],
                 'total_price' => self::RATES['line_handling']
             ]);
+            \Log::info('BillingService: Created line handling item', ['item_id' => $item3->id]);
             $totalAmount += self::RATES['line_handling'];
             $totalAmount += self::RATES['line_handling'];
+        } else {
+            \Log::warning('BillingService: ATB is NULL, skipping item creation');
         }
 
         // 5. Add Service Requests (Fuel/Water)

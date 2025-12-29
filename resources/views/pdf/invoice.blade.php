@@ -371,7 +371,7 @@
         <div class="invoice-header">
             <div class="header-content">
                 <div class="company-info">
-                    <h1>PortFlow</h1>
+                    <h1>PortFlow <span style="font-size: 28px; vertical-align: super; opacity: 0.8;">2.0</span></h1>
                     <p>Port Management Authority</p>
                 </div>
                 <div class="invoice-meta">

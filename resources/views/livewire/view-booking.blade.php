@@ -1,4 +1,4 @@
-<div class="fixed inset-0 z-50 flex items-center justify-center bg-black/50" x-data="{ open: true }" x-show="open">
+<div class="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
     <div class="bg-white rounded-lg shadow-xl w-full max-w-lg overflow-hidden transform transition-all">
         <!-- Header -->
         <div class="bg-slate-900 px-6 py-4 flex justify-between items-center">
@@ -24,41 +24,102 @@
         @else
             <!-- Body -->
             <div class="p-6">
-                <div class="flex items-center space-x-4 mb-6">
-                    <div class="w-12 h-12 bg-teal-100 rounded-full flex items-center justify-center text-teal-600">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                @if(!$editMode)
+                    <!-- View Mode -->
+                    <div class="flex items-center space-x-4 mb-6">
+                        <div class="w-12 h-12 bg-teal-100 rounded-full flex items-center justify-center text-teal-600">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                        </div>
+                        <div>
+                            <h4 class="text-xl font-bold text-slate-800">{{ $booking->vessel->name }}</h4>
+                            <p class="text-sm text-slate-500">{{ $booking->vessel->vessel_type }} • {{ $booking->vessel->imo_number }}</p>
+                        </div>
+                        <div class="ml-auto">
+                            <span class="px-3 py-1 rounded-full text-xs font-bold 
+                                {{ $booking->status === 'alongside' ? 'bg-green-100 text-green-700' : 
+                                   ($booking->status === 'requested' ? 'bg-amber-100 text-amber-700' : 'bg-slate-100 text-slate-700') }}">
+                                {{ ucfirst($booking->status) }}
+                            </span>
+                        </div>
                     </div>
-                    <div>
-                        <h4 class="text-xl font-bold text-slate-800">{{ $booking->vessel->name }}</h4>
-                        <p class="text-sm text-slate-500">{{ $booking->vessel->vessel_type }} • {{ $booking->vessel->imo_number }}</p>
-                    </div>
-                    <div class="ml-auto">
-                        <span class="px-3 py-1 rounded-full text-xs font-bold 
-                            {{ $booking->status === 'alongside' ? 'bg-green-100 text-green-700' : 
-                               ($booking->status === 'requested' ? 'bg-amber-100 text-amber-700' : 'bg-slate-100 text-slate-700') }}">
-                            {{ ucfirst($booking->status) }}
-                        </span>
-                    </div>
-                </div>
 
-                <div class="grid grid-cols-2 gap-4 mb-6">
-                    <div class="p-3 bg-slate-50 rounded border border-slate-100">
-                        <p class="text-xs text-slate-500 uppercase font-semibold">Arrival (ETA)</p>
-                        <p class="text-sm font-medium text-slate-900">{{ $booking->eta ? $booking->eta->format('d M H:i') : '-' }}</p>
+                    <div class="grid grid-cols-2 gap-4 mb-6">
+                        <div class="p-3 bg-slate-50 rounded border border-slate-100">
+                            <p class="text-xs text-slate-500 uppercase font-semibold">Arrival (ETA)</p>
+                            <p class="text-sm font-medium text-slate-900">{{ $booking->eta ? $booking->eta->format('d M H:i') : '-' }}</p>
+                        </div>
+                        <div class="p-3 bg-slate-50 rounded border border-slate-100">
+                            <p class="text-xs text-slate-500 uppercase font-semibold">Departure (ETD)</p>
+                            <p class="text-sm font-medium text-slate-900">{{ $booking->etd ? $booking->etd->format('d M H:i') : '-' }}</p>
+                        </div>
+                        <div class="p-3 bg-slate-50 rounded border border-slate-100">
+                            <p class="text-xs text-slate-500 uppercase font-semibold">Agent</p>
+                            <p class="text-sm font-medium text-slate-900">{{ $booking->agent->name }}</p>
+                        </div>
+                        <div class="p-3 bg-slate-50 rounded border border-slate-100">
+                            <p class="text-xs text-slate-500 uppercase font-semibold">Assigned Berth</p>
+                            <p class="text-sm font-medium text-slate-900">{{ $booking->berth->name ?? 'Unassigned' }}</p>
+                        </div>
                     </div>
-                    <div class="p-3 bg-slate-50 rounded border border-slate-100">
-                        <p class="text-xs text-slate-500 uppercase font-semibold">Departure (ETD)</p>
-                        <p class="text-sm font-medium text-slate-900">{{ $booking->etd ? $booking->etd->format('d M H:i') : '-' }}</p>
+                @else
+                    <!-- Edit Mode -->
+                    <div class="mb-6">
+                        <div class="flex items-center gap-2 mb-4">
+                            <div class="w-10 h-10 bg-indigo-100 rounded-full flex items-center justify-center text-indigo-600">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
+                            </div>
+                            <h4 class="text-lg font-bold text-slate-800">Edit Booking Details</h4>
+                        </div>
+
+                        <div class="space-y-4">
+                            <div>
+                                <label class="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-2">Vessel</label>
+                                <select wire:model="editVesselId" class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent">
+                                    <option value="">Select Vessel</option>
+                                    @foreach($vessels as $vessel)
+                                        <option value="{{ $vessel->id }}">{{ $vessel->name }} ({{ $vessel->imo_number }})</option>
+                                    @endforeach
+                                </select>
+                                @error('editVesselId') <p class="text-xs text-red-500 mt-1">{{ $message }}</p> @enderror
+                            </div>
+
+                            <div>
+                                <label class="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-2">Agent</label>
+                                <select wire:model="editAgentId" class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent">
+                                    <option value="">Select Agent</option>
+                                    @foreach($agents as $agent)
+                                        <option value="{{ $agent->id }}">{{ $agent->name }}</option>
+                                    @endforeach
+                                </select>
+                                @error('editAgentId') <p class="text-xs text-red-500 mt-1">{{ $message }}</p> @enderror
+                            </div>
+
+                            <div>
+                                <label class="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-2">Assigned Berth</label>
+                                <select wire:model="editBerthId" class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent">
+                                    <option value="">Unassigned</option>
+                                    @foreach($berths as $berth)
+                                        <option value="{{ $berth->id }}">{{ $berth->name }}</option>
+                                    @endforeach
+                                </select>
+                                @error('editBerthId') <p class="text-xs text-red-500 mt-1">{{ $message }}</p> @enderror
+                            </div>
+
+                            <div class="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-2">ETA</label>
+                                    <input type="datetime-local" wire:model="editEta" class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent">
+                                    @error('editEta') <p class="text-xs text-red-500 mt-1">{{ $message }}</p> @enderror
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-2">ETD</label>
+                                    <input type="datetime-local" wire:model="editEtd" class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent">
+                                    @error('editEtd') <p class="text-xs text-red-500 mt-1">{{ $message }}</p> @enderror
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                    <div class="p-3 bg-slate-50 rounded border border-slate-100">
-                        <p class="text-xs text-slate-500 uppercase font-semibold">Agent</p>
-                        <p class="text-sm font-medium text-slate-900">{{ $booking->agent->name }}</p>
-                    </div>
-                    <div class="p-3 bg-slate-50 rounded border border-slate-100">
-                        <p class="text-xs text-slate-500 uppercase font-semibold">Assigned Berth</p>
-                        <p class="text-sm font-medium text-slate-900">{{ $booking->berth->name }}</p>
-                    </div>
-                </div>
+                @endif
                 
                 @if(auth()->user()->role === 'admin')
                 <!-- Operational Controls (Ground Ops) -->
@@ -149,15 +210,47 @@
                                 </div>
                                 <p class="text-slate-400 text-xs font-bold uppercase tracking-wider">Waiting for operations...</p>
                                 <p class="text-[10px] text-slate-400">Billing starts when line is secured.</p>
+                                
+                                {{-- Debug Info --}}
+                                <div class="mt-4 p-3 bg-slate-50 rounded text-left text-[10px] text-slate-500">
+                                    <p><strong>Debug:</strong></p>
+                                    <p>ATB: {{ $booking->atb ? $booking->atb->format('Y-m-d H:i:s') : 'NULL' }}</p>
+                                    <p>Status: {{ $booking->status }}</p>
+                                    <p>Invoice ID: {{ $invoice ? $invoice->id : 'NULL' }}</p>
+                                    <p>Invoice Items: {{ $invoice ? $invoice->invoiceItems->count() : '0' }}</p>
+                                    <p>Vessel LOA: {{ $booking->vessel->loa_meters ?? 'NULL' }}m</p>
+                                    <p>Berth: {{ $booking->berth->name ?? 'NULL' }}</p>
+                                    <button wire:click="refreshInvoice" class="mt-2 px-3 py-1 bg-indigo-600 text-white rounded text-xs">Force Refresh</button>
+                                </div>
                             </div>
                         @endif
                     </div>
                 </div>
 
                 <div class="border-t border-slate-100 pt-4 flex justify-end space-x-3">
-                    <button wire:click="close" class="px-4 py-2 text-slate-600 hover:bg-slate-100 rounded text-sm font-medium">Close</button>
-                    @if(auth()->user()->role !== 'agent' || auth()->user()->organization_id == $booking->agent_id)
-                        <button class="px-4 py-2 bg-teal-600 text-white hover:bg-teal-700 rounded text-sm font-medium">Edit Booking</button>
+                    @if($editMode)
+                        <button wire:click="cancelEdit" class="px-4 py-2 text-slate-600 hover:bg-slate-100 rounded text-sm font-medium">Cancel</button>
+                        <button wire:click="saveEdit" class="px-4 py-2 bg-indigo-600 text-white hover:bg-indigo-700 rounded text-sm font-medium">💾 Save Changes</button>
+                    @else
+                        <button wire:click="close" class="px-4 py-2 text-slate-600 hover:bg-slate-100 rounded text-sm font-medium">Close</button>
+                        
+                        @if(auth()->user()->role === 'admin')
+                            {{-- Admins can always edit --}}
+                            <button wire:click="toggleEditMode" class="px-4 py-2 bg-teal-600 text-white hover:bg-teal-700 rounded text-sm font-medium">✏️ Edit Booking</button>
+                        @elseif(auth()->user()->role === 'agent' && auth()->user()->organization_id == $booking->agent_id)
+                            {{-- Agents can only edit if booking is still in 'requested' status --}}
+                            @if($booking->status === 'requested')
+                                <button wire:click="toggleEditMode" class="px-4 py-2 bg-teal-600 text-white hover:bg-teal-700 rounded text-sm font-medium">✏️ Edit Booking</button>
+                            @else
+                                <div class="relative group">
+                                    <button disabled class="px-4 py-2 bg-slate-300 text-slate-500 rounded text-sm font-medium cursor-not-allowed">🔒 Edit Locked</button>
+                                    <div class="absolute bottom-full right-0 mb-2 hidden group-hover:block w-64 bg-slate-900 text-white text-xs rounded-lg p-3 shadow-xl">
+                                        <p class="font-bold mb-1">Editing Disabled</p>
+                                        <p>Bookings in the timeline can only be edited by Port Authority administrators.</p>
+                                    </div>
+                                </div>
+                            @endif
+                        @endif
                     @endif
                 </div>
             </div>

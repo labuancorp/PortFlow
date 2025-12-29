@@ -57,7 +57,14 @@ class Index extends Component
 
         // 3. Warehouse Billing (Pending Storage Charges)
         $warehouseBillingService = new \App\Services\WarehouseBillingService();
-        $warehouseData = $warehouseBillingService->calculateLiveCharges();
+        
+        // AGENT RESTRICTION: Pass organization ID for warehouse data
+        if (auth()->user()->role === 'agent') {
+            $warehouseData = $warehouseBillingService->calculateLiveCharges(auth()->user()->organization_id);
+        } else {
+            $warehouseData = $warehouseBillingService->calculateLiveCharges();
+        }
+        
         $warehouseSummary = [
             'total_charges' => $warehouseData['total_charges'],
             'items_count' => $warehouseData['items_count']
@@ -75,9 +82,15 @@ class Index extends Component
         });
 
         // 4. Asset Rentals (Active Bookings)
-        $assetBookings = \App\Models\AssetBooking::where('status', 'active')
-            ->with(['asset', 'organization'])
-            ->get()
+        $assetBookingsQuery = \App\Models\AssetBooking::where('status', 'active')
+            ->with(['asset', 'organization']);
+        
+        // AGENT RESTRICTION: Filter asset bookings by organization
+        if (auth()->user()->role === 'agent') {
+            $assetBookingsQuery->where('organization_id', auth()->user()->organization_id);
+        }
+        
+        $assetBookings = $assetBookingsQuery->get()
             ->map(function($booking) {
                 $hours = max(1, now()->diffInHours($booking->start_time));
                 $booking->pending_charges = $hours * ($booking->asset->rate_per_hour ?? 0);

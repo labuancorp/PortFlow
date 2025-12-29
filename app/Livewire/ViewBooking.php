@@ -13,8 +13,16 @@ class ViewBooking extends Component
     public $booking; // The PortCall
     public $invoice = null;
     public $isOpen = true;
+    public $editMode = false;
 
     public $permissionError = false;
+
+    // Edit form properties
+    public $editVesselId;
+    public $editAgentId;
+    public $editBerthId;
+    public $editEta;
+    public $editEtd;
 
     public function mount($booking)
     {
@@ -28,16 +36,77 @@ class ViewBooking extends Component
         }
 
         $this->refreshInvoice();
+        $this->initializeEditForm();
+    }
+    
+    public function initializeEditForm()
+    {
+        $this->editVesselId = $this->booking->vessel_id;
+        $this->editAgentId = $this->booking->agent_id;
+        $this->editBerthId = $this->booking->assigned_berth_id;
+        $this->editEta = $this->booking->eta ? $this->booking->eta->format('Y-m-d\TH:i') : '';
+        $this->editEtd = $this->booking->etd ? $this->booking->etd->format('Y-m-d\TH:i') : '';
+    }
+
+    public function toggleEditMode()
+    {
+        $this->editMode = !$this->editMode;
+        if ($this->editMode) {
+            $this->initializeEditForm();
+        }
+    }
+
+    public function saveEdit()
+    {
+        $this->validate([
+            'editVesselId' => 'required|exists:vessels,id',
+            'editAgentId' => 'required|exists:organizations,id',
+            'editBerthId' => 'nullable|exists:berths,id',
+            'editEta' => 'required|date',
+            'editEtd' => 'required|date|after:editEta',
+        ]);
+
+        $this->booking->update([
+            'vessel_id' => $this->editVesselId,
+            'agent_id' => $this->editAgentId,
+            'assigned_berth_id' => $this->editBerthId,
+            'eta' => $this->editEta,
+            'etd' => $this->editEtd,
+        ]);
+
+        $this->booking->refresh();
+        $this->booking->load(['vessel', 'agent', 'berth']);
+        $this->editMode = false;
+        
+        // Notify parent to refresh
+        $this->dispatch('booking-updated');
+        
+        session()->flash('success', 'Booking updated successfully!');
+    }
+
+    public function cancelEdit()
+    {
+        $this->editMode = false;
+        $this->initializeEditForm();
     }
     
     public function refreshInvoice()
     {
-        if ($this->booking->invoice) {
-            $this->invoice = $this->booking->invoice;
+        // Always regenerate invoice for live billing (unless it's paid)
+        $service = new BillingService();
+        $this->invoice = $service->generateInvoice($this->booking);
+        
+        // Reload the invoice with items to ensure fresh data
+        if ($this->invoice) {
+            $this->invoice->load('invoiceItems');
+            \Log::info('Invoice refreshed', [
+                'invoice_id' => $this->invoice->id,
+                'status' => $this->invoice->status,
+                'items_count' => $this->invoice->invoiceItems->count(),
+                'atb' => $this->booking->atb,
+            ]);
         } else {
-            // Generate a draft preview if possible
-            $service = new BillingService();
-            $this->invoice = $service->generateInvoice($this->booking);
+            \Log::warning('Invoice generation returned null');
         }
     }
 
@@ -72,12 +141,13 @@ class ViewBooking extends Component
 
         $this->booking->update($updates);
 
+        // Refresh relation with berth loaded
+        $this->booking->refresh();
+        $this->booking->load(['vessel', 'agent', 'berth']);
+
         // Recalculate Invoice
         $service = new BillingService();
         $this->invoice = $service->generateInvoice($this->booking);
-        
-        // Refresh relation
-        $this->booking->refresh();
 
         // Notify Parent to Refresh Schedule
         $this->dispatch('booking-updated');
@@ -92,6 +162,14 @@ class ViewBooking extends Component
 
     public function render()
     {
-        return view('livewire.view-booking');
+        $vessels = \App\Models\Vessel::orderBy('name')->get();
+        $agents = \App\Models\Organization::where('type', 'agent')->orderBy('name')->get();
+        $berths = \App\Models\Berth::where('status', 'active')->orderBy('name')->get();
+        
+        return view('livewire.view-booking', [
+            'vessels' => $vessels,
+            'agents' => $agents,
+            'berths' => $berths,
+        ]);
     }
 }
